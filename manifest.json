@@ -1,0 +1,15 @@
+{
+  "name": "TVDE Simulação — Alexandre Rebelo",
+  "short_name": "TVDE Sim",
+  "description": "Simulação financeira TVDE — Plano de Negócios Alexandre Rebelo",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#1a3a5c",
+  "theme_color": "#1a3a5c",
+  "orientation": "portrait-primary",
+  "lang": "pt-PT",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
