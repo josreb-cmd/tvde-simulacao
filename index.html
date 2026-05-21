@@ -493,10 +493,10 @@ function calcular() {
     '<tr class="total highlight"><td>Rendimento total líquido mensal</td><td>' + fmtE(rendTotal,0) + '</td></tr>';
  
   document.getElementById('kpi-rem').innerHTML =
-    kpi(fmtE(salLiq,0), 'salário líq. + ajudas', '') +
-    kpi(fmtE(ajudas,0), 'ajudas de custo (isentas)', 'verde') +
-    kpi(fmtE(divMes,0), 'dividendos líq./mês', 'azul') +
-    kpi(fmtE(rendTotal,0), 'rendimento total líquido mensal', 'verde span2');
+    kpi(fmtE(salLiq,0), 'salário Líq. (s/ Ajudas de Custo)', '') +
+    kpi(fmtE(ajudas,0), 'Ajudas de Custo (isentas)', 'verde') +
+    kpi(fmtE(divMes,0), 'Dividendos líq./mês', 'azul') +
+    kpi(fmtE(rendTotal,0), 'Rendimento Total Líquido Mensal', 'verde span2');
  
   // ── Real vs Plano ──
   const planoReceita = 850 * semMes;
