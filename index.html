@@ -148,6 +148,7 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
     <button class="tab" onclick="showTab('energia',this)">Energia</button>
     <button class="tab" onclick="showTab('remuneracao',this)">Remuneração</button>
     <button class="tab" onclick="showTab('rvp',this)">Real vs Plano</button>
+    <button class="tab" onclick="showTab('dr',this)">DR &amp; Balanço</button>
   </div>
  
   <!-- ══ MENSAL ══ -->
@@ -276,6 +277,36 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
     </div>
   </div>
  
+ 
+  <!-- ══ DR & BALANÇO ══ -->
+  <div class="tab-content" id="tab-dr">
+ 
+    <!-- Toggle Mensal/Anual -->
+    <div style="display:flex;gap:8px;margin-bottom:13px">
+      <button class="tab active" id="dr-btn-mensal" style="flex:1;font-size:0.75rem" onclick="drToggle('mensal')">Mensal</button>
+      <button class="tab" id="dr-btn-anual" style="flex:1;font-size:0.75rem" onclick="drToggle('anual')">Anual</button>
+    </div>
+ 
+    <!-- DR -->
+    <div class="section">
+      <h2>📋 Demonstração de Resultados</h2>
+      <table id="dr-table"></table>
+    </div>
+ 
+    <!-- KPIs DR -->
+    <div class="section">
+      <h2>🎯 Indicadores de Rentabilidade</h2>
+      <div class="kpi-grid" id="kpi-dr"></div>
+    </div>
+ 
+    <!-- BALANÇO -->
+    <div class="section">
+      <h2>⚖️ Balanço Estimado</h2>
+      <table id="balanco-table"></table>
+      <div class="nota" style="margin-top:10px">Balanço estimado com base nos fluxos do simulador. Não substitui o balanço contabilístico real — validar com contabilista certificado.</div>
+    </div>
+ 
+  </div>
 </div><!-- /container -->
  
 <footer>Soluções Eficazes · Simulação TVDE Alexandre Rebelo · 2026</footer>
@@ -366,6 +397,16 @@ function getVal(id) { return parseFloat(document.getElementById(id).value) || 0;
 function fmtE(v, dec) { dec = dec === undefined ? 2 : dec; return v.toLocaleString('pt-PT',{minimumFractionDigits:dec,maximumFractionDigits:dec}) + ' €'; }
 function fmt(v, dec) { dec = dec === undefined ? 1 : dec; return v.toLocaleString('pt-PT',{minimumFractionDigits:dec,maximumFractionDigits:dec}); }
 function pct(v) { return fmt(v,1) + '%'; }
+ 
+ 
+// ══ DR TOGGLE ══
+let drModo = 'mensal';
+function drToggle(modo) {
+  drModo = modo;
+  document.getElementById('dr-btn-mensal').className = 'tab' + (modo === 'mensal' ? ' active' : '');
+  document.getElementById('dr-btn-anual').className  = 'tab' + (modo === 'anual'  ? ' active' : '');
+  calcular();
+}
  
 // ══ CÁLCULO ══
 function calcular() {
@@ -493,10 +534,10 @@ function calcular() {
     '<tr class="total highlight"><td>Rendimento total líquido mensal</td><td>' + fmtE(rendTotal,0) + '</td></tr>';
  
   document.getElementById('kpi-rem').innerHTML =
-    kpi(fmtE(salLiq,0), 'Salário Líq. (s/ Ajudas de Custo)', '') +
-    kpi(fmtE(ajudas,0), 'Ajudas de Custo (isentas)', 'verde') +
-    kpi(fmtE(divMes,0), 'Dividendos Líq./mês', 'azul') +
-    kpi(fmtE(rendTotal,0), 'Rendimento Total Líquido Mensal', 'verde span2');
+    kpi(fmtE(salLiq,0), 'salário líq. + ajudas', '') +
+    kpi(fmtE(ajudas,0), 'ajudas de custo (isentas)', 'verde') +
+    kpi(fmtE(divMes,0), 'dividendos líq./mês', 'azul') +
+    kpi(fmtE(rendTotal,0), 'rendimento total líquido mensal', 'verde span2');
  
   // ── Real vs Plano ──
   const planoReceita = 850 * semMes;
@@ -528,9 +569,86 @@ function calcular() {
   document.getElementById('kpi-rvp').innerHTML =
     kpi(fmtE(semVal,0), 'receita real / semana', semVal >= 850 ? 'verde' : 'vermelho') +
     kpi(fmtE(receitaMensal,0), 'receita mensal real', semVal >= 850 ? 'verde' : 'vermelho') +
-    kpi(fmtE(energiaMensal), 'energia mensal real', energiaMensal <= 500 ? 'verde' : 'amarelo') +
-    kpi(fmtE(resultLiq), 'resultado líquido', resultLiq >= 0 ? 'verde span2' : 'vermelho span2');
+    kpi(fmtE(fixosTotal + ssPatronal,0), 'custos fixos + SS', '') +
+    kpi(fmtE(varTotal,0), 'custos variáveis', '') +
+    kpi(fmtE(energiaMensal), 'energia mensal', energiaMensal <= 500 ? 'verde' : 'amarelo') +
+    kpi(fmtE(totalCustos,0), 'total custos', 'vermelho') +
+    kpi(fmtE(resultAntes), 'resultado antes IRC', resultAntes >= 0 ? 'verde' : 'vermelho') +
+    kpi(fmtE(resultLiq), 'resultado líquido', resultLiq >= 0 ? 'verde' : 'vermelho');
 }
+ 
+ 
+  // ── DR & Balanço ──
+  const f = drModo === 'anual' ? 12 : 1;
+  const lbl = drModo === 'anual' ? ' /ano' : ' /mês';
+  const ebitda = receitaMensal * f - (energiaMensal + varTotal + portagens * 0) * f - (ald + segTvde + segAt + contab + telemovel) * f;
+  const gastosPessoal = (salario + ajudas + ssPatronal) * f;
+  const gastosTotais  = totalCustos * f;
+  const resultAntesF  = resultAntes * f;
+  const ircF          = irc * f;
+  const resultLiqF    = resultLiq * f;
+  const receitaF      = receitaMensal * f;
+  const ebitdaF       = receitaF - (energiaMensal * f) - (varTotal * f) - ((ald + segTvde + segAt + contab + telemovel) * f);
+  const ebitF         = ebitdaF - gastosPessoal;
+ 
+  document.getElementById('dr-table').innerHTML =
+    '<tr class="sub"><td colspan="2">PROVEITOS</td></tr>' +
+    '<tr><td>Receita líquida plataformas</td><td style="color:#2e6da4;font-weight:800">' + fmtE(receitaF) + '</td></tr>' +
+    '<tr class="sub"><td colspan="2">GASTOS OPERACIONAIS</td></tr>' +
+    '<tr><td>(−) Energia</td><td>−' + fmtE(energiaMensal * f) + '</td></tr>' +
+    '<tr><td>(−) Custos fixos estrutura</td><td>−' + fmtE((ald + segTvde + segAt + contab + telemovel) * f) + '</td></tr>' +
+    '<tr><td>(−) Custos variáveis</td><td>−' + fmtE(varTotal * f) + '</td></tr>' +
+    '<tr class="total"><td>= EBITDA</td><td>' + fmtE(ebitdaF) + '</td></tr>' +
+    '<tr class="sub"><td colspan="2">GASTOS COM PESSOAL</td></tr>' +
+    '<tr><td>(−) Salário bruto</td><td>−' + fmtE(salario * f) + '</td></tr>' +
+    '<tr><td>(−) SS patronal (23,75%)</td><td>−' + fmtE(ssPatronal * f) + '</td></tr>' +
+    '<tr><td>(−) Ajudas de custo</td><td>−' + fmtE(ajudas * f) + '</td></tr>' +
+    '<tr class="total"><td>= EBIT (Resultado Operacional)</td><td>' + fmtE(ebitF) + '</td></tr>' +
+    '<tr class="total"><td>= Resultado antes IRC</td><td>' + fmtE(resultAntesF) + '</td></tr>' +
+    '<tr><td>(−) IRC (17% PME)</td><td>−' + fmtE(ircF) + '</td></tr>' +
+    '<tr class="' + (resultLiqF >= 0 ? 'result-pos' : 'result-neg') + '"><td>= RESULTADO LÍQUIDO</td><td>' + fmtE(resultLiqF) + '</td></tr>';
+ 
+  // KPIs DR
+  const margemLiq = receitaF > 0 ? (resultLiqF / receitaF * 100) : 0;
+  const margemEbitda = receitaF > 0 ? (ebitdaF / receitaF * 100) : 0;
+  const roi = gastosTotais * f > 0 ? (resultLiqF / (gastosTotais * f) * 100) : 0;
+  document.getElementById('kpi-dr').innerHTML =
+    kpi(pct(margemEbitda), 'margem EBITDA', margemEbitda >= 0 ? 'verde' : 'vermelho') +
+    kpi(pct(margemLiq), 'margem líquida', margemLiq >= 0 ? 'verde' : 'vermelho') +
+    kpi(pct(roi), 'ROI (resultado/custos)', roi >= 0 ? 'verde' : 'vermelho') +
+    kpi(fmtE(breakEven,0), 'break-even / semana', '');
+ 
+  // BALANÇO ESTIMADO (mensal — snapshot do mês)
+  const caixaEstimada   = Math.max(0, resultLiq * 3);   // 3 meses de resultado acumulado estimado
+  const valorResALD     = ald * (60 - 1);               // meses restantes × prestação (aproximação)
+  const activoTotal     = caixaEstimada + 1000;         // caixa + fundo maneio estimado
+  const aldPassivo      = ald * 12;                     // ALD anual restante
+  const ssApagar        = ssPatronal + ssTrabalhador;
+  const irsApagar       = irsRetido;
+  const passivoTotal    = aldPassivo + ssApagar + irsApagar;
+  const capitalSocial   = 1;                            // Unipessoal Lda mínimo
+  const resultAcum      = Math.max(0, resultLiq * 6);   // 6 meses estimados
+  const capProprio      = capitalSocial + resultAcum;
+  const totalPassivoCP  = passivoTotal + capProprio;
+  const autonomiaFin    = totalPassivoCP > 0 ? (capProprio / totalPassivoCP * 100) : 0;
+ 
+  document.getElementById('balanco-table').innerHTML =
+    '<tr class="sub"><td colspan="2">ACTIVO</td></tr>' +
+    '<tr><td>Caixa e depósitos (estimado)</td><td style="color:#2e6da4">' + fmtE(caixaEstimada) + '</td></tr>' +
+    '<tr><td>Fundo maneio operacional</td><td style="color:#2e6da4">' + fmtE(1000) + '</td></tr>' +
+    '<tr class="total"><td>= Total Activo</td><td>' + fmtE(activoTotal) + '</td></tr>' +
+    '<tr class="sub"><td colspan="2">PASSIVO</td></tr>' +
+    '<tr><td>ALD viatura (12 meses)</td><td style="color:#c0392b">−' + fmtE(aldPassivo) + '</td></tr>' +
+    '<tr><td>SS a entregar (mês)</td><td style="color:#c0392b">−' + fmtE(ssApagar) + '</td></tr>' +
+    '<tr><td>IRS a entregar (mês)</td><td style="color:#c0392b">−' + fmtE(irsApagar) + '</td></tr>' +
+    '<tr class="total"><td>= Total Passivo</td><td style="color:#c0392b">' + fmtE(passivoTotal) + '</td></tr>' +
+    '<tr class="sub"><td colspan="2">CAPITAL PRÓPRIO</td></tr>' +
+    '<tr><td>Capital social</td><td>' + fmtE(capitalSocial) + '</td></tr>' +
+    '<tr><td>Resultados acumulados (est. 6 meses)</td><td>' + fmtE(resultAcum) + '</td></tr>' +
+    '<tr class="total highlight"><td>= Total Capital Próprio</td><td>' + fmtE(capProprio) + '</td></tr>' +
+    '<tr class="sub"><td colspan="2">INDICADORES DE BALANÇO</td></tr>' +
+    '<tr><td>Autonomia financeira</td><td style="color:' + (autonomiaFin >= 30 ? '#27ae60' : '#e67e22') + '">' + pct(autonomiaFin) + '</td></tr>' +
+    '<tr><td>Endividamento</td><td>' + pct(100 - autonomiaFin) + '</td></tr>';
  
 function kpi(val, lbl, cls) {
   return '<div class="kpi ' + cls + '"><div class="val">' + val + '</div><div class="lbl">' + lbl + '</div></div>';
