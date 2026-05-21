@@ -313,17 +313,12 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
 <button class="export-btn" onclick="window.print()">⬇ Exportar PDF</button>
  
 <script>
-// ══ SUPABASE ══
 const SB_URL = 'https://qxkeaerpcqbidyqtqqxa.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF4a2VhZXJwY3FiaWR5cXRxcXhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzNjMyODMsImV4cCI6MjA5MTkzOTI4M30.Gmk4v-ggYaU4_b-g7FG7SOzMtZ4-QDhtz5U0p3dmz48';
  
-// ══ BROWSER ID ══
 function getBrowserId() {
   let id = localStorage.getItem('tvde_browser_id');
-  if (!id) {
-    id = 'br_' + Math.random().toString(36).substr(2,9) + '_' + Date.now().toString(36);
-    localStorage.setItem('tvde_browser_id', id);
-  }
+  if (!id) { id = 'br_' + Math.random().toString(36).substr(2,9) + '_' + Date.now().toString(36); localStorage.setItem('tvde_browser_id', id); }
   return id;
 }
 const BROWSER_ID = getBrowserId();
@@ -340,7 +335,7 @@ async function guardarConfig() {
   sbStatus('A guardar…', '');
   const payload = {
     id: BROWSER_ID,
-    sem_val: getVal('sem_val'), sem_mes: getVal('sem_mes'), dias_sem: getVal('dias_sem'), pct_casa: getVal('pct_casa'),
+    sem_val: getVal('sem_val'), sem_mes: getVal('sem_mes'), pct_casa: getVal('pct_casa'),
     km_sem: getVal('km_sem'), consumo_kwh: getVal('consumo_kwh'),
     tarifa_casa: getVal('tarifa_casa'), tarifa_fora: getVal('tarifa_fora'),
     ald: getVal('ald'), seg_tvde: getVal('seg_tvde'), seg_at: getVal('seg_at'),
@@ -368,18 +363,17 @@ async function carregarConfig() {
     });
     const data = await r.json();
     if (data && data.length > 0) {
-      const c = data[0];
-      ['sem_val','sem_mes','dias_sem','pct_casa','km_sem','consumo_kwh','tarifa_casa','tarifa_fora','ald','seg_tvde','seg_at','contab','telemovel','salario','ajudas','portagens','manut','limpeza'].forEach(k => {
-        if (c[k] !== undefined && document.getElementById(k)) document.getElementById(k).value = c[k];
+      const cfg = data[0];
+      ['sem_val','sem_mes','pct_casa','km_sem','consumo_kwh','tarifa_casa','tarifa_fora','ald','seg_tvde','seg_at','contab','telemovel','salario','ajudas','portagens','manut','limpeza'].forEach(k => {
+        if (cfg[k] !== undefined && document.getElementById(k)) document.getElementById(k).value = cfg[k];
       });
-      if (c.pct_casa !== undefined) document.getElementById('pct_casa_lbl').textContent = c.pct_casa + '%';
+      if (cfg.pct_casa !== undefined) document.getElementById('pct_casa_lbl').textContent = cfg.pct_casa + '%';
       calcular();
       sbStatus('✓ Configuração carregada', 'ok');
     } else sbStatus('— Sem config guardada', '');
   } catch(e) { sbStatus('✗ Sem ligação', 'err'); }
 }
  
-// ══ TABS ══
 function showTab(id, btn) {
   document.querySelectorAll('.tab-content').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -387,19 +381,19 @@ function showTab(id, btn) {
   btn.classList.add('active');
 }
  
-// ══ HELPERS ══
-const DEFAULTS = { sem_val:911,sem_mes:4.3,dias_sem:6,pct_casa:60,km_sem:1970,consumo_kwh:18,tarifa_casa:0.18,tarifa_fora:0.55,ald:500,seg_tvde:120,seg_at:45,contab:100,telemovel:25,salario:900,ajudas:862,portagens:80,manut:60,limpeza:30 };
+const DEFAULTS = { sem_val:911, sem_mes:4.3, pct_casa:60, km_sem:1970, consumo_kwh:18, tarifa_casa:0.18, tarifa_fora:0.55, ald:500, seg_tvde:120, seg_at:45, contab:100, telemovel:25, salario:900, ajudas:862, portagens:80, manut:60, limpeza:30 };
+ 
 function resetCustos() {
   ['ald','seg_tvde','seg_at','contab','telemovel','salario','ajudas','portagens','manut','limpeza'].forEach(k => { document.getElementById(k).value = DEFAULTS[k]; });
   calcular();
 }
-function getVal(id) { return parseFloat(document.getElementById(id).value) || 0; }
-function fmtE(v, dec) { dec = dec === undefined ? 2 : dec; return v.toLocaleString('pt-PT',{minimumFractionDigits:dec,maximumFractionDigits:dec}) + ' €'; }
-function fmt(v, dec) { dec = dec === undefined ? 1 : dec; return v.toLocaleString('pt-PT',{minimumFractionDigits:dec,maximumFractionDigits:dec}); }
-function pct(v) { return fmt(v,1) + '%'; }
  
+function getVal(id) { const el = document.getElementById(id); return el ? (parseFloat(el.value) || 0) : 0; }
+function fmtE(v, dec) { dec = (dec === undefined) ? 2 : dec; return v.toLocaleString('pt-PT',{minimumFractionDigits:dec,maximumFractionDigits:dec}) + ' €'; }
+function fmt(v, dec)  { dec = (dec === undefined) ? 1 : dec; return v.toLocaleString('pt-PT',{minimumFractionDigits:dec,maximumFractionDigits:dec}); }
+function pct(v)       { return fmt(v,1) + '%'; }
+function kpi(val, lbl, cls) { return '<div class="kpi ' + cls + '"><div class="val">' + val + '</div><div class="lbl">' + lbl + '</div></div>'; }
  
-// ══ DR TOGGLE ══
 let drModo = 'mensal';
 function drToggle(modo) {
   drModo = modo;
@@ -408,13 +402,14 @@ function drToggle(modo) {
   calcular();
 }
  
-// ══ CÁLCULO ══
 function calcular() {
   const semVal    = getVal('sem_val');
   const semMes    = getVal('sem_mes');
   const pctCasa   = getVal('pct_casa') / 100;
   const tCasa     = getVal('tarifa_casa');
   const tFora     = getVal('tarifa_fora');
+  const kmSemana  = getVal('km_sem') || 1970;
+  const consumo   = getVal('consumo_kwh') || 18;
   const ald       = getVal('ald');
   const segTvde   = getVal('seg_tvde');
   const segAt     = getVal('seg_at');
@@ -426,52 +421,50 @@ function calcular() {
   const manut     = getVal('manut');
   const limpeza   = getVal('limpeza');
  
+  // Receita e energia
   const receitaMensal = semVal * semMes;
-  const kmSemana  = getVal('km_sem') || 1970;
-  const consumo   = getVal('consumo_kwh') || 18;
-  const kwhMes    = (kmSemana * semMes * consumo) / 100;
-  const kwhCasa  = kwhMes * pctCasa;
-  const kwhFora  = kwhMes * (1 - pctCasa);
-  const custoCasa = kwhCasa * tCasa;
-  const custoFora = kwhFora * tFora;
+  const kwhMes        = (kmSemana * semMes * consumo) / 100;
+  const kwhCasa       = kwhMes * pctCasa;
+  const kwhFora       = kwhMes * (1 - pctCasa);
+  const custoCasa     = kwhCasa * tCasa;
+  const custoFora     = kwhFora * tFora;
   const energiaMensal = custoCasa + custoFora;
   const energiaRef    = kwhMes * tFora;
   const poupancaMes   = energiaRef - energiaMensal;
  
+  // SS e salário
   const ssPatronal    = salario * 0.2375;
   const ssTrabalhador = salario * 0.11;
   const irsRetido     = salario * 0.15;
   const salLiq        = salario - ssTrabalhador - irsRetido;
  
-  const fixosTotal    = ald + segTvde + segAt + contab + telemovel + salario + ajudas;
+  // Custos
+  const estrutura     = ald + segTvde + segAt + contab + telemovel;
+  const fixosTotal    = estrutura + salario + ajudas;
   const varTotal      = portagens + manut + limpeza;
-  const totalSemEnergiaSS = fixosTotal + varTotal;
+  const totalSemEnSS  = fixosTotal + varTotal;
   const totalCustos   = fixosTotal + varTotal + energiaMensal + ssPatronal;
  
+  // Resultados
   const resultAntes   = receitaMensal - totalCustos;
   const irc           = resultAntes > 0 ? resultAntes * 0.17 : 0;
   const resultLiq     = resultAntes - irc;
-  const resultAnual   = resultLiq * 12;
-  const divBrutos     = resultAnual * 0.6;
+  const divBrutos     = resultLiq * 12 * 0.6;
   const irsDiv        = divBrutos * 0.28;
-  const divLiq        = divBrutos - irsDiv;
-  const divMes        = divLiq / 12;
+  const divMes        = (divBrutos - irsDiv) / 12;
   const rendTotal     = salLiq + ajudas + divMes;
- 
-  const breakEven     = totalCustos / semMes;
+  const breakEven     = semMes > 0 ? totalCustos / semMes : 0;
   const margemOp      = receitaMensal > 0 ? (resultAntes / receitaMensal * 100) : 0;
   const rendHora      = rendTotal / (9 * 6 * semMes);
  
-  // ── Energia cells ──
+  // ── ENERGIA ──
   document.getElementById('e_casa_val').textContent = fmtE(custoCasa);
   document.getElementById('e_fora_val').textContent = fmtE(custoFora);
   document.getElementById('e_casa_kwh').textContent = fmt(kwhCasa,1) + ' kWh/mês';
   document.getElementById('e_fora_kwh').textContent = fmt(kwhFora,1) + ' kWh/mês';
  
-  // ── Total custos fixos+var ──
-  document.getElementById('total-custos-fixvar').textContent = fmtE(totalSemEnergiaSS);
+  document.getElementById('total-custos-fixvar').textContent = fmtE(totalSemEnSS);
  
-  // ── Tabela Energia ──
   document.getElementById('energia-table').innerHTML =
     '<tr><td>kWh mensais totais (estimado)</td><td>' + fmt(kwhMes,1) + ' kWh</td></tr>' +
     '<tr><td>kWh em casa (' + Math.round(pctCasa*100) + '%)</td><td>' + fmt(kwhCasa,1) + ' kWh</td></tr>' +
@@ -480,178 +473,164 @@ function calcular() {
     '<tr class="pos"><td>Poupança vs. 100% fora</td><td style="color:#27ae60">+' + fmtE(poupancaMes) + '</td></tr>' +
     '<tr class="pos"><td>Poupança anual</td><td style="color:#27ae60">+' + fmtE(poupancaMes*12,0) + '</td></tr>';
  
-  // ── Conta exploração ──
-  const resultClass = resultLiq >= 0 ? 'result-pos' : 'result-neg';
+  // ── CONTA EXPLORAÇÃO ──
+  const rcls = resultLiq >= 0 ? 'result-pos' : 'result-neg';
   document.getElementById('conta-table').innerHTML =
     '<tr><td>Receita líquida plataformas</td><td style="color:#2e6da4;font-weight:800">' + fmtE(receitaMensal) + '</td></tr>' +
     '<tr><td>(−) ALD viatura</td><td>−' + fmtE(ald) + '</td></tr>' +
     '<tr><td>(−) Energia (' + Math.round(pctCasa*100) + '% casa)</td><td>−' + fmtE(energiaMensal) + '</td></tr>' +
-    '<tr><td>(−) Seguros (TVDE + AT)</td><td>−' + fmtE(segTvde + segAt) + '</td></tr>' +
+    '<tr><td>(−) Seguros (TVDE + AT)</td><td>−' + fmtE(segTvde+segAt) + '</td></tr>' +
     '<tr><td>(−) Contabilista</td><td>−' + fmtE(contab) + '</td></tr>' +
-    '<tr><td>(−) Telemóvel</td><td>−' + fmtE(telemovel) + '</td></tr>' +
+    '<tr><td>(−) Telemovel</td><td>−' + fmtE(telemovel) + '</td></tr>' +
     '<tr><td>(−) SS patronal (23,75%)</td><td>−' + fmtE(ssPatronal) + '</td></tr>' +
     '<tr><td>(−) Salário bruto</td><td>−' + fmtE(salario) + '</td></tr>' +
     '<tr><td>(−) Ajudas de custo</td><td>−' + fmtE(ajudas) + '</td></tr>' +
-    '<tr><td>(−) Variáveis (portagens + manut. + limpeza)</td><td>−' + fmtE(varTotal) + '</td></tr>' +
-    '<tr class="total"><td>= Resultado antes de IRC</td><td>' + fmtE(resultAntes) + '</td></tr>' +
+    '<tr><td>(−) Variáveis (portagens+manut.+limpeza)</td><td>−' + fmtE(varTotal) + '</td></tr>' +
+    '<tr class="total"><td>= Resultado antes IRC</td><td>' + fmtE(resultAntes) + '</td></tr>' +
     '<tr><td>(−) IRC (17% PME)</td><td>−' + fmtE(irc) + '</td></tr>' +
-    '<tr class="' + resultClass + '"><td>= Resultado líquido empresa</td><td>' + fmtE(resultLiq) + '</td></tr>';
+    '<tr class="' + rcls + '"><td>= Resultado líquido empresa</td><td>' + fmtE(resultLiq) + '</td></tr>';
  
-  // ── Barras ──
-  const cores = ['#2e6da4','#e67e22','#e74c3c','#9b59b6','#27ae60'];
+  // ── BARRAS ──
   const itens = [
-    { lbl: 'Custos fixos', val: fixosTotal + ssPatronal, cor: cores[0] },
-    { lbl: 'Energia', val: energiaMensal, cor: cores[1] },
-    { lbl: 'Variáveis', val: varTotal, cor: cores[2] },
-    { lbl: 'IRC', val: irc, cor: cores[3] },
-    { lbl: 'Resultado líq.', val: Math.max(0, resultLiq), cor: cores[4] }
+    { lbl: 'Custos fixos', val: fixosTotal + ssPatronal, cor: '#2e6da4' },
+    { lbl: 'Energia',      val: energiaMensal,           cor: '#e67e22' },
+    { lbl: 'Variáveis', val: varTotal,              cor: '#e74c3c' },
+    { lbl: 'IRC',          val: irc,                     cor: '#9b59b6' },
+    { lbl: 'Resultado líq.', val: Math.max(0,resultLiq), cor: '#27ae60' }
   ];
   document.getElementById('bar-wrap').innerHTML = itens.map(it => {
-    const w = receitaMensal > 0 ? Math.min(100, (it.val / receitaMensal * 100)) : 0;
+    const w = receitaMensal > 0 ? Math.min(100, it.val / receitaMensal * 100) : 0;
     return '<div class="bar-row"><div class="bar-lbl">' + it.lbl + '</div>' +
       '<div class="bar-outer"><div class="bar-inner" style="width:' + w.toFixed(1) + '%;background:' + it.cor + '"></div></div>' +
       '<div class="bar-val" style="color:' + it.cor + '">' + fmtE(it.val,0) + '</div></div>';
   }).join('');
  
-  // ── KPI Mensal ──
+  // ── KPI MENSAL ──
   document.getElementById('kpi-mensal').innerHTML =
     kpi(fmtE(breakEven,0), 'break-even semanal', '') +
     kpi(pct(margemOp), 'margem operacional', margemOp >= 0 ? 'verde' : 'vermelho') +
     kpi(fmtE(rendHora), 'rendimento líq. / hora (~9h × 6 dias/sem)', 'azul') +
     kpi(fmtE(poupancaMes*12,0), 'poupança energia/ano vs. 100% fora', 'verde');
  
-  // ── Remuneração ──
+  // ── REMUNERAÇÃO ──
   document.getElementById('rem-table').innerHTML =
     '<tr><td>Salário bruto mensal</td><td>' + fmtE(salario,0) + '</td></tr>' +
     '<tr><td>(−) SS trabalhador (11%)</td><td>−' + fmtE(ssTrabalhador) + '</td></tr>' +
     '<tr><td>(−) IRS retido (~15%)</td><td>−' + fmtE(irsRetido) + '</td></tr>' +
     '<tr class="total pos"><td>= Salário líquido</td><td>' + fmtE(salLiq,0) + '</td></tr>' +
     '<tr class="highlight"><td>Ajudas de custo</td><td>' + fmtE(ajudas,0) + '</td></tr>' +
-    '<tr class="total"><td>= Salário + ajudas (mensal)</td><td>' + fmtE(salLiq + ajudas,0) + '</td></tr>' +
+    '<tr class="total"><td>= Salário + ajudas (mensal)</td><td>' + fmtE(salLiq+ajudas,0) + '</td></tr>' +
     '<tr><td>Dividendos anuais (após IRC 17%)</td><td>' + fmtE(divBrutos,0) + '</td></tr>' +
     '<tr><td>(−) Retenção IRS dividendos (28%)</td><td>−' + fmtE(irsDiv,0) + '</td></tr>' +
     '<tr><td>= Dividendos líquidos / mês</td><td>' + fmtE(divMes,0) + '</td></tr>' +
     '<tr class="total highlight"><td>Rendimento total líquido mensal</td><td>' + fmtE(rendTotal,0) + '</td></tr>';
  
   document.getElementById('kpi-rem').innerHTML =
-    kpi(fmtE(salLiq,0), 'salário líq. + ajudas', '') +
+    kpi(fmtE(salLiq,0), 'salário líquido', '') +
     kpi(fmtE(ajudas,0), 'ajudas de custo (isentas)', 'verde') +
     kpi(fmtE(divMes,0), 'dividendos líq./mês', 'azul') +
     kpi(fmtE(rendTotal,0), 'rendimento total líquido mensal', 'verde span2');
  
-  // ── Real vs Plano ──
+  // ── REAL VS PLANO ──
   const planoReceita = 850 * semMes;
-  const deltaReceita = receitaMensal - planoReceita;
-  const deltaPct = planoReceita > 0 ? (deltaReceita / planoReceita * 100) : 0;
+  const deltaPct = planoReceita > 0 ? ((receitaMensal - planoReceita) / planoReceita * 100) : 0;
   document.getElementById('rvp-table').innerHTML =
-    '<tr><td>Receita/semana</td><td>850 €</td><td>' + fmtE(semVal,0) + ' ' + (semVal >= 850 ? '<span style="color:#27ae60">+' + pct(((semVal-850)/850)*100) + '</span>' : '<span style="color:#c0392b">' + pct(((semVal-850)/850)*100) + '</span>') + '</td></tr>' +
+    '<tr><td>Receita/semana</td><td>850 €</td><td>' + fmtE(semVal,0) + ' <span style="color:' + (semVal>=850?'#27ae60':'#c0392b') + '">' + (semVal>=850?'+':'') + pct(((semVal-850)/850)*100) + '</span></td></tr>' +
     '<tr><td>Receita/dia activo</td><td>~141 €</td><td>' + fmtE(semVal/6,0) + '</td></tr>' +
     '<tr><td>Dias activos/semana</td><td>6</td><td>6 ✅</td></tr>' +
     '<tr><td>Descanso 2ª feira</td><td>Sim</td><td>Sim ✅</td></tr>' +
-    '<tr><td>Energia mensal</td><td>500 €</td><td>' + fmtE(energiaMensal) + ' ' + (energiaMensal <= 500 ? '<span style="color:#27ae60">✅</span>' : '<span style="color:#c0392b">▲</span>') + '</td></tr>' +
-    '<tr><td>ALD viatura</td><td>500 €</td><td>' + fmtE(ald,0) + (ald === 500 ? ' ✅' : '') + '</td></tr>' +
+    '<tr><td>Energia mensal</td><td>500 €</td><td>' + fmtE(energiaMensal) + ' ' + (energiaMensal<=500?'✅':'<span style="color:#c0392b">▲</span>') + '</td></tr>' +
+    '<tr><td>ALD viatura</td><td>500 €</td><td>' + fmtE(ald,0) + (ald===500?' ✅':'') + '</td></tr>' +
     '<tr><td>Plataforma dominante</td><td>Uber+Bolt</td><td>Uber 97%</td></tr>' +
     '<tr><td>Viagens totais (período)</td><td>—</td><td>768</td></tr>';
  
-  // balanço
-  const balMsg = deltaReceita >= 0
+  const balMsg = deltaPct >= 0
     ? 'A operação real supera o plano base em <strong>+' + pct(deltaPct) + ' de receita</strong>. Com a optimização da energia em casa, os custos são ainda menores do que o previsto.'
     : 'A operação real está <strong>' + pct(Math.abs(deltaPct)) + ' abaixo do plano base</strong>. Rever estratégia de receita.';
   document.getElementById('rvp-nota').innerHTML = '<strong>Balanço:</strong> ' + balMsg;
  
-  // resultado box — verde/vermelho
   const rBox = document.getElementById('result-box');
-  const rVal = document.getElementById('resultado-val');
-  rVal.textContent = fmtE(resultLiq);
+  document.getElementById('resultado-val').textContent = fmtE(resultLiq);
   rBox.className = 'result-box ' + (resultLiq >= 0 ? 'pos' : 'neg');
  
-  // KPI RvP
   document.getElementById('kpi-rvp').innerHTML =
     kpi(fmtE(semVal,0), 'receita real / semana', semVal >= 850 ? 'verde' : 'vermelho') +
     kpi(fmtE(receitaMensal,0), 'receita mensal real', semVal >= 850 ? 'verde' : 'vermelho') +
-    kpi(fmtE(fixosTotal + ssPatronal,0), 'custos fixos + SS', '') +
+    kpi(fmtE(estrutura + ssPatronal,0), 'custos fixos + SS', '') +
     kpi(fmtE(varTotal,0), 'custos variáveis', '') +
     kpi(fmtE(energiaMensal), 'energia mensal', energiaMensal <= 500 ? 'verde' : 'amarelo') +
     kpi(fmtE(totalCustos,0), 'total custos', 'vermelho') +
     kpi(fmtE(resultAntes), 'resultado antes IRC', resultAntes >= 0 ? 'verde' : 'vermelho') +
     kpi(fmtE(resultLiq), 'resultado líquido', resultLiq >= 0 ? 'verde' : 'vermelho');
-}
  
- 
-  // ── DR & Balanço ──
+  // ── DR & BALANÇO ──
   const f = drModo === 'anual' ? 12 : 1;
-  const lbl = drModo === 'anual' ? ' /ano' : ' /mês';
-  const ebitda = receitaMensal * f - (energiaMensal + varTotal + portagens * 0) * f - (ald + segTvde + segAt + contab + telemovel) * f;
-  const gastosPessoal = (salario + ajudas + ssPatronal) * f;
-  const gastosTotais  = totalCustos * f;
-  const resultAntesF  = resultAntes * f;
-  const ircF          = irc * f;
-  const resultLiqF    = resultLiq * f;
-  const receitaF      = receitaMensal * f;
-  const ebitdaF       = receitaF - (energiaMensal * f) - (varTotal * f) - ((ald + segTvde + segAt + contab + telemovel) * f);
-  const ebitF         = ebitdaF - gastosPessoal;
+  const receitaF   = receitaMensal * f;
+  const energiaF   = energiaMensal * f;
+  const estruturaF = estrutura * f;
+  const varF       = varTotal * f;
+  const ebitdaF    = receitaF - energiaF - estruturaF - varF;
+  const pessoalF   = (salario + ssPatronal + ajudas) * f;
+  const ebitF      = ebitdaF - pessoalF;
+  const resultAntesF = resultAntes * f;
+  const ircF       = irc * f;
+  const resultLiqF = resultLiq * f;
+  const totalCustosF = totalCustos * f;
+  const margemLiq  = receitaF > 0 ? (resultLiqF / receitaF * 100) : 0;
+  const margemEbitda = receitaF > 0 ? (ebitdaF / receitaF * 100) : 0;
+  const roi        = totalCustosF > 0 ? (resultLiqF / totalCustosF * 100) : 0;
  
   document.getElementById('dr-table').innerHTML =
     '<tr class="sub"><td colspan="2">PROVEITOS</td></tr>' +
     '<tr><td>Receita líquida plataformas</td><td style="color:#2e6da4;font-weight:800">' + fmtE(receitaF) + '</td></tr>' +
     '<tr class="sub"><td colspan="2">GASTOS OPERACIONAIS</td></tr>' +
-    '<tr><td>(−) Energia</td><td>−' + fmtE(energiaMensal * f) + '</td></tr>' +
-    '<tr><td>(−) Custos fixos estrutura</td><td>−' + fmtE((ald + segTvde + segAt + contab + telemovel) * f) + '</td></tr>' +
-    '<tr><td>(−) Custos variáveis</td><td>−' + fmtE(varTotal * f) + '</td></tr>' +
+    '<tr><td>(−) Energia</td><td>−' + fmtE(energiaF) + '</td></tr>' +
+    '<tr><td>(−) Custos fixos estrutura</td><td>−' + fmtE(estruturaF) + '</td></tr>' +
+    '<tr><td>(−) Custos variáveis</td><td>−' + fmtE(varF) + '</td></tr>' +
     '<tr class="total"><td>= EBITDA</td><td>' + fmtE(ebitdaF) + '</td></tr>' +
     '<tr class="sub"><td colspan="2">GASTOS COM PESSOAL</td></tr>' +
-    '<tr><td>(−) Salário bruto</td><td>−' + fmtE(salario * f) + '</td></tr>' +
-    '<tr><td>(−) SS patronal (23,75%)</td><td>−' + fmtE(ssPatronal * f) + '</td></tr>' +
-    '<tr><td>(−) Ajudas de custo</td><td>−' + fmtE(ajudas * f) + '</td></tr>' +
+    '<tr><td>(−) Salário bruto</td><td>−' + fmtE(salario*f) + '</td></tr>' +
+    '<tr><td>(−) SS patronal (23,75%)</td><td>−' + fmtE(ssPatronal*f) + '</td></tr>' +
+    '<tr><td>(−) Ajudas de custo</td><td>−' + fmtE(ajudas*f) + '</td></tr>' +
     '<tr class="total"><td>= EBIT (Resultado Operacional)</td><td>' + fmtE(ebitF) + '</td></tr>' +
     '<tr class="total"><td>= Resultado antes IRC</td><td>' + fmtE(resultAntesF) + '</td></tr>' +
     '<tr><td>(−) IRC (17% PME)</td><td>−' + fmtE(ircF) + '</td></tr>' +
     '<tr class="' + (resultLiqF >= 0 ? 'result-pos' : 'result-neg') + '"><td>= RESULTADO LÍQUIDO</td><td>' + fmtE(resultLiqF) + '</td></tr>';
  
-  // KPIs DR
-  const margemLiq = receitaF > 0 ? (resultLiqF / receitaF * 100) : 0;
-  const margemEbitda = receitaF > 0 ? (ebitdaF / receitaF * 100) : 0;
-  const roi = gastosTotais * f > 0 ? (resultLiqF / (gastosTotais * f) * 100) : 0;
   document.getElementById('kpi-dr').innerHTML =
     kpi(pct(margemEbitda), 'margem EBITDA', margemEbitda >= 0 ? 'verde' : 'vermelho') +
     kpi(pct(margemLiq), 'margem líquida', margemLiq >= 0 ? 'verde' : 'vermelho') +
     kpi(pct(roi), 'ROI (resultado/custos)', roi >= 0 ? 'verde' : 'vermelho') +
     kpi(fmtE(breakEven,0), 'break-even / semana', '');
  
-  // BALANÇO ESTIMADO (mensal — snapshot do mês)
-  const caixaEstimada   = Math.max(0, resultLiq * 3);   // 3 meses de resultado acumulado estimado
-  const valorResALD     = ald * (60 - 1);               // meses restantes × prestação (aproximação)
-  const activoTotal     = caixaEstimada + 1000;         // caixa + fundo maneio estimado
-  const aldPassivo      = ald * 12;                     // ALD anual restante
-  const ssApagar        = ssPatronal + ssTrabalhador;
-  const irsApagar       = irsRetido;
-  const passivoTotal    = aldPassivo + ssApagar + irsApagar;
-  const capitalSocial   = 1;                            // Unipessoal Lda mínimo
-  const resultAcum      = Math.max(0, resultLiq * 6);   // 6 meses estimados
-  const capProprio      = capitalSocial + resultAcum;
-  const totalPassivoCP  = passivoTotal + capProprio;
-  const autonomiaFin    = totalPassivoCP > 0 ? (capProprio / totalPassivoCP * 100) : 0;
+  // Balanço
+  const caixaEst    = Math.max(0, resultLiq * 3);
+  const activoTotal = caixaEst + 1000;
+  const aldPassivo  = ald * 12;
+  const ssAPagar    = ssPatronal + ssTrabalhador;
+  const passivoTotal = aldPassivo + ssAPagar + irsRetido;
+  const resultAcum  = Math.max(0, resultLiq * 6);
+  const capProprio  = 1 + resultAcum;
+  const totalPCP    = passivoTotal + capProprio;
+  const autonomia   = totalPCP > 0 ? (capProprio / totalPCP * 100) : 0;
  
   document.getElementById('balanco-table').innerHTML =
     '<tr class="sub"><td colspan="2">ACTIVO</td></tr>' +
-    '<tr><td>Caixa e depósitos (estimado)</td><td style="color:#2e6da4">' + fmtE(caixaEstimada) + '</td></tr>' +
+    '<tr><td>Caixa e depósitos (estimado)</td><td style="color:#2e6da4">' + fmtE(caixaEst) + '</td></tr>' +
     '<tr><td>Fundo maneio operacional</td><td style="color:#2e6da4">' + fmtE(1000) + '</td></tr>' +
     '<tr class="total"><td>= Total Activo</td><td>' + fmtE(activoTotal) + '</td></tr>' +
     '<tr class="sub"><td colspan="2">PASSIVO</td></tr>' +
     '<tr><td>ALD viatura (12 meses)</td><td style="color:#c0392b">−' + fmtE(aldPassivo) + '</td></tr>' +
-    '<tr><td>SS a entregar (mês)</td><td style="color:#c0392b">−' + fmtE(ssApagar) + '</td></tr>' +
-    '<tr><td>IRS a entregar (mês)</td><td style="color:#c0392b">−' + fmtE(irsApagar) + '</td></tr>' +
+    '<tr><td>SS a entregar (mês)</td><td style="color:#c0392b">−' + fmtE(ssAPagar) + '</td></tr>' +
+    '<tr><td>IRS a entregar (mês)</td><td style="color:#c0392b">−' + fmtE(irsRetido) + '</td></tr>' +
     '<tr class="total"><td>= Total Passivo</td><td style="color:#c0392b">' + fmtE(passivoTotal) + '</td></tr>' +
     '<tr class="sub"><td colspan="2">CAPITAL PRÓPRIO</td></tr>' +
-    '<tr><td>Capital social</td><td>' + fmtE(capitalSocial) + '</td></tr>' +
+    '<tr><td>Capital social</td><td>' + fmtE(1) + '</td></tr>' +
     '<tr><td>Resultados acumulados (est. 6 meses)</td><td>' + fmtE(resultAcum) + '</td></tr>' +
     '<tr class="total highlight"><td>= Total Capital Próprio</td><td>' + fmtE(capProprio) + '</td></tr>' +
     '<tr class="sub"><td colspan="2">INDICADORES DE BALANÇO</td></tr>' +
-    '<tr><td>Autonomia financeira</td><td style="color:' + (autonomiaFin >= 30 ? '#27ae60' : '#e67e22') + '">' + pct(autonomiaFin) + '</td></tr>' +
-    '<tr><td>Endividamento</td><td>' + pct(100 - autonomiaFin) + '</td></tr>';
- 
-function kpi(val, lbl, cls) {
-  return '<div class="kpi ' + cls + '"><div class="val">' + val + '</div><div class="lbl">' + lbl + '</div></div>';
+    '<tr><td>Autonomia financeira</td><td style="color:' + (autonomia >= 30 ? '#27ae60' : '#e67e22') + '">' + pct(autonomia) + '</td></tr>' +
+    '<tr><td>Endividamento</td><td>' + pct(100 - autonomia) + '</td></tr>';
 }
  
 calcular();
