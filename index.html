@@ -156,7 +156,6 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
       <h2>⚙️ Receita</h2>
       <table>
         <tr><td>Receita líquida semanal</td><td><input class="edit-input" id="sem_val" type="number" value="911" step="1" oninput="calcular()"> €</td></tr>
-        <tr><td>Dias de trabalho / semana</td><td><input class="edit-input" id="dias_sem" type="number" value="6" step="1" min="1" max="7" oninput="calcular()"> dias</td></tr>
         <tr><td>Factor mensal</td><td><input class="edit-input" id="sem_mes" type="number" value="4.3" step="0.1" min="1" max="5" oninput="calcular()"></td></tr>
       </table>
       <div class="nota" style="margin-top:10px">
@@ -372,7 +371,6 @@ function pct(v) { return fmt(v,1) + '%'; }
 function calcular() {
   const semVal    = getVal('sem_val');
   const semMes    = getVal('sem_mes');
-  const diasSem   = getVal('dias_sem') || 6;
   const pctCasa   = getVal('pct_casa') / 100;
   const tCasa     = getVal('tarifa_casa');
   const tFora     = getVal('tarifa_fora');
@@ -421,7 +419,7 @@ function calcular() {
  
   const breakEven     = totalCustos / semMes;
   const margemOp      = receitaMensal > 0 ? (resultAntes / receitaMensal * 100) : 0;
-  const rendHora      = rendTotal / (9 * diasSem * semMes);
+  const rendHora      = rendTotal / (9 * 6 * semMes);
  
   // ── Energia cells ──
   document.getElementById('e_casa_val').textContent = fmtE(custoCasa);
@@ -478,7 +476,7 @@ function calcular() {
   document.getElementById('kpi-mensal').innerHTML =
     kpi(fmtE(breakEven,0), 'break-even semanal', '') +
     kpi(pct(margemOp), 'margem operacional', margemOp >= 0 ? 'verde' : 'vermelho') +
-    kpi(fmtE(rendHora), 'rendimento líq. / hora (~9h × ' + diasSem + ' dias/sem)', 'azul') +
+    kpi(fmtE(rendHora), 'rendimento líq. / hora (~9h × 6 dias/sem)', 'azul') +
     kpi(fmtE(poupancaMes*12,0), 'poupança energia/ano vs. 100% fora', 'verde');
  
   // ── Remuneração ──
