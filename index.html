@@ -156,8 +156,12 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
       <h2>⚙️ Receita</h2>
       <table>
         <tr><td>Receita líquida semanal</td><td><input class="edit-input" id="sem_val" type="number" value="911" step="1" oninput="calcular()"> €</td></tr>
-        <tr><td>Semanas activas / mês</td><td><input class="edit-input" id="sem_mes" type="number" value="4.3" step="0.1" oninput="calcular()"></td></tr>
+        <tr><td>Dias de trabalho / semana</td><td><input class="edit-input" id="dias_sem" type="number" value="6" step="1" min="1" max="7" oninput="calcular()"> dias</td></tr>
+        <tr><td>Factor mensal</td><td><input class="edit-input" id="sem_mes" type="number" value="4.3" step="0.1" min="1" max="5" oninput="calcular()"></td></tr>
       </table>
+      <div class="nota" style="margin-top:10px">
+        <strong>Factor mensal</strong> — multiplicador que converte a receita semanal em receita mensal (52 semanas ÷ 12 meses = 4,3). <strong>Não alteres em condições normais.</strong> Usa este campo apenas para simular meses atípicos: férias (→ 3,3), mês com feriados ou doença (→ 3,0), mês de 5 semanas (→ 4,8). Não representa semanas inteiras trabalhadas — é um factor de escala mensal.
+      </div>
       <div class="slider-wrap" style="margin-top:10px">
         <label>% carregamento em casa <span id="pct_casa_lbl" style="font-weight:700;color:#2e6da4">60%</span></label>
         <input type="range" id="pct_casa" min="0" max="100" value="60" step="5" oninput="document.getElementById('pct_casa_lbl').textContent=this.value+'%';calcular()">
@@ -211,6 +215,10 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
   <div class="tab-content" id="tab-energia">
     <div class="section">
       <h2>⚡ Custo de Energia</h2>
+      <table style="margin-bottom:12px">
+        <tr><td>Km percorridos / semana</td><td><input class="edit-input" id="km_sem" type="number" value="1970" step="10" min="100" oninput="calcular()"> km</td></tr>
+        <tr><td>Consumo médio</td><td><input class="edit-input" id="consumo_kwh" type="number" value="18" step="0.5" min="5" max="40" oninput="calcular()"> kWh/100km</td></tr>
+      </table>
       <div class="energia-split">
         <div class="e-box e-casa">
           <div class="tarifa-row">
@@ -232,7 +240,7 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
         </div>
       </div>
       <table id="energia-table"></table>
-      <div class="nota"><strong>Tarifa casa:</strong> ~0,18€/kWh (EDP tarifa simples). <strong>Tarifa fora:</strong> ~0,55€/kWh (média redes públicas Galp/Zunder/Ionity). Ajuste a % em casa no separador Mensal.</div>
+      <div class="nota"><strong>Tarifa casa:</strong> ~0,18€/kWh (EDP tarifa simples). <strong>Tarifa fora:</strong> ~0,55€/kWh (média redes públicas Galp/Zunder/Ionity). Ajuste a % em casa no separador Mensal. Consumo médio do Tesla Model Y em operação TVDE: ~18 kWh/100km.</div>
     </div>
   </div>
  
@@ -302,7 +310,8 @@ async function guardarConfig() {
   sbStatus('A guardar…', '');
   const payload = {
     id: BROWSER_ID,
-    sem_val: getVal('sem_val'), sem_mes: getVal('sem_mes'), pct_casa: getVal('pct_casa'),
+    sem_val: getVal('sem_val'), sem_mes: getVal('sem_mes'), dias_sem: getVal('dias_sem'), pct_casa: getVal('pct_casa'),
+    km_sem: getVal('km_sem'), consumo_kwh: getVal('consumo_kwh'),
     tarifa_casa: getVal('tarifa_casa'), tarifa_fora: getVal('tarifa_fora'),
     ald: getVal('ald'), seg_tvde: getVal('seg_tvde'), seg_at: getVal('seg_at'),
     contab: getVal('contab'), telemovel: getVal('telemovel'),
@@ -330,7 +339,7 @@ async function carregarConfig() {
     const data = await r.json();
     if (data && data.length > 0) {
       const c = data[0];
-      ['sem_val','sem_mes','pct_casa','tarifa_casa','tarifa_fora','ald','seg_tvde','seg_at','contab','telemovel','salario','ajudas','portagens','manut','limpeza'].forEach(k => {
+      ['sem_val','sem_mes','dias_sem','pct_casa','km_sem','consumo_kwh','tarifa_casa','tarifa_fora','ald','seg_tvde','seg_at','contab','telemovel','salario','ajudas','portagens','manut','limpeza'].forEach(k => {
         if (c[k] !== undefined && document.getElementById(k)) document.getElementById(k).value = c[k];
       });
       if (c.pct_casa !== undefined) document.getElementById('pct_casa_lbl').textContent = c.pct_casa + '%';
@@ -349,7 +358,7 @@ function showTab(id, btn) {
 }
  
 // ══ HELPERS ══
-const DEFAULTS = { sem_val:911,sem_mes:4.3,pct_casa:60,tarifa_casa:0.18,tarifa_fora:0.55,ald:500,seg_tvde:120,seg_at:45,contab:100,telemovel:25,salario:900,ajudas:862,portagens:80,manut:60,limpeza:30 };
+const DEFAULTS = { sem_val:911,sem_mes:4.3,dias_sem:6,pct_casa:60,km_sem:1970,consumo_kwh:18,tarifa_casa:0.18,tarifa_fora:0.55,ald:500,seg_tvde:120,seg_at:45,contab:100,telemovel:25,salario:900,ajudas:862,portagens:80,manut:60,limpeza:30 };
 function resetCustos() {
   ['ald','seg_tvde','seg_at','contab','telemovel','salario','ajudas','portagens','manut','limpeza'].forEach(k => { document.getElementById(k).value = DEFAULTS[k]; });
   calcular();
@@ -363,6 +372,7 @@ function pct(v) { return fmt(v,1) + '%'; }
 function calcular() {
   const semVal    = getVal('sem_val');
   const semMes    = getVal('sem_mes');
+  const diasSem   = getVal('dias_sem') || 6;
   const pctCasa   = getVal('pct_casa') / 100;
   const tCasa     = getVal('tarifa_casa');
   const tFora     = getVal('tarifa_fora');
@@ -378,7 +388,9 @@ function calcular() {
   const limpeza   = getVal('limpeza');
  
   const receitaMensal = semVal * semMes;
-  const kwhMes   = (400 * semMes * 18) / 100;
+  const kmSemana  = getVal('km_sem') || 1970;
+  const consumo   = getVal('consumo_kwh') || 18;
+  const kwhMes    = (kmSemana * semMes * consumo) / 100;
   const kwhCasa  = kwhMes * pctCasa;
   const kwhFora  = kwhMes * (1 - pctCasa);
   const custoCasa = kwhCasa * tCasa;
@@ -409,7 +421,7 @@ function calcular() {
  
   const breakEven     = totalCustos / semMes;
   const margemOp      = receitaMensal > 0 ? (resultAntes / receitaMensal * 100) : 0;
-  const rendHora      = rendTotal / (9 * 6 * 4.3);
+  const rendHora      = rendTotal / (9 * diasSem * semMes);
  
   // ── Energia cells ──
   document.getElementById('e_casa_val').textContent = fmtE(custoCasa);
@@ -466,7 +478,7 @@ function calcular() {
   document.getElementById('kpi-mensal').innerHTML =
     kpi(fmtE(breakEven,0), 'break-even semanal', '') +
     kpi(pct(margemOp), 'margem operacional', margemOp >= 0 ? 'verde' : 'vermelho') +
-    kpi(fmtE(rendHora), 'rendimento líq. / hora (~9h × 6 dias/sem)', 'azul') +
+    kpi(fmtE(rendHora), 'rendimento líq. / hora (~9h × ' + diasSem + ' dias/sem)', 'azul') +
     kpi(fmtE(poupancaMes*12,0), 'poupança energia/ano vs. 100% fora', 'verde');
  
   // ── Remuneração ──
