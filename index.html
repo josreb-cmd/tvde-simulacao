@@ -145,9 +145,27 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
       <div class="nota" id="nota-receita-calc" style="margin-top:10px">
         <strong>Receita calculada:</strong> — €/semana · — €/mês · — h/mês
       </div>
-      <div class="slider-wrap" style="margin-top:10px">
-        <label>% carregamento em casa <span id="pct_casa_lbl" style="font-weight:700;color:#2e6da4">60%</span></label>
-        <input type="range" id="pct_casa" min="0" max="100" value="60" step="5" oninput="document.getElementById('pct_casa_lbl').textContent=this.value+'%';calcular()">
+      <div style="margin-top:12px;background:linear-gradient(135deg,#e3f2fd,#e8f5e9);border:2px solid #2e6da4;border-radius:10px;padding:12px 14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span style="font-size:0.82rem;font-weight:700;color:#1a3a5c">⚡ Carregamento em casa</span>
+          <span style="display:flex;gap:6px;align-items:center">
+            <span style="font-size:0.75rem;color:#e67e22;font-weight:700">🔌 Fora</span>
+            <span id="pct_fora_lbl" style="font-size:0.8rem;color:#e67e22;font-weight:800">40%</span>
+            <span style="font-size:0.75rem;color:#888;margin:0 4px">|</span>
+            <span style="font-size:0.75rem;color:#27ae60;font-weight:700">🏠 Casa</span>
+            <span id="pct_casa_lbl" style="font-size:0.8rem;color:#27ae60;font-weight:800">60%</span>
+          </span>
+        </div>
+        <input type="range" id="pct_casa" min="0" max="100" value="60" step="5"
+          style="width:100%;accent-color:#2e6da4;height:6px;cursor:pointer"
+          oninput="
+            document.getElementById('pct_casa_lbl').textContent=this.value+'%';
+            document.getElementById('pct_fora_lbl').textContent=(100-this.value)+'%';
+            calcular()">
+        <div style="display:flex;justify-content:space-between;font-size:0.65rem;color:#888;margin-top:3px">
+          <span>0% casa</span><span>25%</span><span>50%</span><span>75%</span><span>100% casa</span>
+        </div>
+        <div id="energia-resumo" style="margin-top:8px;font-size:0.75rem;color:#555;text-align:center"></div>
       </div>
       <div class="nota azul" style="margin-top:10px"><strong>Base real apurada:</strong> 910,85€/sem · 151,81€/dia · 5,45€/viagem (dados Abr–Mai 2026).</div>
     </div>
@@ -500,6 +518,14 @@ function calcular() {
   const breakEven = semMes > 0 ? totalGastos / semMes : 0;
   const margemOp = receitaMensal > 0 ? (resultadoAntes / receitaMensal * 100) : 0;
   const rendHora = rendTotal / horasMes;
+
+  // Atualiza resumo energia no slider
+  const erEl = document.getElementById('energia-resumo');
+  if (erEl) erEl.innerHTML =
+    '<span style="color:#27ae60;font-weight:700">' + fmtE(custoCasa) + '/mês em casa</span>' +
+    ' &nbsp;·&nbsp; ' +
+    '<span style="color:#e67e22;font-weight:700">' + fmtE(custoFora) + '/mês fora</span>' +
+    ' &nbsp;·&nbsp; Total: <strong>' + fmtE(energiaMensal) + '</strong>';
 
   // Atualiza nota de receita calculada
   document.getElementById('nota-receita-calc').innerHTML =
