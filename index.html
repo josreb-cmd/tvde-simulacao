@@ -203,6 +203,11 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
         <tr><td>Telemóvel / dados</td><td><input class="edit-input" id="telemovel" type="number" value="25" oninput="calcular()"> €/mês</td></tr>
         <tr><td>Salário bruto sócio-gerente</td><td><input class="edit-input" id="salario" type="number" value="900" oninput="calcular()"> €/mês</td></tr>
         <tr><td>Ajudas de custo (dias/mês)</td><td><input class="edit-input" id="ajudas" type="number" value="862" oninput="calcular()"> €/mês</td></tr>
+        <tr class="sub"><td colspan="2">SUBSÍDIO DE REFEIÇÃO</td></tr>
+        <tr><td>Dias úteis / mês</td><td><input class="edit-input" id="sub_ref_dias" type="number" value="22" step="1" min="0" max="31" oninput="calcular()"> dias</td></tr>
+        <tr><td>Valor / dia</td><td><input class="edit-input" id="sub_ref_val" type="number" value="9.60" step="0.10" min="0" max="9.60" oninput="calcular()"> €</td></tr>
+        <tr><td>Total mensal (calculado)</td><td id="sub_ref_total_display" style="color:#27ae60;font-weight:800">—</td></tr>
+        <tr><td style="font-size:0.78rem;color:#888">Limite isento IRS/SS</td><td style="font-size:0.78rem;color:#27ae60;font-weight:700">9,60 €/dia (cartão/transf.)</td></tr>
         <tr class="sub"><td colspan="2">CUSTOS VARIÁVEIS MENSAIS</td></tr>
         <tr><td>Portagens</td><td><input class="edit-input" id="portagens" type="number" value="80" oninput="calcular()"> €/mês</td></tr>
         <tr><td>Manutenção / pneus</td><td><input class="edit-input" id="manut" type="number" value="60" oninput="calcular()"> €/mês</td></tr>
@@ -289,7 +294,7 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
     <div class="section">
       <h2>📋 Demonstração de Resultados</h2>
       <table id="dr-table"></table>
-      <div class="nota azul" style="margin-top:10px"><strong>Nota fiscal:</strong> Apenas os <strong>juros</strong> do crédito automóvel são gasto dedutível no IRC. A amortização de capital não é gasto — é reembolso de dívida e afeta só o balanço. As ajudas de custo são gasto operacional da empresa mas isentas de IRS/SS para o colaborador.</div>
+      <div class="nota azul" style="margin-top:10px"><strong>Nota fiscal:</strong> Apenas os <strong>juros</strong> do crédito são gasto dedutível. A amortização não é gasto. Ajudas de custo e subsídio de refeição são gastos da empresa, isentos de IRS e SS para o colaborador.</div>
     </div>
     <div class="section">
       <h2>🎯 Indicadores de Rentabilidade</h2>
@@ -334,6 +339,7 @@ async function guardarConfig() {
     seg_tvde: getVal('seg_tvde'), seg_at: getVal('seg_at'),
     contab: getVal('contab'), telemovel: getVal('telemovel'),
     salario: getVal('salario'), ajudas: getVal('ajudas'),
+    sub_ref_dias: getVal('sub_ref_dias'), sub_ref_val: getVal('sub_ref_val'),
     portagens: getVal('portagens'), manut: getVal('manut'), limpeza: getVal('limpeza'),
     atualizado_em: new Date().toISOString()
   };
@@ -364,7 +370,7 @@ async function carregarConfig() {
       const cfg = data[0];
       ['rec_dia','dias_sem','horas_dia','sem_mes','pct_casa','km_sem','consumo_kwh','tarifa_casa','tarifa_fora',
        'fin_capital','fin_taxa','fin_prazo',
-       'seg_tvde','seg_at','contab','telemovel','salario','ajudas','portagens','manut','limpeza'].forEach(k => {
+       'seg_tvde','seg_at','contab','telemovel','salario','ajudas','sub_ref_dias','sub_ref_val','portagens','manut','limpeza'].forEach(k => {
         if (cfg[k] !== undefined && document.getElementById(k)) document.getElementById(k).value = cfg[k];
       });
       if (cfg.pct_casa !== undefined) document.getElementById('pct_casa_lbl').textContent = cfg.pct_casa + '%';
@@ -386,12 +392,12 @@ const DEFAULTS = {
   tarifa_casa:0.18, tarifa_fora:0.55,
   fin_capital:30000, fin_taxa:8.25, fin_prazo:72,
   seg_tvde:120, seg_at:45, contab:100, telemovel:25,
-  salario:900, ajudas:862, portagens:80, manut:60, limpeza:30
+  salario:900, ajudas:862, sub_ref_dias:22, sub_ref_val:9.60, portagens:80, manut:60, limpeza:30
 };
 
 function resetCustos() {
   ['fin_capital','fin_taxa','fin_prazo','seg_tvde','seg_at','contab','telemovel',
-   'salario','ajudas','portagens','manut','limpeza'].forEach(k => {
+   'salario','ajudas','sub_ref_dias','sub_ref_val','portagens','manut','limpeza'].forEach(k => {
     document.getElementById(k).value = DEFAULTS[k];
   });
   calcular();
@@ -458,6 +464,12 @@ function calcular() {
   const telemovel = getVal('telemovel');
   const salario = getVal('salario');
   const ajudas = getVal('ajudas');
+  const subRefDias = getVal('sub_ref_dias');
+  const subRefVal = getVal('sub_ref_val');
+  const subRefMes = subRefDias * subRefVal;
+  const subRefLimite = subRefDias * 9.60;
+  const subRefIsento = Math.min(subRefMes, subRefLimite);  // isento IRS/SS
+  const subRefTributado = Math.max(0, subRefMes - subRefLimite); // excesso tributado
   const portagens = getVal('portagens');
   const manut = getVal('manut');
   const limpeza = getVal('limpeza');
@@ -493,14 +505,17 @@ function calcular() {
   // Custos operacionais (DR) — juros são gasto, amortização NÃO
   const estrutura = segTvde + segAt + contab + telemovel; // sem financiamento aqui
   const varTotal = portagens + manut + limpeza;
-  const totalSemEnSS = estrutura + salario + ajudas + varTotal; // para display
+  const totalSemEnSS = estrutura + salario + ajudas + subRefMes + varTotal; // para display
   document.getElementById('total-custos-fixvar').textContent = fmtE(totalSemEnSS);
+
+  // Atualiza display subsídio refeição
+  document.getElementById('sub_ref_total_display').textContent = fmtE(subRefMes);
 
   // Gastos financeiros = juros do crédito (dedutível)
   const gastoFinanceiro = jurosMes;
 
   // Total gastos para resultado
-  const totalGastos = estrutura + energiaMensal + ssPatronal + salario + ajudas + varTotal + gastoFinanceiro;
+  const totalGastos = estrutura + energiaMensal + ssPatronal + salario + ajudas + subRefMes + varTotal + gastoFinanceiro;
 
   // Resultado
   const resultadoAntes = receitaMensal - totalGastos;
@@ -514,7 +529,7 @@ function calcular() {
   const divBrutos = resultLiq * 12 * 0.6;
   const irsDiv = divBrutos * 0.28;
   const divMes = (divBrutos - irsDiv) / 12;
-  const rendTotal = salLiq + ajudas + divMes;
+  const rendTotal = salLiq + ajudas + subRefIsento + (subRefTributado * 0.85) + divMes; // sub ref isento + excesso líq. aprox.
   const breakEven = semMes > 0 ? totalGastos / semMes : 0;
   const margemOp = receitaMensal > 0 ? (resultadoAntes / receitaMensal * 100) : 0;
   const rendHora = rendTotal / horasMes;
@@ -561,6 +576,7 @@ function calcular() {
     '<tr><td>(−) Salário bruto</td><td>−' + fmtE(salario) + '</td></tr>' +
     '<tr><td>(−) SS patronal (23,75%)</td><td>−' + fmtE(ssPatronal) + '</td></tr>' +
     '<tr><td>(−) Ajudas de custo</td><td>−' + fmtE(ajudas) + '</td></tr>' +
+    '<tr><td>(−) Subsídio de refeição (' + subRefDias + ' dias × ' + fmtE(subRefVal) + ')</td><td>−' + fmtE(subRefMes) + '</td></tr>' +
     '<tr class="sub"><td colspan="2">Gastos Financeiros</td></tr>' +
     '<tr><td>(−) Juros crédito automóvel</td><td>−' + fmtE(jurosMes) + '</td></tr>' +
     '<tr class="total"><td>= Resultado antes do IRC</td><td>' + fmtE(resultadoAntes) + '</td></tr>' +
@@ -571,7 +587,7 @@ function calcular() {
 
   // BARRAS
   const itens = [
-    { lbl: 'Pessoal + ajudas', val: salario + ssPatronal + ajudas, cor: '#2e6da4' },
+    { lbl: 'Pessoal + ajudas + sub.ref.', val: salario + ssPatronal + ajudas + subRefMes, cor: '#2e6da4' },
     { lbl: 'Energia', val: energiaMensal, cor: '#e67e22' },
     { lbl: 'Estrutura', val: estrutura, cor: '#8e44ad' },
     { lbl: 'Variáveis', val: varTotal, cor: '#e74c3c' },
@@ -600,7 +616,8 @@ function calcular() {
     '<tr><td>(−) IRS retido (~15%)</td><td>−' + fmtE(irsRetido) + '</td></tr>' +
     '<tr class="total pos"><td>= Salário líquido</td><td>' + fmtE(salLiq,0) + '</td></tr>' +
     '<tr class="highlight"><td>+ Ajudas de custo (isentas IRS/SS)</td><td>' + fmtE(ajudas,0) + '</td></tr>' +
-    '<tr class="total"><td>= Salário + ajudas (mensal)</td><td>' + fmtE(salLiq+ajudas,0) + '</td></tr>' +
+    '<tr class="highlight"><td>+ Subsídio de refeição (' + subRefDias + ' dias × ' + fmtE(subRefVal) + ')</td><td>' + fmtE(subRefIsento,0) + (subRefTributado>0 ? ' <span style="color:#c0392b;font-size:0.75rem">(+' + fmtE(subRefTributado,0) + ' trib.)</span>':'') + '</td></tr>' +
+    '<tr class="total"><td>= Salário + ajudas + sub. refeição</td><td>' + fmtE(salLiq+ajudas+subRefIsento,0) + '</td></tr>' +
     '<tr><td>Dividendos anuais brutos (60% result. líq.)</td><td>' + fmtE(divBrutos,0) + '</td></tr>' +
     '<tr><td>(−) Retenção IRS dividendos (28%)</td><td>−' + fmtE(irsDiv,0) + '</td></tr>' +
     '<tr><td>= Dividendos líquidos / mês</td><td>' + fmtE(divMes,0) + '</td></tr>' +
@@ -609,6 +626,7 @@ function calcular() {
   document.getElementById('kpi-rem').innerHTML =
     kpi(fmtE(salLiq,0), 'salário líquido', '') +
     kpi(fmtE(ajudas,0), 'ajudas de custo (isentas)', 'verde') +
+    kpi(fmtE(subRefIsento,0), 'subsídio refeição isento (' + subRefDias + ' dias)', 'verde') +
     kpi(fmtE(divMes,0), 'dividendos líq./mês (estimativa)', 'azul') +
     kpi(fmtE(rendTotal,0), 'rendimento total líquido mensal', 'verde span2');
 
@@ -653,7 +671,8 @@ function calcular() {
   const ebitdaF = receitaF - energiaF - estruturaF - varF;
   const pessoalF = (salario + ssPatronal) * f;  // salário + SS
   const ajudasF = ajudas * f;                    // ajudas separadas
-  const ebitF = ebitdaF - pessoalF - ajudasF;
+  const subRefF = subRefMes * f;                 // subsídio refeição
+  const ebitF = ebitdaF - pessoalF - ajudasF - subRefF;
   // Juros variam ao longo do tempo — usamos mês 1 como aproximação conservadora
   const jurosF = jurosMes * f;
   const resultadoAntesF = ebitF - jurosF;
@@ -663,8 +682,8 @@ function calcular() {
   const fluxoCaixaF = resultLiqF - amortCapF;
   const margemLiq = receitaF > 0 ? (resultLiqF / receitaF * 100) : 0;
   const margemEbitda = receitaF > 0 ? (ebitdaF / receitaF * 100) : 0;
-  const roi = (estruturaF + energiaF + varF + pessoalF + ajudasF + jurosF) > 0
-    ? (resultLiqF / (estruturaF + energiaF + varF + pessoalF + ajudasF + jurosF) * 100) : 0;
+  const roi = (estruturaF + energiaF + varF + pessoalF + ajudasF + subRefF + jurosF) > 0
+    ? (resultLiqF / (estruturaF + energiaF + varF + pessoalF + ajudasF + subRefF + jurosF) * 100) : 0;
 
   document.getElementById('dr-table').innerHTML =
     '<tr class="sub"><td colspan="2">PROVEITOS</td></tr>' +
@@ -679,6 +698,7 @@ function calcular() {
     '<tr><td>(−) SS patronal (23,75%)</td><td>−' + fmtE(ssPatronal*f) + '</td></tr>' +
     '<tr class="sub"><td colspan="2">OUTROS GASTOS OPERACIONAIS</td></tr>' +
     '<tr><td>(−) Ajudas de custo</td><td>−' + fmtE(ajudasF) + '</td></tr>' +
+    '<tr><td>(−) Subsídio de refeição</td><td>−' + fmtE(subRefF) + '</td></tr>' +
     '<tr class="total"><td>= EBIT (Resultado Operacional)</td><td>' + fmtE(ebitF) + '</td></tr>' +
     '<tr class="sub"><td colspan="2">GASTOS FINANCEIROS</td></tr>' +
     '<tr><td>(−) Juros crédito automóvel</td><td>−' + fmtE(jurosF) + '</td></tr>' +
