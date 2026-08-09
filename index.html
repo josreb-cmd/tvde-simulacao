@@ -19,7 +19,7 @@ header p { font-size: 0.8rem; opacity: 0.8; margin-top: 3px; }
 .container { max-width: 700px; margin: 0 auto; padding: 16px 12px 40px; }
 .section { background: white; border-radius: 12px; padding: 16px; margin-bottom: 13px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); }
 .section h2 { font-size: 0.88rem; font-weight: 700; color: #1a3a5c; margin-bottom: 11px; border-bottom: 2px solid #e8f0fb; padding-bottom: 6px; }
-/* SUPABASE BAR */
+/* BARRA SUPABASE */
 .sb-bar { background: white; border-radius: 10px; padding: 10px 14px; margin-bottom: 13px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .sb-bar span.sb-label { font-size: 0.75rem; font-weight: 700; color: #1a3a5c; }
 .sb-btn { padding: 5px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; border: none; }
@@ -29,7 +29,6 @@ header p { font-size: 0.8rem; opacity: 0.8; margin-top: 3px; }
 .sb-status.visible { opacity: 1; }
 .sb-status.ok { color: #27ae60; }
 .sb-status.err { color: #c0392b; }
-.sb-id { font-size: 0.65rem; color: #bbb; margin-left: auto; }
 /* TABS */
 .tabs { display: flex; gap: 5px; margin-bottom: 13px; flex-wrap: wrap; }
 .tab { flex: 1; min-width: 60px; padding: 7px 3px; border: 2px solid #ddd; border-radius: 7px; font-size: 0.72rem; font-weight: 700; cursor: pointer; text-align: center; background: white; color: #666; }
@@ -47,7 +46,6 @@ tr.sub td { background: #f8f9fa; font-weight: 700; }
 tr.sub td:last-child { color: #2e6da4; }
 tr.highlight td:last-child { color: #27ae60; font-size: 0.95rem; }
 tr.highlight { background: #e8f5e9; }
-/* resultado verde/vermelho dinâmico */
 tr.result-pos td { background: #e8f5e9 !important; }
 tr.result-pos td:last-child { color: #27ae60 !important; font-size: 0.95rem; }
 tr.result-neg td { background: #fdecea !important; }
@@ -55,7 +53,6 @@ tr.result-neg td:last-child { color: #c0392b !important; font-size: 0.95rem; }
 /* INPUTS EDITÁVEIS */
 .edit-input { width: 80px; text-align: right; border: 1px solid #c5d8f0; border-radius: 5px; padding: 3px 6px; font-size: 0.83rem; font-weight: 600; color: #1a3a5c; background: #f0f7ff; outline: none; }
 .edit-input:focus { border-color: #2e6da4; background: #e3f0ff; }
-.edit-label { font-size: 0.72rem; color: #27ae60; font-weight: 700; margin-left: 4px; }
 /* SLIDERS */
 .slider-wrap { margin: 7px 0 2px; }
 .slider-wrap label { font-size: 0.8rem; color: #555; display: flex; justify-content: space-between; margin-bottom: 2px; }
@@ -77,7 +74,7 @@ input[type=range] { width: 100%; accent-color: #2e6da4; }
 .nota.verde strong { color: #27ae60; }
 .nota.azul { background: #e3f2fd; border-color: #2196f3; }
 .nota.azul strong { color: #1565c0; }
-/* RESULTADO BOX */
+/* RESULT BOX */
 .result-box { text-align: center; padding: 14px; border-radius: 10px; border: 2px solid; margin-top: 11px; transition: background 0.3s, border-color 0.3s; }
 .result-box.pos { background: linear-gradient(135deg,#e8f5e9,#f1f8e9); border-color: #a5d6a7; }
 .result-box.neg { background: linear-gradient(135deg,#fdecea,#fff3f3); border-color: #ef9a9a; }
@@ -85,9 +82,6 @@ input[type=range] { width: 100%; accent-color: #2e6da4; }
 .result-box.pos .val { color: #27ae60; }
 .result-box.neg .val { color: #c0392b; }
 .result-box .sub { font-size: 0.76rem; color: #555; margin-top: 3px; }
-.ano5-box { text-align: center; padding: 11px; background: linear-gradient(135deg,#e3f2fd,#e8eaf6); border-radius: 9px; border: 1px solid #90caf9; margin-top: 9px; }
-.ano5-box .val { font-size: 1.3rem; font-weight: 800; color: #1565c0; }
-.ano5-box .sub { font-size: 0.71rem; color: #555; margin-top: 2px; }
 /* BARRAS */
 .bar-wrap { margin-top: 6px; }
 .bar-row { display: flex; align-items: center; gap: 7px; margin-bottom: 6px; font-size: 0.77rem; }
@@ -95,13 +89,12 @@ input[type=range] { width: 100%; accent-color: #2e6da4; }
 .bar-outer { flex: 1; background: #eee; border-radius: 4px; height: 12px; overflow: hidden; }
 .bar-inner { height: 100%; border-radius: 4px; transition: width 0.3s; }
 .bar-val { width: 64px; text-align: right; font-weight: 600; font-size: 0.75rem; }
-/* ENERGIA SPLIT */
+/* ENERGIA */
 .energia-split { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }
 .e-box { border-radius: 8px; padding: 10px; text-align: center; border: 1px solid; }
 .e-box .lbl { font-size: 0.68rem; margin-top: 2px; color: #555; }
 .e-casa { background: #e8f5e9; border-color: #a5d6a7; }
 .e-fora { background: #fff8e1; border-color: #ffe082; }
-/* inputs dentro das e-box */
 .e-box .tarifa-row { display: flex; align-items: center; justify-content: center; gap: 5px; margin-bottom: 4px; }
 .e-box .tarifa-input { width: 68px; text-align: right; border: 1px solid #c5d8f0; border-radius: 5px; padding: 3px 5px; font-size: 0.9rem; font-weight: 700; background: #f0f7ff; outline: none; }
 .e-casa .tarifa-input { color: #27ae60; border-color: #a5d6a7; background: #f1faf3; }
@@ -118,7 +111,7 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
 </style>
 </head>
 <body>
- 
+
 <header>
   <h1>📊 Simulação TVDE — Alexandre Rebelo</h1>
   <p>Unipessoal Lda. · Custos editáveis · Dados reais Abr–Mai 2026</p>
@@ -129,18 +122,17 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
     <span class="badge real">✅ Base real: 911€/semana</span>
   </div>
 </header>
- 
+
 <div class="container">
- 
+
   <!-- SUPABASE BAR -->
   <div class="sb-bar">
-    <span class="sb-label">💾 Config</span>
+    <span class="sb-label">💾 Configuração</span>
     <button class="sb-btn save" onclick="guardarConfig()">↑ Guardar</button>
     <button class="sb-btn load" onclick="carregarConfig()">↓ Carregar</button>
     <span class="sb-status" id="sb-status"></span>
-    <span class="sb-id" id="bid-display"></span>
   </div>
- 
+
   <!-- TABS -->
   <div class="tabs">
     <button class="tab active" onclick="showTab('mensal',this)">Mensal</button>
@@ -148,19 +140,19 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
     <button class="tab" onclick="showTab('energia',this)">Energia</button>
     <button class="tab" onclick="showTab('remuneracao',this)">Remuneração</button>
     <button class="tab" onclick="showTab('rvp',this)">Real vs Plano</button>
-    <button class="tab" onclick="showTab('dr',this)">DR &amp; Balanço</button>
+    <button class="tab" onclick="showTab('dr',this)">DR & Balanço</button>
   </div>
- 
-  <!-- ══ MENSAL ══ -->
+
+  <!-- MENSAL -->
   <div class="tab-content active" id="tab-mensal">
     <div class="section">
       <h2>⚙️ Receita</h2>
       <table>
         <tr><td>Receita líquida semanal</td><td><input class="edit-input" id="sem_val" type="number" value="911" step="1" oninput="calcular()"> €</td></tr>
-        <tr><td>Factor mensal</td><td><input class="edit-input" id="sem_mes" type="number" value="4.3" step="0.1" min="1" max="5" oninput="calcular()"></td></tr>
+        <tr><td>Fator mensal</td><td><input class="edit-input" id="sem_mes" type="number" value="4.3" step="0.1" min="1" max="5" oninput="calcular()"></td></tr>
       </table>
       <div class="nota" style="margin-top:10px">
-        <strong>Factor mensal</strong> — multiplicador que converte a receita semanal em receita mensal (52 semanas ÷ 12 meses = 4,3). <strong>Não alteres em condições normais.</strong> Usa este campo apenas para simular meses atípicos: férias (→ 3,3), mês com feriados ou doença (→ 3,0), mês de 5 semanas (→ 4,8). Não representa semanas inteiras trabalhadas — é um factor de escala mensal.
+        <strong>Fator mensal</strong> — multiplicador que converte a receita semanal em receita mensal (52 semanas ÷ 12 meses = 4,3). <strong>Não alteres em condições normais.</strong> Usa este campo apenas para simular meses atípicos: férias (→ 3,3), mês com feriados ou doença (→ 3,0), mês de 5 semanas (→ 4,8).
       </div>
       <div class="slider-wrap" style="margin-top:10px">
         <label>% carregamento em casa <span id="pct_casa_lbl" style="font-weight:700;color:#2e6da4">60%</span></label>
@@ -168,26 +160,22 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
       </div>
       <div class="nota azul" style="margin-top:10px"><strong>Base real apurada:</strong> 910,85€/sem · 151,81€/dia · 5,45€/viagem · excluindo 2ªs feiras (descanso).</div>
     </div>
- 
     <div class="section">
       <h2>💰 Conta de Exploração Mensal</h2>
       <table id="conta-table"></table>
     </div>
- 
     <div class="section">
       <h2>📊 Destino da Receita Mensal</h2>
       <div class="bar-wrap" id="bar-wrap"></div>
     </div>
- 
     <div class="section">
       <h2>🎯 Indicadores-Chave</h2>
       <div class="kpi-grid" id="kpi-mensal"></div>
     </div>
- 
     <div class="nota">Simulação baseada no plano de negócios e dados reais Abr–Mai 2026. Valores fiscais (IRC, IRS, SS) são estimativas — validar com contabilista certificado da empresa.</div>
   </div>
- 
-  <!-- ══ CUSTOS ══ -->
+
+  <!-- CUSTOS -->
   <div class="tab-content" id="tab-custos">
     <div class="section">
       <h2>✏️ Custos Fixos e Variáveis — editáveis</h2>
@@ -203,15 +191,15 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
         <tr class="sub"><td colspan="2">CUSTOS VARIÁVEIS MENSAIS</td></tr>
         <tr><td>Portagens</td><td><input class="edit-input" id="portagens" type="number" value="80" oninput="calcular()"> €/mês</td></tr>
         <tr><td>Manutenção / pneus</td><td><input class="edit-input" id="manut" type="number" value="60" oninput="calcular()"> €/mês</td></tr>
-        <tr><td>Limpeza / desinfecção</td><td><input class="edit-input" id="limpeza" type="number" value="30" oninput="calcular()"> €/mês</td></tr>
+        <tr><td>Limpeza / desinfeção</td><td><input class="edit-input" id="limpeza" type="number" value="30" oninput="calcular()"> €/mês</td></tr>
         <tr class="total"><td>Total custos (excl. energia + SS)</td><td id="total-custos-fixvar">—</td></tr>
       </table>
       <button class="reset-btn" onclick="resetCustos()">↩ Repor valores padrão</button>
       <div class="nota"><strong>Nota:</strong> Energia e Segurança Social são calculados automaticamente nos separadores próprios.</div>
     </div>
   </div>
- 
-  <!-- ══ ENERGIA ══ -->
+
+  <!-- ENERGIA -->
   <div class="tab-content" id="tab-energia">
     <div class="section">
       <h2>⚡ Custo de Energia</h2>
@@ -243,8 +231,8 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
       <div class="nota"><strong>Tarifa casa:</strong> ~0,18€/kWh (EDP tarifa simples). <strong>Tarifa fora:</strong> ~0,55€/kWh (média redes públicas Galp/Zunder/Ionity). Ajuste a % em casa no separador Mensal. Consumo médio do Tesla Model Y em operação TVDE: ~18 kWh/100km.</div>
     </div>
   </div>
- 
-  <!-- ══ REMUNERAÇÃO ══ -->
+
+  <!-- REMUNERAÇÃO -->
   <div class="tab-content" id="tab-remuneracao">
     <div class="section">
       <h2>💼 Remuneração do Sócio-Gerente</h2>
@@ -256,8 +244,8 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
       <div class="kpi-grid" id="kpi-rem"></div>
     </div>
   </div>
- 
-  <!-- ══ REAL VS PLANO ══ -->
+
+  <!-- REAL VS PLANO -->
   <div class="tab-content" id="tab-rvp">
     <div class="section">
       <h2>📊 Real vs. Plano ABR–MAI 2026</h2>
@@ -276,65 +264,49 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
       <div class="kpi-grid" id="kpi-rvp"></div>
     </div>
   </div>
- 
- 
-  <!-- ══ DR & BALANÇO ══ -->
+
+  <!-- DR & BALANÇO -->
   <div class="tab-content" id="tab-dr">
- 
-    <!-- Toggle Mensal/Anual -->
     <div style="display:flex;gap:8px;margin-bottom:13px">
       <button class="tab active" id="dr-btn-mensal" style="flex:1;font-size:0.75rem" onclick="drToggle('mensal')">Mensal</button>
       <button class="tab" id="dr-btn-anual" style="flex:1;font-size:0.75rem" onclick="drToggle('anual')">Anual</button>
     </div>
- 
-    <!-- DR -->
     <div class="section">
       <h2>📋 Demonstração de Resultados</h2>
       <table id="dr-table"></table>
     </div>
- 
-    <!-- KPIs DR -->
     <div class="section">
       <h2>🎯 Indicadores de Rentabilidade</h2>
       <div class="kpi-grid" id="kpi-dr"></div>
     </div>
- 
-    <!-- BALANÇO -->
     <div class="section">
       <h2>⚖️ Balanço Estimado</h2>
       <table id="balanco-table"></table>
       <div class="nota" style="margin-top:10px">Balanço estimado com base nos fluxos do simulador. Não substitui o balanço contabilístico real — validar com contabilista certificado.</div>
     </div>
- 
   </div>
-</div><!-- /container -->
- 
+
+</div>
+
 <footer>Soluções Eficazes · Simulação TVDE Alexandre Rebelo · 2026</footer>
 <button class="export-btn" onclick="window.print()">⬇ Exportar PDF</button>
- 
+
 <script>
 const SB_URL = 'https://qxkeaerpcqbidyqtqqxa.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF4a2VhZXJwY3FiaWR5cXRxcXhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzNjMyODMsImV4cCI6MjA5MTkzOTI4M30.Gmk4v-ggYaU4_b-g7FG7SOzMtZ4-QDhtz5U0p3dmz48';
- 
-function getBrowserId() {
-  let id = localStorage.getItem('tvde_browser_id');
-  if (!id) { id = 'br_' + Math.random().toString(36).substr(2,9) + '_' + Date.now().toString(36); localStorage.setItem('tvde_browser_id', id); }
-  return id;
-}
-const BROWSER_ID = getBrowserId();
-document.getElementById('bid-display').textContent = 'ID: ' + BROWSER_ID.substr(0,16) + '…';
- 
+const SHARED_ID = 'tvde_alexandre';
+
 function sbStatus(msg, tipo) {
   const el = document.getElementById('sb-status');
   el.textContent = msg;
   el.className = 'sb-status visible ' + (tipo || '');
   setTimeout(() => { el.className = 'sb-status'; }, 3500);
 }
- 
+
 async function guardarConfig() {
   sbStatus('A guardar…', '');
   const payload = {
-    id: BROWSER_ID,
+    id: SHARED_ID,
     sem_val: getVal('sem_val'), sem_mes: getVal('sem_mes'), pct_casa: getVal('pct_casa'),
     km_sem: getVal('km_sem'), consumo_kwh: getVal('consumo_kwh'),
     tarifa_casa: getVal('tarifa_casa'), tarifa_fora: getVal('tarifa_fora'),
@@ -342,129 +314,140 @@ async function guardarConfig() {
     contab: getVal('contab'), telemovel: getVal('telemovel'),
     salario: getVal('salario'), ajudas: getVal('ajudas'),
     portagens: getVal('portagens'), manut: getVal('manut'), limpeza: getVal('limpeza'),
-    updated_at: new Date().toISOString()
+    atualizado_em: new Date().toISOString()
   };
   try {
     const r = await fetch(SB_URL + '/rest/v1/tvde_simulacao_config', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Prefer': 'resolution=merge-duplicates' },
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY,
+        'Prefer': 'resolution=merge-duplicates'
+      },
       body: JSON.stringify(payload)
     });
     if (r.ok || r.status === 201 || r.status === 200) sbStatus('✓ Guardado', 'ok');
     else sbStatus('✗ Erro ' + r.status, 'err');
   } catch(e) { sbStatus('✗ Sem ligação', 'err'); }
 }
- 
+
 async function carregarConfig() {
   sbStatus('A carregar…', '');
   try {
-    const r = await fetch(SB_URL + '/rest/v1/tvde_simulacao_config?id=eq.' + encodeURIComponent(BROWSER_ID) + '&select=*', {
+    const r = await fetch(SB_URL + '/rest/v1/tvde_simulacao_config?id=eq.' + SHARED_ID + '&select=*', {
       headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
     });
     const data = await r.json();
     if (data && data.length > 0) {
       const cfg = data[0];
-      ['sem_val','sem_mes','pct_casa','km_sem','consumo_kwh','tarifa_casa','tarifa_fora','ald','seg_tvde','seg_at','contab','telemovel','salario','ajudas','portagens','manut','limpeza'].forEach(k => {
+      ['sem_val','sem_mes','pct_casa','km_sem','consumo_kwh','tarifa_casa','tarifa_fora',
+       'ald','seg_tvde','seg_at','contab','telemovel','salario','ajudas','portagens','manut','limpeza'].forEach(k => {
         if (cfg[k] !== undefined && document.getElementById(k)) document.getElementById(k).value = cfg[k];
       });
       if (cfg.pct_casa !== undefined) document.getElementById('pct_casa_lbl').textContent = cfg.pct_casa + '%';
       calcular();
       sbStatus('✓ Configuração carregada', 'ok');
-    } else sbStatus('— Sem config guardada', '');
+    } else sbStatus('— Sem configuração guardada', '');
   } catch(e) { sbStatus('✗ Sem ligação', 'err'); }
 }
- 
+
 function showTab(id, btn) {
   document.querySelectorAll('.tab-content').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-' + id).classList.add('active');
   btn.classList.add('active');
 }
- 
-const DEFAULTS = { sem_val:911, sem_mes:4.3, pct_casa:60, km_sem:1970, consumo_kwh:18, tarifa_casa:0.18, tarifa_fora:0.55, ald:500, seg_tvde:120, seg_at:45, contab:100, telemovel:25, salario:900, ajudas:862, portagens:80, manut:60, limpeza:30 };
- 
+
+const DEFAULTS = {
+  sem_val:911, sem_mes:4.3, pct_casa:60, km_sem:1970, consumo_kwh:18,
+  tarifa_casa:0.18, tarifa_fora:0.55, ald:500, seg_tvde:120, seg_at:45,
+  contab:100, telemovel:25, salario:900, ajudas:862, portagens:80, manut:60, limpeza:30
+};
+
 function resetCustos() {
-  ['ald','seg_tvde','seg_at','contab','telemovel','salario','ajudas','portagens','manut','limpeza'].forEach(k => { document.getElementById(k).value = DEFAULTS[k]; });
+  ['ald','seg_tvde','seg_at','contab','telemovel','salario','ajudas','portagens','manut','limpeza'].forEach(k => {
+    document.getElementById(k).value = DEFAULTS[k];
+  });
   calcular();
 }
- 
+
 function getVal(id) { const el = document.getElementById(id); return el ? (parseFloat(el.value) || 0) : 0; }
 function fmtE(v, dec) { dec = (dec === undefined) ? 2 : dec; return v.toLocaleString('pt-PT',{minimumFractionDigits:dec,maximumFractionDigits:dec}) + ' €'; }
-function fmt(v, dec)  { dec = (dec === undefined) ? 1 : dec; return v.toLocaleString('pt-PT',{minimumFractionDigits:dec,maximumFractionDigits:dec}); }
-function pct(v)       { return fmt(v,1) + '%'; }
+function fmt(v, dec) { dec = (dec === undefined) ? 1 : dec; return v.toLocaleString('pt-PT',{minimumFractionDigits:dec,maximumFractionDigits:dec}); }
+function pct(v) { return fmt(v,1) + '%'; }
 function kpi(val, lbl, cls) { return '<div class="kpi ' + cls + '"><div class="val">' + val + '</div><div class="lbl">' + lbl + '</div></div>'; }
- 
+
 let drModo = 'mensal';
 function drToggle(modo) {
   drModo = modo;
   document.getElementById('dr-btn-mensal').className = 'tab' + (modo === 'mensal' ? ' active' : '');
-  document.getElementById('dr-btn-anual').className  = 'tab' + (modo === 'anual'  ? ' active' : '');
+  document.getElementById('dr-btn-anual').className = 'tab' + (modo === 'anual' ? ' active' : '');
   calcular();
 }
- 
+
 function calcular() {
-  const semVal    = getVal('sem_val');
-  const semMes    = getVal('sem_mes');
-  const pctCasa   = getVal('pct_casa') / 100;
-  const tCasa     = getVal('tarifa_casa');
-  const tFora     = getVal('tarifa_fora');
-  const kmSemana  = getVal('km_sem') || 1970;
-  const consumo   = getVal('consumo_kwh') || 18;
-  const ald       = getVal('ald');
-  const segTvde   = getVal('seg_tvde');
-  const segAt     = getVal('seg_at');
-  const contab    = getVal('contab');
+  const semVal = getVal('sem_val');
+  const semMes = getVal('sem_mes');
+  const pctCasa = getVal('pct_casa') / 100;
+  const tCasa = getVal('tarifa_casa');
+  const tFora = getVal('tarifa_fora');
+  const kmSemana = getVal('km_sem') || 1970;
+  const consumo = getVal('consumo_kwh') || 18;
+  const ald = getVal('ald');
+  const segTvde = getVal('seg_tvde');
+  const segAt = getVal('seg_at');
+  const contab = getVal('contab');
   const telemovel = getVal('telemovel');
-  const salario   = getVal('salario');
-  const ajudas    = getVal('ajudas');
+  const salario = getVal('salario');
+  const ajudas = getVal('ajudas');
   const portagens = getVal('portagens');
-  const manut     = getVal('manut');
-  const limpeza   = getVal('limpeza');
- 
+  const manut = getVal('manut');
+  const limpeza = getVal('limpeza');
+
   // Receita e energia
   const receitaMensal = semVal * semMes;
-  const kwhMes        = (kmSemana * semMes * consumo) / 100;
-  const kwhCasa       = kwhMes * pctCasa;
-  const kwhFora       = kwhMes * (1 - pctCasa);
-  const custoCasa     = kwhCasa * tCasa;
-  const custoFora     = kwhFora * tFora;
+  const kwhMes = (kmSemana * semMes * consumo) / 100;
+  const kwhCasa = kwhMes * pctCasa;
+  const kwhFora = kwhMes * (1 - pctCasa);
+  const custoCasa = kwhCasa * tCasa;
+  const custoFora = kwhFora * tFora;
   const energiaMensal = custoCasa + custoFora;
-  const energiaRef    = kwhMes * tFora;
-  const poupancaMes   = energiaRef - energiaMensal;
- 
-  // SS e salário
-  const ssPatronal    = salario * 0.2375;
+  const energiaRef = kwhMes * tFora;
+  const poupancaMes = energiaRef - energiaMensal;
+
+  // SS e impostos
+  const ssPatronal = salario * 0.2375;
   const ssTrabalhador = salario * 0.11;
-  const irsRetido     = salario * 0.15;
-  const salLiq        = salario - ssTrabalhador - irsRetido;
- 
+  const irsRetido = salario * 0.15;
+  const salLiq = salario - ssTrabalhador - irsRetido;
+
   // Custos
-  const estrutura     = ald + segTvde + segAt + contab + telemovel;
-  const fixosTotal    = estrutura + salario + ajudas;
-  const varTotal      = portagens + manut + limpeza;
-  const totalSemEnSS  = fixosTotal + varTotal;
-  const totalCustos   = fixosTotal + varTotal + energiaMensal + ssPatronal;
- 
-  // Resultados
-  const resultAntes   = receitaMensal - totalCustos;
-  const irc           = resultAntes > 0 ? resultAntes * 0.17 : 0;
-  const resultLiq     = resultAntes - irc;
-  const divBrutos     = resultLiq * 12 * 0.6;
-  const irsDiv        = divBrutos * 0.28;
-  const divMes        = (divBrutos - irsDiv) / 12;
-  const rendTotal     = salLiq + ajudas + divMes;
-  const breakEven     = semMes > 0 ? totalCustos / semMes : 0;
-  const margemOp      = receitaMensal > 0 ? (resultAntes / receitaMensal * 100) : 0;
-  const rendHora      = rendTotal / (9 * 6 * semMes);
- 
-  // ── ENERGIA ──
+  const estrutura = ald + segTvde + segAt + contab + telemovel;
+  const fixosTotal = estrutura + salario + ajudas;
+  const varTotal = portagens + manut + limpeza;
+  const totalSemEnSS = fixosTotal + varTotal;
+  const totalCustos = fixosTotal + varTotal + energiaMensal + ssPatronal;
+
+  // Resultado
+  const resultadoAntes = receitaMensal - totalCustos;
+  const irc = resultadoAntes > 0 ? resultadoAntes * 0.17 : 0;
+  const resultLiq = resultadoAntes - irc;
+  const divBrutos = resultLiq * 12 * 0.6;
+  const irsDiv = divBrutos * 0.28;
+  const divMes = (divBrutos - irsDiv) / 12;
+  const rendTotal = salLiq + ajudas + divMes;
+  const breakEven = semMes > 0 ? totalCustos / semMes : 0;
+  const margemOp = receitaMensal > 0 ? (resultadoAntes / receitaMensal * 100) : 0;
+  const rendHora = rendTotal / (9 * 6 * semMes);
+
+  // ENERGIA
   document.getElementById('e_casa_val').textContent = fmtE(custoCasa);
   document.getElementById('e_fora_val').textContent = fmtE(custoFora);
   document.getElementById('e_casa_kwh').textContent = fmt(kwhCasa,1) + ' kWh/mês';
   document.getElementById('e_fora_kwh').textContent = fmt(kwhFora,1) + ' kWh/mês';
- 
   document.getElementById('total-custos-fixvar').textContent = fmtE(totalSemEnSS);
- 
+
   document.getElementById('energia-table').innerHTML =
     '<tr><td>kWh mensais totais (estimado)</td><td>' + fmt(kwhMes,1) + ' kWh</td></tr>' +
     '<tr><td>kWh em casa (' + Math.round(pctCasa*100) + '%)</td><td>' + fmt(kwhCasa,1) + ' kWh</td></tr>' +
@@ -472,8 +455,8 @@ function calcular() {
     '<tr class="highlight"><td>= Custo energia mensal</td><td>' + fmtE(energiaMensal) + '</td></tr>' +
     '<tr class="pos"><td>Poupança vs. 100% fora</td><td style="color:#27ae60">+' + fmtE(poupancaMes) + '</td></tr>' +
     '<tr class="pos"><td>Poupança anual</td><td style="color:#27ae60">+' + fmtE(poupancaMes*12,0) + '</td></tr>';
- 
-  // ── CONTA EXPLORAÇÃO ──
+
+  // CONTA EXPLORAÇÃO
   const rcls = resultLiq >= 0 ? 'result-pos' : 'result-neg';
   document.getElementById('conta-table').innerHTML =
     '<tr><td>Receita líquida plataformas</td><td style="color:#2e6da4;font-weight:800">' + fmtE(receitaMensal) + '</td></tr>' +
@@ -481,38 +464,38 @@ function calcular() {
     '<tr><td>(−) Energia (' + Math.round(pctCasa*100) + '% casa)</td><td>−' + fmtE(energiaMensal) + '</td></tr>' +
     '<tr><td>(−) Seguros (TVDE + AT)</td><td>−' + fmtE(segTvde+segAt) + '</td></tr>' +
     '<tr><td>(−) Contabilista</td><td>−' + fmtE(contab) + '</td></tr>' +
-    '<tr><td>(−) Telemovel</td><td>−' + fmtE(telemovel) + '</td></tr>' +
+    '<tr><td>(−) Telemóvel</td><td>−' + fmtE(telemovel) + '</td></tr>' +
     '<tr><td>(−) SS patronal (23,75%)</td><td>−' + fmtE(ssPatronal) + '</td></tr>' +
     '<tr><td>(−) Salário bruto</td><td>−' + fmtE(salario) + '</td></tr>' +
     '<tr><td>(−) Ajudas de custo</td><td>−' + fmtE(ajudas) + '</td></tr>' +
     '<tr><td>(−) Variáveis (portagens+manut.+limpeza)</td><td>−' + fmtE(varTotal) + '</td></tr>' +
-    '<tr class="total"><td>= Resultado antes IRC</td><td>' + fmtE(resultAntes) + '</td></tr>' +
+    '<tr class="total"><td>= Resultado antes do IRC</td><td>' + fmtE(resultadoAntes) + '</td></tr>' +
     '<tr><td>(−) IRC (17% PME)</td><td>−' + fmtE(irc) + '</td></tr>' +
     '<tr class="' + rcls + '"><td>= Resultado líquido empresa</td><td>' + fmtE(resultLiq) + '</td></tr>';
- 
-  // ── BARRAS ──
+
+  // BARRAS
   const itens = [
     { lbl: 'Custos fixos', val: fixosTotal + ssPatronal, cor: '#2e6da4' },
-    { lbl: 'Energia',      val: energiaMensal,           cor: '#e67e22' },
-    { lbl: 'Variáveis', val: varTotal,              cor: '#e74c3c' },
-    { lbl: 'IRC',          val: irc,                     cor: '#9b59b6' },
-    { lbl: 'Resultado líq.', val: Math.max(0,resultLiq), cor: '#27ae60' }
+    { lbl: 'Energia', val: energiaMensal, cor: '#e67e22' },
+    { lbl: 'Variáveis', val: varTotal, cor: '#e74c3c' },
+    { lbl: 'IRC', val: irc, cor: '#9b59b6' },
+    { lbl: 'Resultado líquido', val: Math.max(0,resultLiq), cor: '#27ae60' }
   ];
   document.getElementById('bar-wrap').innerHTML = itens.map(it => {
-    const w = receitaMensal > 0 ? Math.min(100, it.val / receitaMensal * 100) : 0;
+    const w = receitaMensal > 0 ? Math.min(100, it.val/receitaMensal * 100) : 0;
     return '<div class="bar-row"><div class="bar-lbl">' + it.lbl + '</div>' +
       '<div class="bar-outer"><div class="bar-inner" style="width:' + w.toFixed(1) + '%;background:' + it.cor + '"></div></div>' +
       '<div class="bar-val" style="color:' + it.cor + '">' + fmtE(it.val,0) + '</div></div>';
   }).join('');
- 
-  // ── KPI MENSAL ──
+
+  // KPI MENSAL
   document.getElementById('kpi-mensal').innerHTML =
-    kpi(fmtE(breakEven,0), 'break-even semanal', '') +
+    kpi(fmtE(breakEven,0), 'ponto de equilíbrio semanal', '') +
     kpi(pct(margemOp), 'margem operacional', margemOp >= 0 ? 'verde' : 'vermelho') +
     kpi(fmtE(rendHora), 'rendimento líq. / hora (~9h × 6 dias/sem)', 'azul') +
     kpi(fmtE(poupancaMes*12,0), 'poupança energia/ano vs. 100% fora', 'verde');
- 
-  // ── REMUNERAÇÃO ──
+
+  // REMUNERAÇÃO
   document.getElementById('rem-table').innerHTML =
     '<tr><td>Salário bruto mensal</td><td>' + fmtE(salario,0) + '</td></tr>' +
     '<tr><td>(−) SS trabalhador (11%)</td><td>−' + fmtE(ssTrabalhador) + '</td></tr>' +
@@ -524,35 +507,35 @@ function calcular() {
     '<tr><td>(−) Retenção IRS dividendos (28%)</td><td>−' + fmtE(irsDiv,0) + '</td></tr>' +
     '<tr><td>= Dividendos líquidos / mês</td><td>' + fmtE(divMes,0) + '</td></tr>' +
     '<tr class="total highlight"><td>Rendimento total líquido mensal</td><td>' + fmtE(rendTotal,0) + '</td></tr>';
- 
+
   document.getElementById('kpi-rem').innerHTML =
     kpi(fmtE(salLiq,0), 'salário líquido', '') +
     kpi(fmtE(ajudas,0), 'ajudas de custo (isentas)', 'verde') +
     kpi(fmtE(divMes,0), 'dividendos líq./mês', 'azul') +
     kpi(fmtE(rendTotal,0), 'rendimento total líquido mensal', 'verde span2');
- 
-  // ── REAL VS PLANO ──
+
+  // REAL VS PLANO
   const planoReceita = 850 * semMes;
   const deltaPct = planoReceita > 0 ? ((receitaMensal - planoReceita) / planoReceita * 100) : 0;
   document.getElementById('rvp-table').innerHTML =
     '<tr><td>Receita/semana</td><td>850 €</td><td>' + fmtE(semVal,0) + ' <span style="color:' + (semVal>=850?'#27ae60':'#c0392b') + '">' + (semVal>=850?'+':'') + pct(((semVal-850)/850)*100) + '</span></td></tr>' +
-    '<tr><td>Receita/dia activo</td><td>~141 €</td><td>' + fmtE(semVal/6,0) + '</td></tr>' +
-    '<tr><td>Dias activos/semana</td><td>6</td><td>6 ✅</td></tr>' +
+    '<tr><td>Receita/dia ativo</td><td>~141 €</td><td>' + fmtE(semVal/6,0) + '</td></tr>' +
+    '<tr><td>Dias ativos/semana</td><td>6</td><td>6 ✅</td></tr>' +
     '<tr><td>Descanso 2ª feira</td><td>Sim</td><td>Sim ✅</td></tr>' +
     '<tr><td>Energia mensal</td><td>500 €</td><td>' + fmtE(energiaMensal) + ' ' + (energiaMensal<=500?'✅':'<span style="color:#c0392b">▲</span>') + '</td></tr>' +
     '<tr><td>ALD viatura</td><td>500 €</td><td>' + fmtE(ald,0) + (ald===500?' ✅':'') + '</td></tr>' +
     '<tr><td>Plataforma dominante</td><td>Uber+Bolt</td><td>Uber 97%</td></tr>' +
     '<tr><td>Viagens totais (período)</td><td>—</td><td>768</td></tr>';
- 
+
   const balMsg = deltaPct >= 0
     ? 'A operação real supera o plano base em <strong>+' + pct(deltaPct) + ' de receita</strong>. Com a optimização da energia em casa, os custos são ainda menores do que o previsto.'
     : 'A operação real está <strong>' + pct(Math.abs(deltaPct)) + ' abaixo do plano base</strong>. Rever estratégia de receita.';
   document.getElementById('rvp-nota').innerHTML = '<strong>Balanço:</strong> ' + balMsg;
- 
+
   const rBox = document.getElementById('result-box');
   document.getElementById('resultado-val').textContent = fmtE(resultLiq);
   rBox.className = 'result-box ' + (resultLiq >= 0 ? 'pos' : 'neg');
- 
+
   document.getElementById('kpi-rvp').innerHTML =
     kpi(fmtE(semVal,0), 'receita real / semana', semVal >= 850 ? 'verde' : 'vermelho') +
     kpi(fmtE(receitaMensal,0), 'receita mensal real', semVal >= 850 ? 'verde' : 'vermelho') +
@@ -560,32 +543,32 @@ function calcular() {
     kpi(fmtE(varTotal,0), 'custos variáveis', '') +
     kpi(fmtE(energiaMensal), 'energia mensal', energiaMensal <= 500 ? 'verde' : 'amarelo') +
     kpi(fmtE(totalCustos,0), 'total custos', 'vermelho') +
-    kpi(fmtE(resultAntes), 'resultado antes IRC', resultAntes >= 0 ? 'verde' : 'vermelho') +
+    kpi(fmtE(resultadoAntes), 'resultado antes do IRC', resultadoAntes >= 0 ? 'verde' : 'vermelho') +
     kpi(fmtE(resultLiq), 'resultado líquido', resultLiq >= 0 ? 'verde' : 'vermelho');
- 
-  // ── DR & BALANÇO ──
+
+  // DR & BALANÇO
   const f = drModo === 'anual' ? 12 : 1;
-  const receitaF   = receitaMensal * f;
-  const energiaF   = energiaMensal * f;
+  const receitaF = receitaMensal * f;
+  const energiaF = energiaMensal * f;
   const estruturaF = estrutura * f;
-  const varF       = varTotal * f;
-  const ebitdaF    = receitaF - energiaF - estruturaF - varF;
-  const pessoalF   = (salario + ssPatronal + ajudas) * f;
-  const ebitF      = ebitdaF - pessoalF;
-  const resultAntesF = resultAntes * f;
-  const ircF       = irc * f;
+  const varF = varTotal * f;
+  const ebitdaF = receitaF - energiaF - estruturaF - varF;
+  const pessoalF = (salario + ssPatronal + ajudas) * f;
+  const ebitF = ebitdaF - pessoalF;
+  const resultadoAntesF = resultadoAntes * f;
+  const ircF = irc * f;
   const resultLiqF = resultLiq * f;
   const totalCustosF = totalCustos * f;
-  const margemLiq  = receitaF > 0 ? (resultLiqF / receitaF * 100) : 0;
+  const margemLiq = receitaF > 0 ? (resultLiqF / receitaF * 100) : 0;
   const margemEbitda = receitaF > 0 ? (ebitdaF / receitaF * 100) : 0;
-  const roi        = totalCustosF > 0 ? (resultLiqF / totalCustosF * 100) : 0;
- 
+  const roi = totalCustosF > 0 ? (resultLiqF / totalCustosF * 100) : 0;
+
   document.getElementById('dr-table').innerHTML =
     '<tr class="sub"><td colspan="2">PROVEITOS</td></tr>' +
     '<tr><td>Receita líquida plataformas</td><td style="color:#2e6da4;font-weight:800">' + fmtE(receitaF) + '</td></tr>' +
     '<tr class="sub"><td colspan="2">GASTOS OPERACIONAIS</td></tr>' +
     '<tr><td>(−) Energia</td><td>−' + fmtE(energiaF) + '</td></tr>' +
-    '<tr><td>(−) Custos fixos estrutura</td><td>−' + fmtE(estruturaF) + '</td></tr>' +
+    '<tr><td>(−) Estrutura de custos fixos</td><td>−' + fmtE(estruturaF) + '</td></tr>' +
     '<tr><td>(−) Custos variáveis</td><td>−' + fmtE(varF) + '</td></tr>' +
     '<tr class="total"><td>= EBITDA</td><td>' + fmtE(ebitdaF) + '</td></tr>' +
     '<tr class="sub"><td colspan="2">GASTOS COM PESSOAL</td></tr>' +
@@ -593,32 +576,32 @@ function calcular() {
     '<tr><td>(−) SS patronal (23,75%)</td><td>−' + fmtE(ssPatronal*f) + '</td></tr>' +
     '<tr><td>(−) Ajudas de custo</td><td>−' + fmtE(ajudas*f) + '</td></tr>' +
     '<tr class="total"><td>= EBIT (Resultado Operacional)</td><td>' + fmtE(ebitF) + '</td></tr>' +
-    '<tr class="total"><td>= Resultado antes IRC</td><td>' + fmtE(resultAntesF) + '</td></tr>' +
+    '<tr class="total"><td>= Resultado antes do IRC</td><td>' + fmtE(resultadoAntesF) + '</td></tr>' +
     '<tr><td>(−) IRC (17% PME)</td><td>−' + fmtE(ircF) + '</td></tr>' +
     '<tr class="' + (resultLiqF >= 0 ? 'result-pos' : 'result-neg') + '"><td>= RESULTADO LÍQUIDO</td><td>' + fmtE(resultLiqF) + '</td></tr>';
- 
+
   document.getElementById('kpi-dr').innerHTML =
     kpi(pct(margemEbitda), 'margem EBITDA', margemEbitda >= 0 ? 'verde' : 'vermelho') +
     kpi(pct(margemLiq), 'margem líquida', margemLiq >= 0 ? 'verde' : 'vermelho') +
     kpi(pct(roi), 'ROI (resultado/custos)', roi >= 0 ? 'verde' : 'vermelho') +
-    kpi(fmtE(breakEven,0), 'break-even / semana', '');
- 
-  // Balanço
-  const caixaEst    = Math.max(0, resultLiq * 3);
-  const activoTotal = caixaEst + 1000;
-  const aldPassivo  = ald * 12;
-  const ssAPagar    = ssPatronal + ssTrabalhador;
+    kpi(fmtE(breakEven,0), 'ponto de equilíbrio / semana', '');
+
+  // BALANÇO
+  const caixaEst = Math.max(0, resultLiq * 3);
+  const ativoTotal = caixaEst + 1000;
+  const aldPassivo = ald * 12;
+  const ssAPagar = ssPatronal + ssTrabalhador;
   const passivoTotal = aldPassivo + ssAPagar + irsRetido;
-  const resultAcum  = Math.max(0, resultLiq * 6);
-  const capProprio  = 1 + resultAcum;
-  const totalPCP    = passivoTotal + capProprio;
-  const autonomia   = totalPCP > 0 ? (capProprio / totalPCP * 100) : 0;
- 
+  const resultAcum = Math.max(0, resultLiq * 6);
+  const capProprio = 1 + resultAcum;
+  const totalPCP = passivoTotal + capProprio;
+  const autonomia = totalPCP > 0 ? (capProprio / totalPCP * 100) : 0;
+
   document.getElementById('balanco-table').innerHTML =
-    '<tr class="sub"><td colspan="2">ACTIVO</td></tr>' +
+    '<tr class="sub"><td colspan="2">ATIVO</td></tr>' +
     '<tr><td>Caixa e depósitos (estimado)</td><td style="color:#2e6da4">' + fmtE(caixaEst) + '</td></tr>' +
-    '<tr><td>Fundo maneio operacional</td><td style="color:#2e6da4">' + fmtE(1000) + '</td></tr>' +
-    '<tr class="total"><td>= Total Activo</td><td>' + fmtE(activoTotal) + '</td></tr>' +
+    '<tr><td>Fundo de maneio operacional</td><td style="color:#2e6da4">' + fmtE(1000) + '</td></tr>' +
+    '<tr class="total"><td>= Total Ativo</td><td>' + fmtE(ativoTotal) + '</td></tr>' +
     '<tr class="sub"><td colspan="2">PASSIVO</td></tr>' +
     '<tr><td>ALD viatura (12 meses)</td><td style="color:#c0392b">−' + fmtE(aldPassivo) + '</td></tr>' +
     '<tr><td>SS a entregar (mês)</td><td style="color:#c0392b">−' + fmtE(ssAPagar) + '</td></tr>' +
@@ -627,12 +610,12 @@ function calcular() {
     '<tr class="sub"><td colspan="2">CAPITAL PRÓPRIO</td></tr>' +
     '<tr><td>Capital social</td><td>' + fmtE(1) + '</td></tr>' +
     '<tr><td>Resultados acumulados (est. 6 meses)</td><td>' + fmtE(resultAcum) + '</td></tr>' +
-    '<tr class="total highlight"><td>= Total Capital Próprio</td><td>' + fmtE(capProprio) + '</td></tr>' +
+    '<tr class="total highlight"><td>= Capital Próprio Total</td><td>' + fmtE(capProprio) + '</td></tr>' +
     '<tr class="sub"><td colspan="2">INDICADORES DE BALANÇO</td></tr>' +
     '<tr><td>Autonomia financeira</td><td style="color:' + (autonomia >= 30 ? '#27ae60' : '#e67e22') + '">' + pct(autonomia) + '</td></tr>' +
     '<tr><td>Endividamento</td><td>' + pct(100 - autonomia) + '</td></tr>';
 }
- 
+
 calcular();
 </script>
 </body>
