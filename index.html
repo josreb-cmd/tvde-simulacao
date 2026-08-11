@@ -201,13 +201,14 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
         <tr><td>Seguro acidentes trabalho</td><td><input class="edit-input" id="seg_at" type="number" value="45" oninput="calcular()"> €/mês</td></tr>
         <tr><td>Contabilista certificado</td><td><input class="edit-input" id="contab" type="number" value="100" oninput="calcular()"> €/mês</td></tr>
         <tr><td>Telemóvel / dados</td><td><input class="edit-input" id="telemovel" type="number" value="25" oninput="calcular()"> €/mês</td></tr>
+        <tr><td>Renda de garagem</td><td><input class="edit-input" id="garagem" type="number" value="80" oninput="calcular()"> €/mês</td></tr>
         <tr><td>Salário bruto sócio-gerente</td><td><input class="edit-input" id="salario" type="number" value="900" oninput="calcular()"> €/mês</td></tr>
-        <tr><td>Ajudas de custo (dias/mês)</td><td><input class="edit-input" id="ajudas" type="number" value="862" oninput="calcular()"> €/mês</td></tr>
+        <tr><td>Ajudas de custo (€/mês)</td><td><input class="edit-input" id="ajudas" type="number" value="862" oninput="calcular()"> €/mês</td></tr>
         <tr class="sub"><td colspan="2">SUBSÍDIO DE REFEIÇÃO</td></tr>
         <tr><td>Dias úteis / mês</td><td><input class="edit-input" id="sub_ref_dias" type="number" value="22" step="1" min="0" max="31" oninput="calcular()"> dias</td></tr>
-        <tr><td>Valor / dia</td><td><input class="edit-input" id="sub_ref_val" type="number" value="9.60" step="0.10" min="0" max="9.60" oninput="calcular()"> €</td></tr>
+        <tr><td>Valor / dia</td><td><input class="edit-input" id="sub_ref_val" type="number" value="10.46" step="0.10" min="0" max="20" oninput="calcular()"> €</td></tr>
         <tr><td>Total mensal (calculado)</td><td id="sub_ref_total_display" style="color:#27ae60;font-weight:800">—</td></tr>
-        <tr><td style="font-size:0.78rem;color:#888">Limite isento IRS/SS</td><td style="font-size:0.78rem;color:#27ae60;font-weight:700">9,60 €/dia (cartão/transf.)</td></tr>
+        <tr><td style="font-size:0.78rem;color:#888">Limite isento IRS/SS (cartão refeição)</td><td style="font-size:0.78rem;color:#27ae60;font-weight:700">10,46 €/dia (2026)</td></tr>
         <tr class="sub"><td colspan="2">CUSTOS VARIÁVEIS MENSAIS</td></tr>
         <tr><td>Portagens</td><td><input class="edit-input" id="portagens" type="number" value="80" oninput="calcular()"> €/mês</td></tr>
         <tr><td>Manutenção / pneus</td><td><input class="edit-input" id="manut" type="number" value="60" oninput="calcular()"> €/mês</td></tr>
@@ -215,7 +216,7 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
         <tr class="total"><td>Total custos (excl. energia + SS + financiamento)</td><td id="total-custos-fixvar">—</td></tr>
       </table>
       <button class="reset-btn" onclick="resetCustos()">↩ Repor valores padrão</button>
-      <div class="nota"><strong>Nota:</strong> Energia, SS e financiamento são calculados automaticamente. Os juros do crédito são gasto fiscal dedutível; a amortização do capital não é gasto — reduz o passivo do balanço.</div>
+      <div class="nota"><strong>Nota:</strong> Energia, SS e financiamento são calculados automaticamente. Os juros do crédito são gasto fiscal dedutível; a amortização do capital não é gasto — reduz o passivo do balanço. A renda de garagem é dedutível em IRC (art. 23.º CIRC) quando a garagem é usada exclusivamente na atividade TVDE.</div>
     </div>
   </div>
 
@@ -257,7 +258,7 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
     <div class="section">
       <h2>💼 Remuneração do Sócio-Gerente</h2>
       <table id="rem-table"></table>
-      <div class="nota"><strong>Ajudas de custo:</strong> isentas de IRS e SS até 57,5€/dia. Para 15 dias = 862€ líquidos sem descontos — forma mais eficiente de remuneração neste modelo.</div>
+      <div class="nota"><strong>Ajudas de custo (membros de órgãos sociais):</strong> isentas de IRS e SS até 72,65€/dia (DL n.º 1/2025, em vigor desde 1 jan. 2025). O valor de 862€/mês corresponde a aproximadamente 11,9 dias/mês × 72,65€ — forma mais eficiente de remuneração neste modelo.</div>
     </div>
     <div class="section">
       <h2>👤 Rendimento Total Alexandre</h2>
@@ -276,7 +277,7 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
       <h2>💰 Resultado Líquido da Empresa</h2>
       <div class="result-box pos" id="result-box">
         <div class="val" id="resultado-val">—</div>
-        <div class="sub">resultado líquido mensal estimado (após IRC 17%)</div>
+        <div class="sub">resultado líquido mensal estimado (após IRC 15% PME)</div>
       </div>
     </div>
     <div class="section">
@@ -340,7 +341,7 @@ async function guardarConfig() {
     contab: getVal('contab'), telemovel: getVal('telemovel'),
     salario: getVal('salario'), ajudas: getVal('ajudas'),
     sub_ref_dias: getVal('sub_ref_dias'), sub_ref_val: getVal('sub_ref_val'),
-    portagens: getVal('portagens'), manut: getVal('manut'), limpeza: getVal('limpeza'),
+    portagens: getVal('portagens'), manut: getVal('manut'), limpeza: getVal('limpeza'), garagem: getVal('garagem'),
     atualizado_em: new Date().toISOString()
   };
   try {
@@ -370,7 +371,7 @@ async function carregarConfig() {
       const cfg = data[0];
       ['rec_dia','dias_sem','horas_dia','sem_mes','pct_casa','km_sem','consumo_kwh','tarifa_casa','tarifa_fora',
        'fin_capital','fin_taxa','fin_prazo',
-       'seg_tvde','seg_at','contab','telemovel','salario','ajudas','sub_ref_dias','sub_ref_val','portagens','manut','limpeza'].forEach(k => {
+       'seg_tvde','seg_at','contab','telemovel','garagem','salario','ajudas','sub_ref_dias','sub_ref_val','portagens','manut','limpeza'].forEach(k => {
         if (cfg[k] !== undefined && document.getElementById(k)) document.getElementById(k).value = cfg[k];
       });
       if (cfg.pct_casa !== undefined) document.getElementById('pct_casa_lbl').textContent = cfg.pct_casa + '%';
@@ -392,11 +393,11 @@ const DEFAULTS = {
   tarifa_casa:0.18, tarifa_fora:0.55,
   fin_capital:30000, fin_taxa:8.25, fin_prazo:72,
   seg_tvde:120, seg_at:45, contab:100, telemovel:25,
-  salario:900, ajudas:862, sub_ref_dias:22, sub_ref_val:9.60, portagens:80, manut:60, limpeza:30
+  salario:900, ajudas:862, sub_ref_dias:22, sub_ref_val:10.46, portagens:80, manut:60, limpeza:30, garagem:80
 };
 
 function resetCustos() {
-  ['fin_capital','fin_taxa','fin_prazo','seg_tvde','seg_at','contab','telemovel',
+  ['fin_capital','fin_taxa','fin_prazo','seg_tvde','seg_at','contab','telemovel','garagem',
    'salario','ajudas','sub_ref_dias','sub_ref_val','portagens','manut','limpeza'].forEach(k => {
     document.getElementById(k).value = DEFAULTS[k];
   });
@@ -408,6 +409,12 @@ function fmtE(v, dec) { dec = (dec === undefined) ? 2 : dec; return v.toLocaleSt
 function fmt(v, dec) { dec = (dec === undefined) ? 1 : dec; return v.toLocaleString('pt-PT',{minimumFractionDigits:dec,maximumFractionDigits:dec}); }
 function pct(v) { return fmt(v,1) + '%'; }
 function kpi(val, lbl, cls) { return '<div class="kpi ' + cls + '"><div class="val">' + val + '</div><div class="lbl">' + lbl + '</div></div>'; }
+
+// ─── CONSTANTES FISCAIS 2026 ────────────────────────────────────────────────
+const IRC_PME_TAXA       = 0.15;   // Lei n.º 64/2025 — taxa PME primeiros 50.000€ MC (era 0.17 em 2025)
+const SUB_REF_LIMITE_DIA = 10.46;  // Portaria n.º 51-B/2026/1 — limite isento IRS/SS em cartão refeição
+const AJUDAS_LIMITE_DIA  = 72.65;  // DL n.º 1/2025 — membros de órgãos sociais, território nacional
+// ────────────────────────────────────────────────────────────────────────────
 
 // Calcula prestação mensal e decomposição juros/capital para mês N
 function calcPrestacao(capital, taxaAnual, prazo) {
@@ -448,7 +455,7 @@ function calcular() {
   const diasSem = getVal('dias_sem') || 6;
   const horasDia = getVal('horas_dia') || 9;
   const semMes = getVal('sem_mes');
-  const semVal = recDia * diasSem;  // receita semanal calculada
+  const semVal = recDia * diasSem;
   const horasMes = horasDia * diasSem * semMes;
   const pctCasa = getVal('pct_casa') / 100;
   const tCasa = getVal('tarifa_casa');
@@ -462,25 +469,26 @@ function calcular() {
   const segAt = getVal('seg_at');
   const contab = getVal('contab');
   const telemovel = getVal('telemovel');
+  const garagem = getVal('garagem');
   const salario = getVal('salario');
   const ajudas = getVal('ajudas');
   const subRefDias = getVal('sub_ref_dias');
   const subRefVal = getVal('sub_ref_val');
   const subRefMes = subRefDias * subRefVal;
-  const subRefLimite = subRefDias * 9.60;
-  const subRefIsento = Math.min(subRefMes, subRefLimite);  // isento IRS/SS
-  const subRefTributado = Math.max(0, subRefMes - subRefLimite); // excesso tributado
+  // Limite isento = 10,46€/dia (cartão refeição, 2026) — Portaria n.º 51-B/2026/1
+  const subRefLimite = subRefDias * SUB_REF_LIMITE_DIA;
+  const subRefIsento = Math.min(subRefMes, subRefLimite);
+  const subRefTributado = Math.max(0, subRefMes - subRefLimite);
   const portagens = getVal('portagens');
   const manut = getVal('manut');
   const limpeza = getVal('limpeza');
 
-  // Financiamento — decomposição correta
+  // Financiamento
   const fin = calcPrestacao(finCapital, finTaxa, finPrazo);
   const prestacaoMensal = fin.prestacao;
-  const jurosMes = fin.juros;       // gasto fiscal dedutível
-  const amortMes = fin.amort;       // reembolso de capital — não é gasto
+  const jurosMes = fin.juros;
+  const amortMes = fin.amort;
 
-  // Atualiza display no separador Custos
   document.getElementById('fin_prestacao_display').textContent = fmtE(prestacaoMensal);
   document.getElementById('fin_juros_display').textContent = fmtE(jurosMes);
   document.getElementById('fin_amort_display').textContent = fmtE(amortMes);
@@ -502,39 +510,33 @@ function calcular() {
   const irsRetido = salario * 0.15;
   const salLiq = salario - ssTrabalhador - irsRetido;
 
-  // Custos operacionais (DR) — juros são gasto, amortização NÃO
-  const estrutura = segTvde + segAt + contab + telemovel; // sem financiamento aqui
+  // Custos para display
+  const estrutura = segTvde + segAt + contab + telemovel + garagem;
   const varTotal = portagens + manut + limpeza;
-  const totalSemEnSS = estrutura + salario + ajudas + subRefMes + varTotal; // para display
+  const totalSemEnSS = estrutura + salario + ajudas + subRefMes + varTotal;
   document.getElementById('total-custos-fixvar').textContent = fmtE(totalSemEnSS);
-
-  // Atualiza display subsídio refeição
   document.getElementById('sub_ref_total_display').textContent = fmtE(subRefMes);
 
-  // Gastos financeiros = juros do crédito (dedutível)
   const gastoFinanceiro = jurosMes;
-
-  // Total gastos para resultado
   const totalGastos = estrutura + energiaMensal + ssPatronal + salario + ajudas + subRefMes + varTotal + gastoFinanceiro;
 
-  // Resultado
+  // IRC — taxa PME 15% (Lei n.º 64/2025, OE 2026)
   const resultadoAntes = receitaMensal - totalGastos;
-  const irc = resultadoAntes > 0 ? resultadoAntes * 0.17 : 0;
+  const irc = resultadoAntes > 0 ? resultadoAntes * IRC_PME_TAXA : 0;
   const resultLiq = resultadoAntes - irc;
 
-  // Fluxo de caixa real (inclui amortização de capital — saída de caixa mas não gasto)
   const fluxoCaixa = resultLiq - amortMes;
 
   // Dividendos e remuneração
   const divBrutos = resultLiq * 12 * 0.6;
   const irsDiv = divBrutos * 0.28;
   const divMes = (divBrutos - irsDiv) / 12;
-  const rendTotal = salLiq + ajudas + subRefIsento + (subRefTributado * 0.85) + divMes; // sub ref isento + excesso líq. aprox.
+  const rendTotal = salLiq + ajudas + subRefIsento + (subRefTributado * 0.85) + divMes;
   const breakEven = semMes > 0 ? totalGastos / semMes : 0;
   const margemOp = receitaMensal > 0 ? (resultadoAntes / receitaMensal * 100) : 0;
   const rendHora = rendTotal / horasMes;
 
-  // Atualiza resumo energia no slider
+  // Energia resumo
   const erEl = document.getElementById('energia-resumo');
   if (erEl) erEl.innerHTML =
     '<span style="color:#27ae60;font-weight:700">' + fmtE(custoCasa) + '/mês em casa</span>' +
@@ -542,7 +544,6 @@ function calcular() {
     '<span style="color:#e67e22;font-weight:700">' + fmtE(custoFora) + '/mês fora</span>' +
     ' &nbsp;·&nbsp; Total: <strong>' + fmtE(energiaMensal) + '</strong>';
 
-  // Atualiza nota de receita calculada
   document.getElementById('nota-receita-calc').innerHTML =
     '<strong>Receita calculada:</strong> ' + fmtE(semVal,0) + '/semana · ' +
     fmtE(receitaMensal,0) + '/mês · ' + fmt(horasMes,0) + ' h/mês · ' +
@@ -571,16 +572,17 @@ function calcular() {
     '<tr><td>(−) Seguros (TVDE + AT)</td><td>−' + fmtE(segTvde+segAt) + '</td></tr>' +
     '<tr><td>(−) Contabilista</td><td>−' + fmtE(contab) + '</td></tr>' +
     '<tr><td>(−) Telemóvel</td><td>−' + fmtE(telemovel) + '</td></tr>' +
+    '<tr><td>(−) Renda de garagem (ded. IRC — art. 23.º CIRC)</td><td>−' + fmtE(garagem) + '</td></tr>' +
     '<tr><td>(−) Variáveis (portagens+manut.+limpeza)</td><td>−' + fmtE(varTotal) + '</td></tr>' +
     '<tr class="sub"><td colspan="2">Gastos com Pessoal</td></tr>' +
     '<tr><td>(−) Salário bruto</td><td>−' + fmtE(salario) + '</td></tr>' +
     '<tr><td>(−) SS patronal (23,75%)</td><td>−' + fmtE(ssPatronal) + '</td></tr>' +
-    '<tr><td>(−) Ajudas de custo</td><td>−' + fmtE(ajudas) + '</td></tr>' +
+    '<tr><td>(−) Ajudas de custo (isentas até ' + fmtE(AJUDAS_LIMITE_DIA) + '/dia)</td><td>−' + fmtE(ajudas) + '</td></tr>' +
     '<tr><td>(−) Subsídio de refeição (' + subRefDias + ' dias × ' + fmtE(subRefVal) + ')</td><td>−' + fmtE(subRefMes) + '</td></tr>' +
     '<tr class="sub"><td colspan="2">Gastos Financeiros</td></tr>' +
     '<tr><td>(−) Juros crédito automóvel</td><td>−' + fmtE(jurosMes) + '</td></tr>' +
     '<tr class="total"><td>= Resultado antes do IRC</td><td>' + fmtE(resultadoAntes) + '</td></tr>' +
-    '<tr><td>(−) IRC (17% PME)</td><td>−' + fmtE(irc) + '</td></tr>' +
+    '<tr><td>(−) IRC (15% PME — Lei n.º 64/2025)</td><td>−' + fmtE(irc) + '</td></tr>' +
     '<tr class="' + rcls + '"><td>= Resultado líquido empresa</td><td>' + fmtE(resultLiq) + '</td></tr>' +
     '<tr><td style="color:#666;font-size:0.8rem">(−) Amortização capital crédito</td><td style="color:#666;font-size:0.8rem">−' + fmtE(amortMes) + '</td></tr>' +
     '<tr><td style="color:#1a3a5c;font-weight:700;font-size:0.85rem">= Fluxo de caixa livre estimado</td><td style="color:' + (fluxoCaixa>=0?'#27ae60':'#c0392b') + ';font-weight:700">' + fmtE(fluxoCaixa) + '</td></tr>';
@@ -610,13 +612,15 @@ function calcular() {
     kpi(fmtE(poupancaMes*12,0), 'poupança energia/ano vs. 100% fora', 'verde');
 
   // REMUNERAÇÃO
+  // Ajudas: dias implícitos = ajudas / AJUDAS_LIMITE_DIA
+  const ajudasDiasImpl = AJUDAS_LIMITE_DIA > 0 ? (ajudas / AJUDAS_LIMITE_DIA).toFixed(1) : '—';
   document.getElementById('rem-table').innerHTML =
     '<tr><td>Salário bruto mensal</td><td>' + fmtE(salario,0) + '</td></tr>' +
     '<tr><td>(−) SS trabalhador (11%)</td><td>−' + fmtE(ssTrabalhador) + '</td></tr>' +
     '<tr><td>(−) IRS retido (~15%)</td><td>−' + fmtE(irsRetido) + '</td></tr>' +
     '<tr class="total pos"><td>= Salário líquido</td><td>' + fmtE(salLiq,0) + '</td></tr>' +
-    '<tr class="highlight"><td>+ Ajudas de custo (isentas IRS/SS)</td><td>' + fmtE(ajudas,0) + '</td></tr>' +
-    '<tr class="highlight"><td>+ Subsídio de refeição (' + subRefDias + ' dias × ' + fmtE(subRefVal) + ')</td><td>' + fmtE(subRefIsento,0) + (subRefTributado>0 ? ' <span style="color:#c0392b;font-size:0.75rem">(+' + fmtE(subRefTributado,0) + ' trib.)</span>':'') + '</td></tr>' +
+    '<tr class="highlight"><td>+ Ajudas de custo (~' + ajudasDiasImpl + ' dias × ' + fmtE(AJUDAS_LIMITE_DIA) + '/dia, isentas IRS/SS)</td><td>' + fmtE(ajudas,0) + '</td></tr>' +
+    '<tr class="highlight"><td>+ Subsídio de refeição (' + subRefDias + ' dias × ' + fmtE(subRefVal) + ', cartão)</td><td>' + fmtE(subRefIsento,0) + (subRefTributado>0 ? ' <span style="color:#c0392b;font-size:0.75rem">(+' + fmtE(subRefTributado,0) + ' trib.)</span>':'') + '</td></tr>' +
     '<tr class="total"><td>= Salário + ajudas + sub. refeição</td><td>' + fmtE(salLiq+ajudas+subRefIsento,0) + '</td></tr>' +
     '<tr><td>Dividendos anuais brutos (60% result. líq.)</td><td>' + fmtE(divBrutos,0) + '</td></tr>' +
     '<tr><td>(−) Retenção IRS dividendos (28%)</td><td>−' + fmtE(irsDiv,0) + '</td></tr>' +
@@ -625,8 +629,8 @@ function calcular() {
 
   document.getElementById('kpi-rem').innerHTML =
     kpi(fmtE(salLiq,0), 'salário líquido', '') +
-    kpi(fmtE(ajudas,0), 'ajudas de custo (isentas)', 'verde') +
-    kpi(fmtE(subRefIsento,0), 'subsídio refeição isento (' + subRefDias + ' dias)', 'verde') +
+    kpi(fmtE(ajudas,0), 'ajudas de custo (~' + ajudasDiasImpl + ' dias, isentas)', 'verde') +
+    kpi(fmtE(subRefIsento,0), 'subsídio refeição isento (' + subRefDias + ' dias, cartão)', 'verde') +
     kpi(fmtE(divMes,0), 'dividendos líq./mês (estimativa)', 'azul') +
     kpi(fmtE(rendTotal,0), 'rendimento total líquido mensal', 'verde span2');
 
@@ -669,14 +673,14 @@ function calcular() {
   const estruturaF = estrutura * f;
   const varF = varTotal * f;
   const ebitdaF = receitaF - energiaF - estruturaF - varF;
-  const pessoalF = (salario + ssPatronal) * f;  // salário + SS
-  const ajudasF = ajudas * f;                    // ajudas separadas
-  const subRefF = subRefMes * f;                 // subsídio refeição
+  const pessoalF = (salario + ssPatronal) * f;
+  const ajudasF = ajudas * f;
+  const subRefF = subRefMes * f;
   const ebitF = ebitdaF - pessoalF - ajudasF - subRefF;
-  // Juros variam ao longo do tempo — usamos mês 1 como aproximação conservadora
   const jurosF = jurosMes * f;
   const resultadoAntesF = ebitF - jurosF;
-  const ircF = resultadoAntesF > 0 ? resultadoAntesF * 0.17 : 0;
+  // IRC — taxa PME 15% (Lei n.º 64/2025)
+  const ircF = resultadoAntesF > 0 ? resultadoAntesF * IRC_PME_TAXA : 0;
   const resultLiqF = resultadoAntesF - ircF;
   const amortCapF = amortMes * f;
   const fluxoCaixaF = resultLiqF - amortCapF;
@@ -690,20 +694,20 @@ function calcular() {
     '<tr><td>Receita líquida plataformas</td><td style="color:#2e6da4;font-weight:800">' + fmtE(receitaF) + '</td></tr>' +
     '<tr class="sub"><td colspan="2">GASTOS OPERACIONAIS</td></tr>' +
     '<tr><td>(−) Energia</td><td>−' + fmtE(energiaF) + '</td></tr>' +
-    '<tr><td>(−) Estrutura (seguros + contab. + tel.)</td><td>−' + fmtE(estruturaF) + '</td></tr>' +
+    '<tr><td>(−) Estrutura (seguros + contab. + tel. + garagem)</td><td>−' + fmtE(estruturaF) + '</td></tr>' +
     '<tr><td>(−) Custos variáveis</td><td>−' + fmtE(varF) + '</td></tr>' +
     '<tr class="total"><td>= EBITDA</td><td>' + fmtE(ebitdaF) + '</td></tr>' +
     '<tr class="sub"><td colspan="2">GASTOS COM PESSOAL</td></tr>' +
     '<tr><td>(−) Salário bruto</td><td>−' + fmtE(salario*f) + '</td></tr>' +
     '<tr><td>(−) SS patronal (23,75%)</td><td>−' + fmtE(ssPatronal*f) + '</td></tr>' +
     '<tr class="sub"><td colspan="2">OUTROS GASTOS OPERACIONAIS</td></tr>' +
-    '<tr><td>(−) Ajudas de custo</td><td>−' + fmtE(ajudasF) + '</td></tr>' +
-    '<tr><td>(−) Subsídio de refeição</td><td>−' + fmtE(subRefF) + '</td></tr>' +
+    '<tr><td>(−) Ajudas de custo (isentas até ' + fmtE(AJUDAS_LIMITE_DIA) + '/dia)</td><td>−' + fmtE(ajudasF) + '</td></tr>' +
+    '<tr><td>(−) Subsídio de refeição (cartão, isento até ' + fmtE(SUB_REF_LIMITE_DIA) + '/dia)</td><td>−' + fmtE(subRefF) + '</td></tr>' +
     '<tr class="total"><td>= EBIT (Resultado Operacional)</td><td>' + fmtE(ebitF) + '</td></tr>' +
     '<tr class="sub"><td colspan="2">GASTOS FINANCEIROS</td></tr>' +
     '<tr><td>(−) Juros crédito automóvel</td><td>−' + fmtE(jurosF) + '</td></tr>' +
     '<tr class="total"><td>= EBT (Resultado antes do IRC)</td><td>' + fmtE(resultadoAntesF) + '</td></tr>' +
-    '<tr><td>(−) IRC (17% PME)</td><td>−' + fmtE(ircF) + '</td></tr>' +
+    '<tr><td>(−) IRC (15% PME — Lei n.º 64/2025)</td><td>−' + fmtE(ircF) + '</td></tr>' +
     '<tr class="' + (resultLiqF >= 0 ? 'result-pos' : 'result-neg') + '"><td>= RESULTADO LÍQUIDO</td><td>' + fmtE(resultLiqF) + '</td></tr>' +
     '<tr><td style="color:#666;font-size:0.8rem">(−) Reembolso capital crédito (não é gasto)</td><td style="color:#666;font-size:0.8rem">−' + fmtE(amortCapF) + '</td></tr>' +
     '<tr><td style="color:#1a3a5c;font-weight:700">= Fluxo de caixa livre estimado</td><td style="color:' + (fluxoCaixaF>=0?'#27ae60':'#c0392b') + ';font-weight:700">' + fmtE(fluxoCaixaF) + '</td></tr>';
@@ -714,28 +718,26 @@ function calcular() {
     kpi(pct(roi), 'ROI (resultado/gastos)', roi >= 0 ? 'verde' : 'vermelho') +
     kpi(fmtE(breakEven,0), 'ponto de equilíbrio / semana (' + diasSem + ' dias)', '');
 
-  // BALANÇO — tratamento correto crédito automóvel (SNC)
-  const valorAquisicao = finCapital; // custo histórico viatura
-  const depreciacao = valorAquisicao / (finPrazo / 12); // depreciação linear anual (prazo crédito como proxy)
+  // BALANÇO
+  const valorAquisicao = finCapital;
+  const depreciacao = valorAquisicao / (finPrazo / 12);
   const depreciacaoMes = depreciacao / 12;
-  const viaturaLiq = Math.max(0, valorAquisicao - depreciacaoMes * 6); // valor líquido estimado (6 meses)
+  const viaturaLiq = Math.max(0, valorAquisicao - depreciacaoMes * 6);
 
   const caixaEst = Math.max(0, fluxoCaixa * 3);
-  const contasReceber = receitaMensal * 0.1; // ~10 dias receita em trânsito
+  const contasReceber = receitaMensal * 0.1;
   const ativoCirculante = caixaEst + contasReceber;
   const ativoFixo = viaturaLiq;
   const ativoTotal = ativoCirculante + ativoFixo;
 
-  // Passivo
-  const divida = Math.max(0, finCapital - amortMes * 6); // dívida remanescente estimada (6 meses)
+  const divida = Math.max(0, finCapital - amortMes * 6);
   const ssAPagar = ssPatronal + ssTrabalhador;
   const irsAPagar = irsRetido;
   const ircAPagar = irc;
-  const passivoMlPrazo = divida * (1 - 12 / Math.max(finPrazo, 12)); // parte > 12 meses
+  const passivoMlPrazo = divida * (1 - 12 / Math.max(finPrazo, 12));
   const passivoCorrente = (divida - passivoMlPrazo) + ssAPagar + irsAPagar + ircAPagar;
   const passivoTotal = passivoCorrente + passivoMlPrazo;
 
-  // Capital próprio
   const resultAcum = Math.max(0, resultLiq * 6);
   const capProprio = 1 + resultAcum;
   const totalPCP = passivoTotal + capProprio;
@@ -766,11 +768,9 @@ function calcular() {
     '<tr><td>Autonomia financeira</td><td style="color:' + (autonomia >= 30 ? '#27ae60' : '#e67e22') + '">' + pct(autonomia) + '</td></tr>' +
     '<tr><td>Endividamento</td><td>' + pct(100 - autonomia) + '</td></tr>';
 
-  // PLANO AMORTIZAÇÃO (primeiros 12 meses)
+  // PLANO AMORTIZAÇÃO (primeiros 24 meses)
   const plano = gerarPlanoAmort(finCapital, finTaxa, finPrazo);
-  let amortHtml = '<tr class="sub"><td>Mês</td><td>Prestação</td><td>Juros</td><td>Capital</td><td>Saldo</td></tr>';
-  // cabeçalho com 5 colunas
-  amortHtml = '<tr style="background:#f8f9fa;font-weight:700;font-size:0.75rem"><td>Mês</td><td style="text-align:right">Prestação</td><td style="text-align:right">Juros</td><td style="text-align:right">Capital</td><td style="text-align:right">Saldo</td></tr>';
+  let amortHtml = '<tr style="background:#f8f9fa;font-weight:700;font-size:0.75rem"><td>Mês</td><td style="text-align:right">Prestação</td><td style="text-align:right">Juros</td><td style="text-align:right">Capital</td><td style="text-align:right">Saldo</td></tr>';
   const mostrar = Math.min(plano.length, 24);
   for (let i = 0; i < mostrar; i++) {
     const r = plano[i];
