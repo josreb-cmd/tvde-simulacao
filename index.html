@@ -240,6 +240,14 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
         <tr><td>Telemóvel / dados</td><td><input class="edit-input" id="telemovel" type="number" value="25" oninput="calcular()"> €/mês</td></tr>
         <tr><td>Renda de garagem</td><td><input class="edit-input" id="garagem" type="number" value="80" oninput="calcular()"> €/mês</td></tr>
         <tr><td>Salário bruto sócio-gerente</td><td><input class="edit-input" id="salario" type="number" value="900" oninput="calcular()"> €/mês</td></tr>
+        <tr><td>Situação familiar (IRS)</td><td>
+          <select id="sit_familiar" onchange="calcular()" style="border:1px solid #c5d8f0;border-radius:5px;padding:3px 6px;font-size:0.8rem;color:#1a3a5c;background:#f0f7ff;outline:none;width:100%;text-align:right">
+            <option value="NC">Não casado / C. 2 titulares</option>
+            <option value="C1">Casado 1 titular</option>
+          </select>
+        </td></tr>
+        <tr><td>IRS retido (calculado pela tabela 2026)</td><td id="irs_retido_display" style="color:#c0392b;font-weight:700">—</td></tr>
+        <tr><td style="font-size:0.78rem;color:#888">Taxa efectiva IRS</td><td id="irs_taxa_display" style="font-size:0.78rem;color:#888">—</td></tr>
         <tr><td>Ajudas de custo (€/mês)</td><td><input class="edit-input" id="ajudas" type="number" value="862" oninput="calcular()"> €/mês</td></tr>
         <tr class="sub"><td colspan="2">SUBSÍDIO DE REFEIÇÃO</td></tr>
         <tr><td>Dias úteis / mês</td><td><input class="edit-input" id="sub_ref_dias" type="number" value="22" step="1" min="0" max="31" oninput="calcular()"> dias</td></tr>
@@ -560,13 +568,61 @@ function pct(v) { return fmt(v,1) + '%'; }
 function kpi(val, lbl, cls) { return '<div class="kpi ' + cls + '"><div class="val">' + val + '</div><div class="lbl">' + lbl + '</div></div>'; }
 
 // ── CONSTANTES FISCAIS 2026 ────────────────────────────────────────
-const IRC_PME_TAXA       = 0.15;
-const SUB_REF_LIMITE_DIA = 10.46;
-const AJUDAS_LIMITE_DIA  = 72.65;
+const IRC_PME_TAXA       = 0.15;   // Lei n.º 64/2025
+const SUB_REF_LIMITE_DIA = 10.46;  // Portaria n.º 51-B/2026/1
+const AJUDAS_LIMITE_DIA  = 72.65;  // DL n.º 1/2025
 const SS_PAT_TAXA        = 0.2375;
 const SS_TRAB_TAXA       = 0.11;
-const IRS_RET_TAXA       = 0.15;
 const IRS_DIV_TAXA       = 0.28;
+
+// Tabela retenção na fonte IRS 2026 — Despacho n.º 2186-A/2025
+// [limite_mensal, taxa_marginal, parcela_a_abater]
+// Tabela A: não casado / casado 2 titulares, sem dependentes
+const IRS_TAB_A = [
+  [820,      0.000,   0.00],
+  [935,      0.134, 109.89],
+  [1001,     0.180, 152.95],
+  [1123,     0.230, 202.95],
+  [1765,     0.250, 225.41],
+  [2057,     0.320, 348.77],
+  [2664,     0.365, 441.52],
+  [3025,     0.400, 534.89],
+  [3472,     0.420, 595.39],
+  [4172,     0.430, 630.11],
+  [5408,     0.440, 671.83],
+  [6250,     0.450, 725.98],
+  [20000,    0.475, 882.23],
+  [Infinity, 0.480, 982.23],
+];
+// Tabela B: casado 1 titular, sem dependentes
+const IRS_TAB_B = [
+  [1050,     0.000,   0.00],
+  [1175,     0.134, 140.70],
+  [1367,     0.180, 194.75],
+  [1510,     0.230, 263.10],
+  [2059,     0.250, 293.30],
+  [2394,     0.320, 437.43],
+  [3174,     0.365, 544.94],
+  [3584,     0.400, 656.13],
+  [4115,     0.420, 727.81],
+  [4965,     0.430, 768.96],
+  [6416,     0.440, 818.62],
+  [7407,     0.450, 882.77],
+  [20000,    0.475,1068.11],
+  [Infinity, 0.480,1143.11],
+];
+
+function calcIRSRetido(salBruto) {
+  const el = document.getElementById('sit_familiar');
+  const sit = el ? el.value : 'NC';
+  const tabela = sit === 'C1' ? IRS_TAB_B : IRS_TAB_A;
+  for (const [lim, taxa, parcela] of tabela) {
+    if (salBruto <= lim) {
+      return Math.max(0, Math.round((salBruto * taxa - parcela) * 100) / 100);
+    }
+  }
+  return 0;
+}
 // ──────────────────────────────────────────────────────────────────
 
 function calcPrestacao(capital, taxaAnual, prazo) {
@@ -655,8 +711,15 @@ function calcular() {
 
   const ssPatronal = salario * SS_PAT_TAXA;
   const ssTrabalhador = salario * SS_TRAB_TAXA;
-  const irsRetido = salario * IRS_RET_TAXA;
+  const irsRetido = calcIRSRetido(salario);
+  const taxaEfectivaIRS = salario > 0 ? irsRetido / salario * 100 : 0;
   const salLiq = salario - ssTrabalhador - irsRetido;
+
+  // Actualizar display na tab Custos
+  const irsDisp = document.getElementById('irs_retido_display');
+  const irsTaxaDisp = document.getElementById('irs_taxa_display');
+  if (irsDisp) irsDisp.textContent = fmtE(irsRetido);
+  if (irsTaxaDisp) irsTaxaDisp.textContent = taxaEfectivaIRS.toFixed(1) + '% (tabela oficial 2026)';
 
   const estrutura = segTvde + segAt + contab + telemovel + garagem;
   const varTotal = portagens + manut + limpeza;
@@ -755,7 +818,7 @@ function calcular() {
   document.getElementById('rem-table').innerHTML =
     '<tr><td>Salário bruto mensal</td><td>' + fmtE(salario,0) + '</td></tr>' +
     '<tr><td>(−) SS trabalhador (11%)</td><td>−' + fmtE(ssTrabalhador) + '</td></tr>' +
-    '<tr><td>(−) IRS retido (~15%)</td><td>−' + fmtE(irsRetido) + '</td></tr>' +
+    '<tr><td>(−) IRS retido (' + taxaEfectivaIRS.toFixed(1) + '% tabela 2026)</td><td>−' + fmtE(irsRetido) + '</td></tr>' +
     '<tr class="total pos"><td>= Salário líquido</td><td>' + fmtE(salLiq,0) + '</td></tr>' +
     '<tr class="highlight"><td>+ Ajudas de custo (~' + ajudasDiasImpl + ' dias × ' + fmtE(AJUDAS_LIMITE_DIA) + '/dia, isentas IRS/SS)</td><td>' + fmtE(ajudas,0) + '</td></tr>' +
     '<tr class="highlight"><td>+ Subsídio de refeição (' + subRefDias + ' dias × ' + fmtE(subRefVal) + ', cartão)</td><td>' + fmtE(subRefIsento,0) + (subRefTributado>0 ? ' <span style="color:#c0392b;font-size:0.75rem">(+' + fmtE(subRefTributado,0) + ' trib.)</span>':'') + '</td></tr>' +
@@ -965,7 +1028,7 @@ function calcCenarios() {
   const cn = salarios.map(sal => {
     const ssP   = sal * SS_PAT_TAXA;
     const ssT   = sal * SS_TRAB_TAXA;
-    const irsR  = sal * IRS_RET_TAXA;
+    const irsR  = calcIRSRetido(sal);
     const salLiq = sal - ssT - irsR;
     const custoPessoal = sal + ssP + ajudas + subRefMes;
     const totalGastos  = estrutura + energiaMes + sal + ssP + ajudas + subRefMes + varTotal + jurosMes;
