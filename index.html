@@ -29,7 +29,7 @@ header p { font-size: 0.8rem; opacity: 0.8; margin-top: 3px; }
 .sb-status.ok { color: #27ae60; }
 .sb-status.err { color: #c0392b; }
 .tabs { display: flex; gap: 5px; margin-bottom: 13px; flex-wrap: wrap; }
-.tab { flex: 1; min-width: 60px; padding: 7px 3px; border: 2px solid #ddd; border-radius: 7px; font-size: 0.72rem; font-weight: 700; cursor: pointer; text-align: center; background: white; color: #666; }
+.tab { flex: 1; min-width: 55px; padding: 7px 3px; border: 2px solid #ddd; border-radius: 7px; font-size: 0.68rem; font-weight: 700; cursor: pointer; text-align: center; background: white; color: #666; }
 .tab.active { border-color: #2e6da4; background: #2e6da4; color: white; }
 .tab-content { display: none; }
 .tab-content.active { display: block; }
@@ -97,6 +97,42 @@ input[type=range] { width: 100%; accent-color: #2e6da4; }
 footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
 .export-btn { position: fixed; bottom: 20px; right: 16px; z-index: 999; background: linear-gradient(135deg, #27ae60, #1e8449); color: white; border: none; border-radius: 50px; padding: 13px 22px; font-size: 0.88rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(39,174,96,0.5); display: flex; align-items: center; gap: 7px; }
 .export-btn:active { transform: scale(0.97); }
+
+/* ── CENÁRIOS ── */
+.cn-grid { display: grid; grid-template-columns: minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr); border: 1px solid #dde4ef; border-radius: 8px; overflow: hidden; font-size: 0.78rem; }
+.cn-hdr { padding: 8px 6px; text-align: center; font-size: 0.72rem; font-weight: 700; }
+.cn-hdr.h0 { background: #f0f4f8; color: #1a3a5c; text-align: left; padding-left: 8px; }
+.cn-hdr.h1 { background: #dbeafe; color: #1a3a5c; }
+.cn-hdr.h2 { background: #d1fae5; color: #065f46; }
+.cn-hdr.h3 { background: #fef3c7; color: #78350f; }
+.cn-badge { display: inline-block; font-size: 0.6rem; font-weight: 700; padding: 1px 6px; border-radius: 20px; margin-top: 2px; }
+.cn-badge.b1 { background: #bfdbfe; color: #1e40af; }
+.cn-badge.b2 { background: #a7f3d0; color: #065f46; }
+.cn-badge.b3 { background: #fde68a; color: #78350f; }
+.cn-lbl { padding: 5px 8px; background: #fafbfc; border-top: 1px solid #edf0f5; color: #444; font-size: 0.76rem; }
+.cn-sec { padding: 4px 8px; background: #e8f0fb; border-top: 1px solid #c5d8f0; font-size: 0.7rem; font-weight: 700; color: #1a3a5c; grid-column: span 4; text-transform: uppercase; letter-spacing: 0.04em; }
+.cn-cell { padding: 5px 6px; text-align: right; font-weight: 600; border-top: 1px solid #edf0f5; color: #222; }
+.cn-cell.red { color: #c0392b; }
+.cn-cell.green { color: #1a8a4a; }
+.cn-cell.blue { color: #1a5fa0; }
+.cn-cell.total { background: #f0f7ff; font-weight: 700; font-size: 0.82rem; border-top: 2px solid #c5d8f0; }
+.cn-cell.rpos { background: #e8f5e9; color: #1a8a4a; font-weight: 700; }
+.cn-cell.rneg { background: #fdecea; color: #c0392b; font-weight: 700; }
+.cn-cell.hi { background: #fffde7; }
+.cn-input-sal { width: 72px; text-align: right; border: 1px solid #c5d8f0; border-radius: 5px; padding: 3px 5px; font-size: 0.8rem; font-weight: 700; color: #1a3a5c; background: #f0f7ff; outline: none; }
+.cn-input-sal:focus { border-color: #2e6da4; }
+.cn-sub-tabs { display: flex; gap: 5px; margin-bottom: 11px; flex-wrap: wrap; }
+.cn-sub-tab { flex: 1; min-width: 60px; padding: 5px 3px; border: 1.5px solid #ddd; border-radius: 6px; font-size: 0.68rem; font-weight: 700; cursor: pointer; text-align: center; background: white; color: #666; }
+.cn-sub-tab.active { border-color: #2e6da4; background: #2e6da4; color: white; }
+.cn-section { display: none; }
+.cn-section.active { display: block; }
+.cn-kpi-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 11px; }
+.cn-kpi { background: #f0f7ff; border-radius: 9px; padding: 10px 8px; text-align: center; border: 1px solid #d0e4f7; }
+.cn-kpi .val { font-size: 1.05rem; font-weight: 800; color: #1a3a5c; }
+.cn-kpi .lbl { font-size: 0.63rem; color: #666; margin-top: 2px; line-height: 1.3; }
+.cn-kpi.verde .val { color: #27ae60; }
+.cn-kpi.azul .val { color: #2e6da4; }
+.cn-kpi.vermelho .val { color: #c0392b; }
 </style>
 </head>
 <body>
@@ -130,6 +166,7 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
     <button class="tab" onclick="showTab('remuneracao',this)">Remuneração</button>
     <button class="tab" onclick="showTab('rvp',this)">Real vs Plano</button>
     <button class="tab" onclick="showTab('dr',this)">DR & Balanço</button>
+    <button class="tab" onclick="showTab('cenarios',this)">Cenários</button>
   </div>
 
   <!-- MENSAL -->
@@ -312,7 +349,104 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
     </div>
   </div>
 
-</div>
+  <!-- CENÁRIOS -->
+  <div class="tab-content" id="tab-cenarios">
+
+    <!-- INPUTS SALÁRIO -->
+    <div class="section">
+      <h2>🔀 Comparação de Cenários de Salário</h2>
+      <p style="font-size:0.77rem;color:#666;margin-bottom:10px">Edita os três salários brutos abaixo. Todos os valores são recalculados em tempo real com base nos custos e receita actuais.</p>
+      <div class="cn-grid">
+        <div class="cn-hdr h0">Salário bruto / mês</div>
+        <div class="cn-hdr h1">Mínimo<br><span class="cn-badge b1">cenário A</span></div>
+        <div class="cn-hdr h2">Actual<br><span class="cn-badge b2">cenário B</span></div>
+        <div class="cn-hdr h3">Máximo<br><span class="cn-badge b3">cenário C</span></div>
+        <div class="cn-lbl" style="background:#f0f7ff"></div>
+        <div class="cn-cell" style="background:#f0f7ff"><input class="cn-input-sal" id="cn_s1" type="number" value="820" step="50" oninput="calcCenarios()"> €</div>
+        <div class="cn-cell" style="background:#e8f5e9"><input class="cn-input-sal" id="cn_s2" type="number" value="900" step="50" oninput="calcCenarios()"> €</div>
+        <div class="cn-cell" style="background:#fff8e1"><input class="cn-input-sal" id="cn_s3" type="number" value="1200" step="50" oninput="calcCenarios()"> €</div>
+      </div>
+      <p style="font-size:0.7rem;color:#888;margin-top:6px">💡 O cenário B replica o salário definido na tab Custos. Podes editá-lo livremente aqui.</p>
+    </div>
+
+    <!-- SUB-TABS -->
+    <div class="cn-sub-tabs">
+      <button class="cn-sub-tab active" onclick="showCnSec('remuneracao',this)">Remuneração</button>
+      <button class="cn-sub-tab" onclick="showCnSec('empresa',this)">Empresa</button>
+      <button class="cn-sub-tab" onclick="showCnSec('drm',this)">DR Mensal</button>
+      <button class="cn-sub-tab" onclick="showCnSec('dr',this)">DR Anual</button>
+      <button class="cn-sub-tab" onclick="showCnSec('balanco',this)">Balanço</button>
+      <button class="cn-sub-tab" onclick="showCnSec('dividendos',this)">Dividendos</button>
+      <button class="cn-sub-tab" onclick="showCnSec('decisao',this)">Decisão</button>
+    </div>
+
+    <!-- REMUNERAÇÃO -->
+    <div class="cn-section active" id="cn-sec-remuneracao">
+      <div class="section" style="margin-bottom:11px">
+        <h2>👤 Remuneração do Gerente</h2>
+        <div class="cn-grid" id="cn-grid-rem"></div>
+        <div class="nota azul" style="margin-top:9px"><strong>Ajudas de custo:</strong> isentas de IRS e SS até 72,65€/dia (DL n.º 1/2025). <strong>Sub. refeição:</strong> isento até 10,46€/dia em cartão (Portaria n.º 51-B/2026/1). Dividendos: taxa liberatória IRS 28%.</div>
+      </div>
+    </div>
+
+    <!-- EMPRESA -->
+    <div class="cn-section" id="cn-sec-empresa">
+      <div class="section" style="margin-bottom:11px">
+        <h2>🏢 Custo Total para a Empresa</h2>
+        <div class="cn-grid" id="cn-grid-emp"></div>
+        <div class="nota" style="margin-top:9px"><strong>SS patronal:</strong> 23,75% sobre o salário bruto. As ajudas de custo e sub. refeição são gasto da empresa dedutível em IRC, mas isentos de IRS e SS para o colaborador.</div>
+      </div>
+    </div>
+
+    <!-- DR MENSAL -->
+    <div class="cn-section" id="cn-sec-drm">
+      <div class="section" style="margin-bottom:11px">
+        <h2>📋 Demonstração de Resultados — Mensal</h2>
+        <div class="cn-grid" id="cn-grid-drm"></div>
+        <div class="nota azul" style="margin-top:9px"><strong>Nota fiscal:</strong> IRC 15% PME (Lei n.º 64/2025). Juros do crédito são gasto dedutível. A amortização do capital não é gasto fiscal — reduz o passivo.</div>
+      </div>
+    </div>
+
+    <!-- DR ANUAL -->
+    <div class="cn-section" id="cn-sec-dr">
+      <div class="section" style="margin-bottom:11px">
+        <h2>📋 Demonstração de Resultados — Anual</h2>
+        <div class="cn-grid" id="cn-grid-dr"></div>
+        <div class="nota azul" style="margin-top:9px"><strong>Nota fiscal:</strong> IRC 15% PME (Lei n.º 64/2025 — OE 2026). Apenas os juros do crédito são gasto dedutível. A amortização do capital não é gasto fiscal.</div>
+      </div>
+    </div>
+
+    <!-- BALANÇO -->
+    <div class="cn-section" id="cn-sec-balanco">
+      <div class="section" style="margin-bottom:11px">
+        <h2>⚖️ Balanço Estimado — comparação</h2>
+        <div class="cn-grid" id="cn-grid-balanco"></div>
+        <div class="nota" style="margin-top:9px">Balanço estimado a 6 meses. <strong>Nota metodológica:</strong> num crédito recente, o passivo (dívida remanescente ~28k) supera o ativo líquido enquanto os resultados acumulados são ainda baixos — situação normal e esperada. O balanço estimado não equilibra por simplificação do modelo de caixa; o balanço contabilístico real equilibra sempre. Validar com contabilista certificado.</div>
+      </div>
+    </div>
+
+    <!-- DIVIDENDOS -->
+    <div class="cn-section" id="cn-sec-dividendos">
+      <div class="section" style="margin-bottom:11px">
+        <h2>💸 Dividendos e Rendimento Total</h2>
+        <div class="cn-grid" id="cn-grid-div"></div>
+        <div class="nota" style="margin-top:9px"><strong>Dividendos:</strong> 60% do resultado líquido anual distribuído. Retenção na fonte IRS 28% (taxa liberatória). Rendimento total = salário líquido + ajudas + sub. refeição isento + dividendos líquidos.</div>
+      </div>
+    </div>
+
+    <!-- DECISÃO -->
+    <div class="cn-section" id="cn-sec-decisao">
+      <div class="section" style="margin-bottom:11px">
+        <h2>🎯 Indicadores de Decisão</h2>
+        <div class="cn-kpi-grid" id="cn-kpi-decisao"></div>
+        <div class="cn-grid" id="cn-grid-decisao"></div>
+        <div class="nota verde" id="cn-nota-decisao" style="margin-top:9px"><strong>Recomendação:</strong> a calcular…</div>
+      </div>
+    </div>
+
+  </div><!-- /tab-cenarios -->
+
+</div><!-- /container -->
 
 <footer>Soluções Eficazes · Simulação TVDE Alexandre Rebelo · 2026</footer>
 <button class="export-btn" onclick="window.print()">⬇ Exportar PDF</button>
@@ -355,7 +489,7 @@ async function guardarConfig() {
       },
       body: JSON.stringify(payload)
     });
-    if (r.ok || r.status === 201 || r.status === 200) sbStatus('✓ Guardado', 'ok');
+    if (r.ok || r.status === 201 || r.status === 200) sbStatus('✔ Guardado', 'ok');
     else sbStatus('✗ Erro ' + r.status, 'err');
   } catch(e) { sbStatus('✗ Sem ligação', 'err'); }
 }
@@ -376,7 +510,7 @@ async function carregarConfig() {
       });
       if (cfg.pct_casa !== undefined) document.getElementById('pct_casa_lbl').textContent = cfg.pct_casa + '%';
       calcular();
-      sbStatus('✓ Configuração carregada', 'ok');
+      sbStatus('✔ Configuração carregada', 'ok');
     } else sbStatus('— Sem configuração guardada', '');
   } catch(e) { sbStatus('✗ Sem ligação', 'err'); }
 }
@@ -386,6 +520,21 @@ function showTab(id, btn) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-' + id).classList.add('active');
   btn.classList.add('active');
+  if (id === 'cenarios') sincronizarSalarioAtual();
+}
+
+function showCnSec(id, btn) {
+  document.querySelectorAll('.cn-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.cn-sub-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('cn-sec-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// Sincroniza o cenário B com o salário actual da tab Custos
+function sincronizarSalarioAtual() {
+  const salAtual = getVal('salario');
+  if (salAtual > 0) document.getElementById('cn_s2').value = salAtual;
+  calcCenarios();
 }
 
 const DEFAULTS = {
@@ -410,13 +559,16 @@ function fmt(v, dec) { dec = (dec === undefined) ? 1 : dec; return v.toLocaleStr
 function pct(v) { return fmt(v,1) + '%'; }
 function kpi(val, lbl, cls) { return '<div class="kpi ' + cls + '"><div class="val">' + val + '</div><div class="lbl">' + lbl + '</div></div>'; }
 
-// ─── CONSTANTES FISCAIS 2026 ────────────────────────────────────────────────
-const IRC_PME_TAXA       = 0.15;   // Lei n.º 64/2025 — taxa PME primeiros 50.000€ MC (era 0.17 em 2025)
-const SUB_REF_LIMITE_DIA = 10.46;  // Portaria n.º 51-B/2026/1 — limite isento IRS/SS em cartão refeição
-const AJUDAS_LIMITE_DIA  = 72.65;  // DL n.º 1/2025 — membros de órgãos sociais, território nacional
-// ────────────────────────────────────────────────────────────────────────────
+// ── CONSTANTES FISCAIS 2026 ────────────────────────────────────────
+const IRC_PME_TAXA       = 0.15;
+const SUB_REF_LIMITE_DIA = 10.46;
+const AJUDAS_LIMITE_DIA  = 72.65;
+const SS_PAT_TAXA        = 0.2375;
+const SS_TRAB_TAXA       = 0.11;
+const IRS_RET_TAXA       = 0.15;
+const IRS_DIV_TAXA       = 0.28;
+// ──────────────────────────────────────────────────────────────────
 
-// Calcula prestação mensal e decomposição juros/capital para mês N
 function calcPrestacao(capital, taxaAnual, prazo) {
   const tm = taxaAnual / 100 / 12;
   if (tm === 0) return { prestacao: capital / prazo, juros: 0, amort: capital / prazo };
@@ -426,7 +578,6 @@ function calcPrestacao(capital, taxaAnual, prazo) {
   return { prestacao, juros, amort };
 }
 
-// Gera plano de amortização completo
 function gerarPlanoAmort(capital, taxaAnual, prazo) {
   const tm = taxaAnual / 100 / 12;
   const prestacao = tm === 0 ? capital / prazo :
@@ -450,6 +601,7 @@ function drToggle(modo) {
   calcular();
 }
 
+// ── CÁLCULO PRINCIPAL ─────────────────────────────────────────────
 function calcular() {
   const recDia = getVal('rec_dia');
   const diasSem = getVal('dias_sem') || 6;
@@ -475,7 +627,6 @@ function calcular() {
   const subRefDias = getVal('sub_ref_dias');
   const subRefVal = getVal('sub_ref_val');
   const subRefMes = subRefDias * subRefVal;
-  // Limite isento = 10,46€/dia (cartão refeição, 2026) — Portaria n.º 51-B/2026/1
   const subRefLimite = subRefDias * SUB_REF_LIMITE_DIA;
   const subRefIsento = Math.min(subRefMes, subRefLimite);
   const subRefTributado = Math.max(0, subRefMes - subRefLimite);
@@ -483,7 +634,6 @@ function calcular() {
   const manut = getVal('manut');
   const limpeza = getVal('limpeza');
 
-  // Financiamento
   const fin = calcPrestacao(finCapital, finTaxa, finPrazo);
   const prestacaoMensal = fin.prestacao;
   const jurosMes = fin.juros;
@@ -493,7 +643,6 @@ function calcular() {
   document.getElementById('fin_juros_display').textContent = fmtE(jurosMes);
   document.getElementById('fin_amort_display').textContent = fmtE(amortMes);
 
-  // Receita e energia
   const receitaMensal = semVal * semMes;
   const kwhMes = (kmSemana * semMes * consumo) / 100;
   const kwhCasa = kwhMes * pctCasa;
@@ -504,13 +653,11 @@ function calcular() {
   const energiaRef = kwhMes * tFora;
   const poupancaMes = energiaRef - energiaMensal;
 
-  // SS
-  const ssPatronal = salario * 0.2375;
-  const ssTrabalhador = salario * 0.11;
-  const irsRetido = salario * 0.15;
+  const ssPatronal = salario * SS_PAT_TAXA;
+  const ssTrabalhador = salario * SS_TRAB_TAXA;
+  const irsRetido = salario * IRS_RET_TAXA;
   const salLiq = salario - ssTrabalhador - irsRetido;
 
-  // Custos para display
   const estrutura = segTvde + segAt + contab + telemovel + garagem;
   const varTotal = portagens + manut + limpeza;
   const totalSemEnSS = estrutura + salario + ajudas + subRefMes + varTotal;
@@ -520,23 +667,19 @@ function calcular() {
   const gastoFinanceiro = jurosMes;
   const totalGastos = estrutura + energiaMensal + ssPatronal + salario + ajudas + subRefMes + varTotal + gastoFinanceiro;
 
-  // IRC — taxa PME 15% (Lei n.º 64/2025, OE 2026)
   const resultadoAntes = receitaMensal - totalGastos;
   const irc = resultadoAntes > 0 ? resultadoAntes * IRC_PME_TAXA : 0;
   const resultLiq = resultadoAntes - irc;
-
   const fluxoCaixa = resultLiq - amortMes;
 
-  // Dividendos e remuneração
   const divBrutos = resultLiq * 12 * 0.6;
-  const irsDiv = divBrutos * 0.28;
+  const irsDiv = divBrutos * IRS_DIV_TAXA;
   const divMes = (divBrutos - irsDiv) / 12;
   const rendTotal = salLiq + ajudas + subRefIsento + (subRefTributado * 0.85) + divMes;
   const breakEven = semMes > 0 ? totalGastos / semMes : 0;
   const margemOp = receitaMensal > 0 ? (resultadoAntes / receitaMensal * 100) : 0;
   const rendHora = rendTotal / horasMes;
 
-  // Energia resumo
   const erEl = document.getElementById('energia-resumo');
   if (erEl) erEl.innerHTML =
     '<span style="color:#27ae60;font-weight:700">' + fmtE(custoCasa) + '/mês em casa</span>' +
@@ -549,7 +692,6 @@ function calcular() {
     fmtE(receitaMensal,0) + '/mês · ' + fmt(horasMes,0) + ' h/mês · ' +
     fmtE(rendHora) + '/hora líq.';
 
-  // ENERGIA
   document.getElementById('e_casa_val').textContent = fmtE(custoCasa);
   document.getElementById('e_fora_val').textContent = fmtE(custoFora);
   document.getElementById('e_casa_kwh').textContent = fmt(kwhCasa,1) + ' kWh/mês';
@@ -563,8 +705,9 @@ function calcular() {
     '<tr class="pos"><td>Poupança vs. 100% fora</td><td style="color:#27ae60">+' + fmtE(poupancaMes) + '</td></tr>' +
     '<tr class="pos"><td>Poupança anual</td><td style="color:#27ae60">+' + fmtE(poupancaMes*12,0) + '</td></tr>';
 
-  // CONTA EXPLORAÇÃO MENSAL
   const rcls = resultLiq >= 0 ? 'result-pos' : 'result-neg';
+  const ajudasDiasImpl = AJUDAS_LIMITE_DIA > 0 ? (ajudas / AJUDAS_LIMITE_DIA).toFixed(1) : '—';
+
   document.getElementById('conta-table').innerHTML =
     '<tr><td>Receita líquida plataformas</td><td style="color:#2e6da4;font-weight:800">' + fmtE(receitaMensal) + '</td></tr>' +
     '<tr class="sub"><td colspan="2">Gastos Operacionais</td></tr>' +
@@ -587,7 +730,6 @@ function calcular() {
     '<tr><td style="color:#666;font-size:0.8rem">(−) Amortização capital crédito</td><td style="color:#666;font-size:0.8rem">−' + fmtE(amortMes) + '</td></tr>' +
     '<tr><td style="color:#1a3a5c;font-weight:700;font-size:0.85rem">= Fluxo de caixa livre estimado</td><td style="color:' + (fluxoCaixa>=0?'#27ae60':'#c0392b') + ';font-weight:700">' + fmtE(fluxoCaixa) + '</td></tr>';
 
-  // BARRAS
   const itens = [
     { lbl: 'Pessoal + ajudas + sub.ref.', val: salario + ssPatronal + ajudas + subRefMes, cor: '#2e6da4' },
     { lbl: 'Energia', val: energiaMensal, cor: '#e67e22' },
@@ -604,16 +746,12 @@ function calcular() {
       '<div class="bar-val" style="color:' + it.cor + '">' + fmtE(it.val,0) + '</div></div>';
   }).join('');
 
-  // KPI MENSAL
   document.getElementById('kpi-mensal').innerHTML =
     kpi(fmtE(breakEven,0), 'ponto de equilíbrio / semana (' + diasSem + ' dias)', '') +
     kpi(pct(margemOp), 'margem operacional', margemOp >= 0 ? 'verde' : 'vermelho') +
     kpi(fmtE(fluxoCaixa), 'fluxo de caixa livre / mês', fluxoCaixa >= 0 ? 'verde' : 'vermelho') +
     kpi(fmtE(poupancaMes*12,0), 'poupança energia/ano vs. 100% fora', 'verde');
 
-  // REMUNERAÇÃO
-  // Ajudas: dias implícitos = ajudas / AJUDAS_LIMITE_DIA
-  const ajudasDiasImpl = AJUDAS_LIMITE_DIA > 0 ? (ajudas / AJUDAS_LIMITE_DIA).toFixed(1) : '—';
   document.getElementById('rem-table').innerHTML =
     '<tr><td>Salário bruto mensal</td><td>' + fmtE(salario,0) + '</td></tr>' +
     '<tr><td>(−) SS trabalhador (11%)</td><td>−' + fmtE(ssTrabalhador) + '</td></tr>' +
@@ -634,7 +772,6 @@ function calcular() {
     kpi(fmtE(divMes,0), 'dividendos líq./mês (estimativa)', 'azul') +
     kpi(fmtE(rendTotal,0), 'rendimento total líquido mensal', 'verde span2');
 
-  // REAL VS PLANO
   const planoReceita = 850 * semMes;
   const deltaPct = planoReceita > 0 ? ((receitaMensal - planoReceita) / planoReceita * 100) : 0;
   document.getElementById('rvp-table').innerHTML =
@@ -666,7 +803,6 @@ function calcular() {
     kpi(fmtE(resultadoAntes), 'resultado antes IRC', resultadoAntes >= 0 ? 'verde' : 'vermelho') +
     kpi(fmtE(resultLiq), 'resultado líquido', resultLiq >= 0 ? 'verde' : 'vermelho');
 
-  // DR & BALANÇO
   const f = drModo === 'anual' ? 12 : 1;
   const receitaF = receitaMensal * f;
   const energiaF = energiaMensal * f;
@@ -679,7 +815,6 @@ function calcular() {
   const ebitF = ebitdaF - pessoalF - ajudasF - subRefF;
   const jurosF = jurosMes * f;
   const resultadoAntesF = ebitF - jurosF;
-  // IRC — taxa PME 15% (Lei n.º 64/2025)
   const ircF = resultadoAntesF > 0 ? resultadoAntesF * IRC_PME_TAXA : 0;
   const resultLiqF = resultadoAntesF - ircF;
   const amortCapF = amortMes * f;
@@ -718,18 +853,15 @@ function calcular() {
     kpi(pct(roi), 'ROI (resultado/gastos)', roi >= 0 ? 'verde' : 'vermelho') +
     kpi(fmtE(breakEven,0), 'ponto de equilíbrio / semana (' + diasSem + ' dias)', '');
 
-  // BALANÇO
   const valorAquisicao = finCapital;
   const depreciacao = valorAquisicao / (finPrazo / 12);
   const depreciacaoMes = depreciacao / 12;
   const viaturaLiq = Math.max(0, valorAquisicao - depreciacaoMes * 6);
-
   const caixaEst = Math.max(0, fluxoCaixa * 3);
   const contasReceber = receitaMensal * 0.1;
   const ativoCirculante = caixaEst + contasReceber;
   const ativoFixo = viaturaLiq;
   const ativoTotal = ativoCirculante + ativoFixo;
-
   const divida = Math.max(0, finCapital - amortMes * 6);
   const ssAPagar = ssPatronal + ssTrabalhador;
   const irsAPagar = irsRetido;
@@ -737,7 +869,6 @@ function calcular() {
   const passivoMlPrazo = divida * (1 - 12 / Math.max(finPrazo, 12));
   const passivoCorrente = (divida - passivoMlPrazo) + ssAPagar + irsAPagar + ircAPagar;
   const passivoTotal = passivoCorrente + passivoMlPrazo;
-
   const resultAcum = Math.max(0, resultLiq * 6);
   const capProprio = 1 + resultAcum;
   const totalPCP = passivoTotal + capProprio;
@@ -768,7 +899,6 @@ function calcular() {
     '<tr><td>Autonomia financeira</td><td style="color:' + (autonomia >= 30 ? '#27ae60' : '#e67e22') + '">' + pct(autonomia) + '</td></tr>' +
     '<tr><td>Endividamento</td><td>' + pct(100 - autonomia) + '</td></tr>';
 
-  // PLANO AMORTIZAÇÃO (primeiros 24 meses)
   const plano = gerarPlanoAmort(finCapital, finTaxa, finPrazo);
   let amortHtml = '<tr style="background:#f8f9fa;font-weight:700;font-size:0.75rem"><td>Mês</td><td style="text-align:right">Prestação</td><td style="text-align:right">Juros</td><td style="text-align:right">Capital</td><td style="text-align:right">Saldo</td></tr>';
   const mostrar = Math.min(plano.length, 24);
@@ -785,6 +915,317 @@ function calcular() {
     amortHtml += '<tr><td colspan="5" style="text-align:center;color:#888;font-size:0.75rem;padding:8px">... ' + (plano.length - 24) + ' meses restantes</td></tr>';
   }
   document.getElementById('amort-table').innerHTML = amortHtml;
+
+  // Actualiza cenários se estiver visível
+  calcCenarios();
+}
+
+// ── CENÁRIOS ─────────────────────────────────────────────────────
+function calcCenarios() {
+  const salarios = [
+    parseFloat(document.getElementById('cn_s1').value) || 820,
+    parseFloat(document.getElementById('cn_s2').value) || 900,
+    parseFloat(document.getElementById('cn_s3').value) || 1200
+  ];
+
+  // Variáveis partilhadas com o simulador principal
+  const recDia    = getVal('rec_dia');
+  const diasSem   = getVal('dias_sem') || 6;
+  const horasDia  = getVal('horas_dia') || 9;
+  const semMes    = getVal('sem_mes');
+  const recMes    = recDia * diasSem * semMes;
+  const horasMes  = horasDia * diasSem * semMes;
+  const ajudas    = getVal('ajudas');
+  const subRefMes = getVal('sub_ref_dias') * getVal('sub_ref_val');
+  const subRefIsento = Math.min(subRefMes, getVal('sub_ref_dias') * SUB_REF_LIMITE_DIA);
+  const finCapital = getVal('fin_capital');
+  const finTaxa   = getVal('fin_taxa');
+  const finPrazo  = getVal('fin_prazo');
+  const fin       = calcPrestacao(finCapital, finTaxa, finPrazo);
+  const jurosMes  = fin.juros;
+  const amortMes  = fin.amort;
+  const segTvde   = getVal('seg_tvde');
+  const segAt     = getVal('seg_at');
+  const contab    = getVal('contab');
+  const telemovel = getVal('telemovel');
+  const garagem   = getVal('garagem');
+  const portagens = getVal('portagens');
+  const manut     = getVal('manut');
+  const limpeza   = getVal('limpeza');
+  const pctCasa   = getVal('pct_casa') / 100;
+  const tCasa     = getVal('tarifa_casa');
+  const tFora     = getVal('tarifa_fora');
+  const kmSemana  = getVal('km_sem') || 1970;
+  const consumo   = getVal('consumo_kwh') || 18;
+  const kwhMes    = (kmSemana * semMes * consumo) / 100;
+  const energiaMes = kwhMes * pctCasa * tCasa + kwhMes * (1-pctCasa) * tFora;
+  const estrutura = segTvde + segAt + contab + telemovel + garagem;
+  const varTotal  = portagens + manut + limpeza;
+
+  const cn = salarios.map(sal => {
+    const ssP   = sal * SS_PAT_TAXA;
+    const ssT   = sal * SS_TRAB_TAXA;
+    const irsR  = sal * IRS_RET_TAXA;
+    const salLiq = sal - ssT - irsR;
+    const custoPessoal = sal + ssP + ajudas + subRefMes;
+    const totalGastos  = estrutura + energiaMes + sal + ssP + ajudas + subRefMes + varTotal + jurosMes;
+    const ebitda = recMes - energiaMes - estrutura - varTotal;
+    const ebit   = ebitda - sal - ssP - ajudas - subRefMes;
+    const ebt    = ebit - jurosMes;
+    const irc    = ebt > 0 ? ebt * IRC_PME_TAXA : 0;
+    const resLiq = ebt - irc;
+    const fluxo  = resLiq - amortMes;
+    const divBrutoA = Math.max(0, resLiq * 12 * 0.6);
+    const divIrs    = divBrutoA * IRS_DIV_TAXA;
+    const divLiqM   = (divBrutoA - divIrs) / 12;
+    const rendTotal = salLiq + ajudas + subRefIsento + divLiqM;
+    const margemLiq = recMes > 0 ? (resLiq / recMes * 100) : 0;
+    const rendHora  = horasMes > 0 ? rendTotal / horasMes : 0;
+    const custTotalEmp = custoPessoal + estrutura + energiaMes + varTotal + jurosMes;
+    return { sal, ssP, ssT, irsR, salLiq, custoPessoal, custTotalEmp, totalGastos,
+             ebitda, ebit, ebt, irc, resLiq, fluxo,
+             divBrutoA, divIrs, divLiqM, rendTotal, margemLiq, rendHora };
+  });
+
+  function hdr() {
+    return `<div class="cn-hdr h0"></div>
+<div class="cn-hdr h1">Mínimo<br><span class="cn-badge b1">A</span></div>
+<div class="cn-hdr h2">Actual<br><span class="cn-badge b2">B</span></div>
+<div class="cn-hdr h3">Máximo<br><span class="cn-badge b3">C</span></div>`;
+  }
+
+  function row(lbl, fn, cls) {
+    cls = cls || '';
+    return `<div class="cn-lbl">${lbl}</div>` +
+      cn.map(r => `<div class="cn-cell ${cls}">${fn(r)}</div>`).join('');
+  }
+
+  function sec(lbl) {
+    return `<div class="cn-sec">${lbl}</div>`;
+  }
+
+  function rCls(r) { return r.resLiq >= 0 ? 'rpos' : 'rneg'; }
+
+  // ── REMUNERAÇÃO
+  document.getElementById('cn-grid-rem').innerHTML = hdr() +
+    sec('Salário') +
+    row('Salário bruto', r => fmtE(r.sal,0), 'blue') +
+    row('(−) SS trabalhador (11%)', r => '−' + fmtE(r.ssT,0), 'red') +
+    row('(−) SS patronal (23,75%)', r => '−' + fmtE(r.ssP,0), 'red') +
+    row('(−) IRS retido (~15%)', r => '−' + fmtE(r.irsR,0), 'red') +
+    row('= Salário líquido', r => fmtE(r.salLiq,0), 'total') +
+    sec('Isenções') +
+    row('+ Ajudas de custo (isentas)', r => fmtE(ajudas,0), 'green') +
+    row('+ Sub. refeição (isento)', r => fmtE(subRefIsento,0), 'green') +
+    row('= Sal. + ajudas + sub.', r => fmtE(r.salLiq + ajudas + subRefIsento, 0), 'total') +
+    sec('Dividendos') +
+    row('+ Dividendos líquidos/mês', r => fmtE(r.divLiqM,0), 'blue') +
+    `<div class="cn-lbl" style="font-weight:700">Rendimento total líquido/mês</div>` +
+    cn.map(r => `<div class="cn-cell rpos">${fmtE(r.rendTotal,0)}</div>`).join('') +
+    row('Rendimento/hora', r => r.rendHora.toFixed(2) + ' €', 'green');
+
+  // ── EMPRESA
+  document.getElementById('cn-grid-emp').innerHTML = hdr() +
+    sec('Custo pessoal') +
+    row('Salário bruto', r => fmtE(r.sal,0), 'blue') +
+    row('SS patronal (23,75%)', r => fmtE(r.ssP,0), 'red') +
+    row('Ajudas de custo', r => fmtE(ajudas,0), '') +
+    row('Subsídio de refeição', r => fmtE(subRefMes,0), '') +
+    row('= Custo total pessoal/mês', r => fmtE(r.custoPessoal,0), 'total') +
+    sec('Custo total empresa') +
+    row('+ Estrutura', r => fmtE(estrutura,0), '') +
+    row('+ Energia', r => fmtE(energiaMes,0), '') +
+    row('+ Variáveis', r => fmtE(varTotal,0), '') +
+    row('+ Juros crédito', r => fmtE(jurosMes,0), '') +
+    row('= Custo total empresa/mês', r => fmtE(r.custTotalEmp,0), 'total') +
+    sec('Variação vs cenário actual') +
+    row('Δ custo pessoal vs B', r => {
+      const d = r.custoPessoal - cn[1].custoPessoal;
+      return (d >= 0 ? '+' : '') + fmtE(d,0);
+    }, '') +
+    row('Δ resultado líquido vs B', r => {
+      const d = r.resLiq - cn[1].resLiq;
+      return (d >= 0 ? '+' : '') + fmtE(d,0);
+    }, '');
+
+  // ── DR MENSAL
+  document.getElementById('cn-grid-drm').innerHTML = hdr() +
+    sec('Proveitos') +
+    row('Receita mensal', r => fmtE(recMes,0), 'blue') +
+    sec('Gastos operacionais') +
+    row('(−) Energia', r => '−' + fmtE(energiaMes,0), 'red') +
+    row('(−) Estrutura', r => '−' + fmtE(estrutura,0), 'red') +
+    row('(−) Variáveis', r => '−' + fmtE(varTotal,0), 'red') +
+    row('= EBITDA', r => fmtE(r.ebitda,0), 'total') +
+    sec('Gastos com pessoal') +
+    row('(−) Salário bruto', r => '−' + fmtE(r.sal,0), 'red') +
+    row('(−) SS patronal (23,75%)', r => '−' + fmtE(r.ssP,0), 'red') +
+    row('(−) Ajudas de custo', r => '−' + fmtE(ajudas,0), '') +
+    row('(−) Sub. refeição', r => '−' + fmtE(subRefMes,0), '') +
+    row('= EBIT', r => fmtE(r.ebit,0), 'total') +
+    sec('Gastos financeiros') +
+    row('(−) Juros crédito', r => '−' + fmtE(jurosMes,0), 'red') +
+    row('= EBT (antes IRC)', r => fmtE(r.ebt,0), 'total') +
+    row('(−) IRC 15% PME', r => '−' + fmtE(r.irc,0), 'red') +
+    `<div class="cn-lbl" style="font-weight:700">= Resultado líquido/mês</div>` +
+    cn.map(r => `<div class="cn-cell ${rCls(r)}">${fmtE(r.resLiq,0)}</div>`).join('') +
+    row('(−) Reembolso capital/mês', r => '−' + fmtE(amortMes,0), '') +
+    `<div class="cn-lbl" style="font-weight:700">= Fluxo de caixa livre/mês</div>` +
+    cn.map(r => `<div class="cn-cell ${r.fluxo>=0?'rpos':'rneg'}">${fmtE(r.fluxo,0)}</div>`).join('') +
+    sec('Indicadores mensais') +
+    row('Margem líquida', r => pct(r.margemLiq), '') +
+    row('IRC poupado vs C', r => {
+      const d = cn[2].irc - r.irc;
+      return d > 0 ? '+' + fmtE(d,0) : fmtE(0,0);
+    }, 'green');
+
+  // ── DR ANUAL
+  const f = 12;
+  document.getElementById('cn-grid-dr').innerHTML = hdr() +
+    sec('Proveitos') +
+    row('Receita anual', r => fmtE(recMes*f,0), 'blue') +
+    sec('Gastos operacionais') +
+    row('(−) Energia', r => '−' + fmtE(energiaMes*f,0), 'red') +
+    row('(−) Estrutura', r => '−' + fmtE(estrutura*f,0), 'red') +
+    row('(−) Variáveis', r => '−' + fmtE(varTotal*f,0), 'red') +
+    row('= EBITDA', r => fmtE(r.ebitda*f,0), 'total') +
+    sec('Gastos com pessoal') +
+    row('(−) Salário bruto', r => '−' + fmtE(r.sal*f,0), 'red') +
+    row('(−) SS patronal', r => '−' + fmtE(r.ssP*f,0), 'red') +
+    row('(−) Ajudas + sub. ref.', r => '−' + fmtE((ajudas+subRefMes)*f,0), '') +
+    row('= EBIT', r => fmtE(r.ebit*f,0), 'total') +
+    sec('Gastos financeiros') +
+    row('(−) Juros crédito', r => '−' + fmtE(jurosMes*f,0), 'red') +
+    row('= EBT (antes IRC)', r => fmtE(r.ebt*f,0), 'total') +
+    row('(−) IRC 15% PME', r => '−' + fmtE(r.irc*f,0), 'red') +
+    `<div class="cn-lbl" style="font-weight:700">= Resultado líquido anual</div>` +
+    cn.map(r => `<div class="cn-cell ${rCls(r)}">${fmtE(r.resLiq*f,0)}</div>`).join('') +
+    row('(−) Reembolso capital/ano', r => '−' + fmtE(amortMes*f,0), '') +
+    `<div class="cn-lbl" style="font-weight:700">= Fluxo de caixa livre/ano</div>` +
+    cn.map(r => `<div class="cn-cell ${r.fluxo>=0?'rpos':'rneg'}">${fmtE(r.fluxo*f,0)}</div>`).join('');
+
+  // ── BALANÇO (estimado a 6 meses)
+  const meses6 = 6;
+  const valorAquis  = finCapital;
+  const finPrazoV   = getVal('fin_prazo');
+  const deprecMes   = valorAquis / finPrazoV;
+  const viaturaLiq  = Math.max(0, valorAquis - deprecMes * meses6);
+  const contasRec   = recMes * 0.1;
+
+  document.getElementById('cn-grid-balanco').innerHTML = hdr() +
+    sec('Ativo não corrente') +
+    row('Viatura — custo aquisição', r => fmtE(valorAquis,0), 'blue') +
+    row('(−) Depreciação acum. (6 meses)', r => '−' + fmtE(deprecMes*meses6,0), 'red') +
+    row('= Viatura — valor líquido', r => fmtE(viaturaLiq,0), 'total') +
+    sec('Ativo corrente') +
+    row('Caixa estimada (3× fluxo)', r => fmtE(Math.max(0, r.fluxo*3),0), 'blue') +
+    row('Clientes / receitas a receber', r => fmtE(contasRec,0), '') +
+    `<div class="cn-lbl" style="font-weight:700">= Total Ativo</div>` +
+    cn.map(r => {
+      const ativo = viaturaLiq + Math.max(0, r.fluxo*3) + contasRec;
+      return `<div class="cn-cell total">${fmtE(ativo,0)}</div>`;
+    }).join('') +
+    sec('Passivo não corrente') +
+    (() => {
+      const divida = Math.max(0, finCapital - amortMes * meses6);
+      const passMlP = divida * (1 - 12 / Math.max(finPrazoV, 12));
+      return row('Crédito auto — parcela > 12m', r => '−' + fmtE(passMlP,0), 'red') +
+        sec('Passivo corrente') +
+        row('Crédito auto — parcela corrente', r => '−' + fmtE(divida - passMlP,0), 'red') +
+        row('SS a entregar', r => '−' + fmtE(r.ssP + r.ssT,0), 'red') +
+        row('IRS a entregar', r => '−' + fmtE(r.irsR,0), 'red') +
+        row('IRC a entregar', r => '−' + fmtE(r.irc,0), 'red') +
+        `<div class="cn-lbl" style="font-weight:700">= Total Passivo</div>` +
+        cn.map(r => {
+          const divida2 = Math.max(0, finCapital - amortMes * meses6);
+          const passMlP2 = divida2 * (1 - 12 / Math.max(finPrazoV, 12));
+          const passivo = passMlP2 + (divida2 - passMlP2) + r.ssP + r.ssT + r.irsR + r.irc;
+          return `<div class="cn-cell rneg">${fmtE(passivo,0)}</div>`;
+        }).join('');
+    })() +
+    sec('Capital próprio') +
+    row('Capital social', r => fmtE(1,0), '') +
+    row('Resultados acum. (6 meses)', r => fmtE(Math.max(0, r.resLiq * meses6),0), 'green') +
+    `<div class="cn-lbl" style="font-weight:700">= Capital Próprio Total</div>` +
+    cn.map(r => {
+      const capProp = 1 + Math.max(0, r.resLiq * meses6);
+      return `<div class="cn-cell rpos">${fmtE(capProp,0)}</div>`;
+    }).join('') +
+    sec('Indicadores de balanço') +
+    row('Autonomia financeira', r => {
+      const divida2  = Math.max(0, finCapital - amortMes * meses6);
+      const passMlP2 = divida2 * (1 - 12 / Math.max(finPrazoV, 12));
+      const passivo  = passMlP2 + (divida2 - passMlP2) + r.ssP + r.ssT + r.irsR + r.irc;
+      const capProp  = 1 + Math.max(0, r.resLiq * meses6);
+      const totalPCP = passivo + capProp;
+      const aut      = totalPCP > 0 ? capProp / totalPCP * 100 : 0;
+      return pct(aut);
+    }, 'green') +
+    row('Endividamento', r => {
+      const divida2  = Math.max(0, finCapital - amortMes * meses6);
+      const passMlP2 = divida2 * (1 - 12 / Math.max(finPrazoV, 12));
+      const passivo  = passMlP2 + (divida2 - passMlP2) + r.ssP + r.ssT + r.irsR + r.irc;
+      const capProp  = 1 + Math.max(0, r.resLiq * meses6);
+      const totalPCP = passivo + capProp;
+      const aut      = totalPCP > 0 ? capProp / totalPCP * 100 : 0;
+      return pct(100 - aut);
+    }, 'red') +
+    row('Δ Capital Próprio vs B', r => {
+      const capB = 1 + Math.max(0, cn[1].resLiq * meses6);
+      const capR = 1 + Math.max(0, r.resLiq * meses6);
+      const d = capR - capB;
+      return (d >= 0 ? '+' : '') + fmtE(d,0);
+    }, '');
+
+  // ── DIVIDENDOS
+  document.getElementById('cn-grid-div').innerHTML = hdr() +
+    sec('Base de distribuição') +
+    row('Resultado líquido anual', r => fmtE(r.resLiq*f,0), 'total') +
+    row('Dividendos brutos (60%)', r => fmtE(r.divBrutoA,0), 'blue') +
+    row('(−) IRS 28% (ret. fonte)', r => '−' + fmtE(r.divIrs,0), 'red') +
+    row('= Dividendos líquidos/ano', r => fmtE(r.divBrutoA - r.divIrs,0), 'total') +
+    row('Dividendos líquidos/mês', r => fmtE(r.divLiqM,0), 'green') +
+    sec('Rendimento total mensal') +
+    row('Salário líquido', r => fmtE(r.salLiq,0), '') +
+    row('Ajudas + sub. (isentos)', r => fmtE(ajudas + subRefIsento,0), 'green') +
+    row('Dividendos líquidos/mês', r => fmtE(r.divLiqM,0), 'blue') +
+    `<div class="cn-lbl" style="font-weight:700">Rendimento total líquido/mês</div>` +
+    cn.map(r => `<div class="cn-cell rpos">${fmtE(r.rendTotal,0)}</div>`).join('');
+
+  // ── DECISÃO
+  document.getElementById('cn-kpi-decisao').innerHTML =
+    cn.map((r,i) => {
+      const cls = i===0?'azul':i===1?'verde':'vermelho';
+      const lbl = ['Mínimo (A)','Actual (B)','Máximo (C)'][i];
+      return `<div class="cn-kpi ${cls}"><div class="val">${fmtE(r.rendTotal,0)}</div><div class="lbl">Rendimento total<br>${lbl} — ${fmtE(r.sal,0)} bruto</div></div>`;
+    }).join('');
+
+  document.getElementById('cn-grid-decisao').innerHTML = hdr() +
+    row('Salário bruto', r => fmtE(r.sal,0), 'blue') +
+    row('Custo total pessoal/mês', r => fmtE(r.custoPessoal,0), 'total') +
+    row('IRC mensal estimado', r => fmtE(r.irc,0), 'red') +
+    `<div class="cn-lbl">Resultado líquido/mês</div>` +
+    cn.map(r => `<div class="cn-cell ${rCls(r)}">${fmtE(r.resLiq,0)}</div>`).join('') +
+    row('Margem líquida', r => pct(r.margemLiq), '') +
+    row('Fluxo de caixa livre/mês', r => fmtE(r.fluxo,0), '') +
+    row('Dividendos líquidos/mês', r => fmtE(r.divLiqM,0), 'blue') +
+    row('Rendimento total líquido/mês', r => fmtE(r.rendTotal,0), 'rpos') +
+    row('Rendimento/hora', r => r.rendHora.toFixed(2) + ' €', 'green');
+
+  // Nota de recomendação
+  const melhor = cn.reduce((a,b) => b.rendTotal > a.rendTotal ? b : a);
+  const idx = cn.indexOf(melhor);
+  const nomes = ['A (Mínimo)','B (Actual)','C (Máximo)'];
+  const delta = melhor.rendTotal - cn[1].rendTotal;
+  let nota = '';
+  if (idx === 1) {
+    nota = 'O cenário actual (B) já optimiza o rendimento total líquido do Alexandre.';
+  } else if (idx === 0) {
+    nota = `O cenário A (salário mínimo) gera mais ${fmtE(Math.abs(delta),0)}/mês de rendimento total — a poupança no custo salarial liberta resultado para dividendos.`;
+  } else {
+    nota = `Com salário mais elevado (cenário C), o rendimento total sobe ${fmtE(delta,0)}/mês vs. o actual, mas o custo para a empresa aumenta e o resultado líquido diminui.`;
+  }
+  document.getElementById('cn-nota-decisao').innerHTML = '<strong>Análise:</strong> ' + nota;
 }
 
 calcular();
