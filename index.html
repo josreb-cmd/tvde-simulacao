@@ -230,6 +230,7 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
         <tr><td>Capital em dívida</td><td><input class="edit-input" id="fin_capital" type="number" value="30000" step="500" oninput="calcular()"> €</td></tr>
         <tr><td>Taxa de juro anual (TAN)</td><td><input class="edit-input" id="fin_taxa" type="number" value="8.25" step="0.05" oninput="calcular()"> %</td></tr>
         <tr><td>Prazo</td><td><input class="edit-input" id="fin_prazo" type="number" value="72" step="6" oninput="calcular()"> meses</td></tr>
+        <tr><td>Mês actual do crédito</td><td><input class="edit-input" id="fin_mes_atual" type="number" value="1" step="1" min="1" max="72" oninput="calcular()"> º mês</td></tr>
         <tr><td>Prestação mensal (calculada)</td><td id="fin_prestacao_display" style="color:#1a3a5c;font-weight:800">—</td></tr>
         <tr><td style="padding-left:12px;color:#666;font-size:0.8rem">· dos quais juros (mês 1)</td><td id="fin_juros_display" style="color:#c0392b;font-size:0.8rem">—</td></tr>
         <tr><td style="padding-left:12px;color:#666;font-size:0.8rem">· dos quais amortização (mês 1)</td><td id="fin_amort_display" style="color:#27ae60;font-size:0.8rem">—</td></tr>
@@ -625,6 +626,36 @@ function calcIRSRetido(salBruto) {
 }
 // ──────────────────────────────────────────────────────────────────
 
+// Calcula juros e amortização reais para 12 meses a partir do mês mesAtual (1-based)
+function calcJurosAmortAnual(capital, taxaAnual, prazo, mesAtual) {
+  const tm = taxaAnual / 100 / 12;
+  if (tm === 0) {
+    const amortMes = capital / prazo;
+    return { jurosAnual: 0, amortAnual: amortMes * 12, prestacaoAnual: amortMes * 12 };
+  }
+  const prestacao = capital * (tm * Math.pow(1+tm, prazo)) / (Math.pow(1+tm, prazo) - 1);
+  // Calcular saldo no início do mês mesAtual
+  let saldo = capital;
+  for (let i = 1; i < mesAtual; i++) {
+    const j = saldo * tm;
+    saldo -= (prestacao - j);
+  }
+  saldo = Math.max(0, saldo);
+  // Somar juros e amortização dos 12 meses seguintes
+  let jurosAnual = 0, amortAnual = 0;
+  const mesesRestantes = prazo - mesAtual + 1;
+  const mesesACalcular = Math.min(12, mesesRestantes);
+  for (let i = 0; i < mesesACalcular; i++) {
+    const j = saldo * tm;
+    const a = Math.min(prestacao - j, saldo);
+    jurosAnual += j;
+    amortAnual += a;
+    saldo -= a;
+    saldo = Math.max(0, saldo);
+  }
+  return { jurosAnual, amortAnual, prestacaoAnual: jurosAnual + amortAnual };
+}
+
 function calcPrestacao(capital, taxaAnual, prazo) {
   const tm = taxaAnual / 100 / 12;
   if (tm === 0) return { prestacao: capital / prazo, juros: 0, amort: capital / prazo };
@@ -694,6 +725,10 @@ function calcular() {
   const prestacaoMensal = fin.prestacao;
   const jurosMes = fin.juros;
   const amortMes = fin.amort;
+  const mesAtual = Math.max(1, Math.min(Math.round(getVal('fin_mes_atual')) || 1, finPrazo));
+  const finAnual = calcJurosAmortAnual(finCapital, finTaxa, finPrazo, mesAtual);
+  const jurosAnual = finAnual.jurosAnual;
+  const amortAnual = finAnual.amortAnual;
 
   document.getElementById('fin_prestacao_display').textContent = fmtE(prestacaoMensal);
   document.getElementById('fin_juros_display').textContent = fmtE(jurosMes);
@@ -876,11 +911,12 @@ function calcular() {
   const ajudasF = ajudas * f;
   const subRefF = subRefMes * f;
   const ebitF = ebitdaF - pessoalF - ajudasF - subRefF;
-  const jurosF = jurosMes * f;
+  // Juros e amortização: valores reais do plano para modo anual, mensais para mensal
+  const jurosF = drModo === 'anual' ? jurosAnual : jurosMes;
   const resultadoAntesF = ebitF - jurosF;
   const ircF = resultadoAntesF > 0 ? resultadoAntesF * IRC_PME_TAXA : 0;
   const resultLiqF = resultadoAntesF - ircF;
-  const amortCapF = amortMes * f;
+  const amortCapF = drModo === 'anual' ? amortAnual : amortMes;
   const fluxoCaixaF = resultLiqF - amortCapF;
   const margemLiq = receitaF > 0 ? (resultLiqF / receitaF * 100) : 0;
   const margemEbitda = receitaF > 0 ? (ebitdaF / receitaF * 100) : 0;
@@ -903,11 +939,11 @@ function calcular() {
     '<tr><td>(−) Subsídio de refeição (cartão, isento até ' + fmtE(SUB_REF_LIMITE_DIA) + '/dia)</td><td>−' + fmtE(subRefF) + '</td></tr>' +
     '<tr class="total"><td>= EBIT (Resultado Operacional)</td><td>' + fmtE(ebitF) + '</td></tr>' +
     '<tr class="sub"><td colspan="2">GASTOS FINANCEIROS</td></tr>' +
-    '<tr><td>(−) Juros crédito automóvel</td><td>−' + fmtE(jurosF) + '</td></tr>' +
+    '<tr><td>(−) Juros crédito automóvel' + (drModo==="anual"?' (meses '+mesAtual+'-'+(mesAtual+11)+', plano real)':'') + '</td><td>−' + fmtE(jurosF) + '</td></tr>' +
     '<tr class="total"><td>= EBT (Resultado antes do IRC)</td><td>' + fmtE(resultadoAntesF) + '</td></tr>' +
     '<tr><td>(−) IRC (15% PME — Lei n.º 64/2025)</td><td>−' + fmtE(ircF) + '</td></tr>' +
     '<tr class="' + (resultLiqF >= 0 ? 'result-pos' : 'result-neg') + '"><td>= RESULTADO LÍQUIDO</td><td>' + fmtE(resultLiqF) + '</td></tr>' +
-    '<tr><td style="color:#666;font-size:0.8rem">(−) Reembolso capital crédito (não é gasto)</td><td style="color:#666;font-size:0.8rem">−' + fmtE(amortCapF) + '</td></tr>' +
+    '<tr><td style="color:#666;font-size:0.8rem">(−) Reembolso capital crédito (não é gasto)' + (drModo==="anual"?' — real plano':'') + '</td><td style="color:#666;font-size:0.8rem">−' + fmtE(amortCapF) + '</td></tr>' +
     '<tr><td style="color:#1a3a5c;font-weight:700">= Fluxo de caixa livre estimado</td><td style="color:' + (fluxoCaixaF>=0?'#27ae60':'#c0392b') + ';font-weight:700">' + fmtE(fluxoCaixaF) + '</td></tr>';
 
   document.getElementById('kpi-dr').innerHTML =
@@ -1007,6 +1043,10 @@ function calcCenarios() {
   const fin       = calcPrestacao(finCapital, finTaxa, finPrazo);
   const jurosMes  = fin.juros;
   const amortMes  = fin.amort;
+  const mesAtualCn = Math.max(1, Math.min(Math.round(getVal('fin_mes_atual')) || 1, finPrazo));
+  const finAnualCn = calcJurosAmortAnual(finCapital, finTaxa, finPrazo, mesAtualCn);
+  const jurosAnualCn = finAnualCn.jurosAnual;
+  const amortAnualCn = finAnualCn.amortAnual;
   const segTvde   = getVal('seg_tvde');
   const segAt     = getVal('seg_at');
   const contab    = getVal('contab');
@@ -1158,12 +1198,13 @@ function calcCenarios() {
     row('(−) Ajudas + sub. ref.', r => '−' + fmtE((ajudas+subRefMes)*f,0), '') +
     row('= EBIT', r => fmtE(r.ebit*f,0), 'total') +
     sec('Gastos financeiros') +
-    row('(−) Juros crédito', r => '−' + fmtE(jurosMes*f,0), 'red') +
-    row('= EBT (antes IRC)', r => fmtE(r.ebt*f,0), 'total') +
-    row('(−) IRC 15% PME', r => '−' + fmtE(r.irc*f,0), 'red') +
+    row('(−) Juros crédito (plano real, meses ' + mesAtualCn + '-' + (mesAtualCn+11) + ')', r => '−' + fmtE(jurosAnualCn,0), 'red') +
+    `<div class="cn-lbl" style="font-weight:700">= EBT (antes IRC)</div>` +
+    cn.map(r => { const ebtA = r.ebit*f - jurosAnualCn; return `<div class="cn-cell total">${fmtE(ebtA,0)}</div>`; }).join('') +
+    cn.map(r => { const ebtA = r.ebit*f - jurosAnualCn; const ircA = ebtA>0?ebtA*0.15:0; return `<div class="cn-lbl">(−) IRC 15% PME</div><div class="cn-cell red">${fmtE(ircA,0)}</div>`; }).join('').replace(/<div class="cn-lbl">.*?<\/div>/g, '') +
     `<div class="cn-lbl" style="font-weight:700">= Resultado líquido anual</div>` +
-    cn.map(r => `<div class="cn-cell ${rCls(r)}">${fmtE(r.resLiq*f,0)}</div>`).join('') +
-    row('(−) Reembolso capital/ano', r => '−' + fmtE(amortMes*f,0), '') +
+    cn.map(r => { const ebtA=r.ebit*f-jurosAnualCn; const ircA=ebtA>0?ebtA*0.15:0; const resA=ebtA-ircA; return `<div class="cn-cell ${resA>=0?'rpos':'rneg'}">${fmtE(resA,0)}</div>`; }).join('') +
+    row('(−) Reembolso capital/ano (plano real)', r => '−' + fmtE(amortAnualCn,0), '') +
     `<div class="cn-lbl" style="font-weight:700">= Fluxo de caixa livre/ano</div>` +
     cn.map(r => `<div class="cn-cell ${r.fluxo>=0?'rpos':'rneg'}">${fmtE(r.fluxo*f,0)}</div>`).join('');
 
