@@ -1201,12 +1201,13 @@ function calcCenarios() {
     row('(−) Juros crédito (plano real, meses ' + mesAtualCn + '-' + (mesAtualCn+11) + ')', r => '−' + fmtE(jurosAnualCn,0), 'red') +
     `<div class="cn-lbl" style="font-weight:700">= EBT (antes IRC)</div>` +
     cn.map(r => { const ebtA = r.ebit*f - jurosAnualCn; return `<div class="cn-cell total">${fmtE(ebtA,0)}</div>`; }).join('') +
-    cn.map(r => { const ebtA = r.ebit*f - jurosAnualCn; const ircA = ebtA>0?ebtA*0.15:0; return `<div class="cn-lbl">(−) IRC 15% PME</div><div class="cn-cell red">${fmtE(ircA,0)}</div>`; }).join('').replace(/<div class="cn-lbl">.*?<\/div>/g, '') +
+    `<div class="cn-lbl">(−) IRC 15% PME</div>` +
+    cn.map(r => { const ebtA = r.ebit*f - jurosAnualCn; const ircA = ebtA>0?ebtA*0.15:0; return `<div class="cn-cell red">−${fmtE(ircA,0)}</div>`; }).join('') +
     `<div class="cn-lbl" style="font-weight:700">= Resultado líquido anual</div>` +
     cn.map(r => { const ebtA=r.ebit*f-jurosAnualCn; const ircA=ebtA>0?ebtA*0.15:0; const resA=ebtA-ircA; return `<div class="cn-cell ${resA>=0?'rpos':'rneg'}">${fmtE(resA,0)}</div>`; }).join('') +
     row('(−) Reembolso capital/ano (plano real)', r => '−' + fmtE(amortAnualCn,0), '') +
     `<div class="cn-lbl" style="font-weight:700">= Fluxo de caixa livre/ano</div>` +
-    cn.map(r => `<div class="cn-cell ${r.fluxo>=0?'rpos':'rneg'}">${fmtE(r.fluxo*f,0)}</div>`).join('');
+    cn.map(r => { const ebtA=r.ebit*f-jurosAnualCn; const ircA=ebtA>0?ebtA*0.15:0; const resA=ebtA-ircA; const fluxoA=resA-amortAnualCn; return `<div class="cn-cell ${fluxoA>=0?'rpos':'rneg'}">${fmtE(fluxoA,0)}</div>`; }).join('');
 
   // ── BALANÇO (estimado a 6 meses)
   const meses6 = 6;
