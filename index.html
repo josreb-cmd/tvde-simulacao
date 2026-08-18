@@ -37,7 +37,6 @@ table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
 td { padding: 6px 4px; border-bottom: 1px solid #f2f2f2; vertical-align: middle; }
 td:last-child { text-align: right; font-weight: 600; }
 tr.total td { border-top: 2px solid #ddd; font-weight: 700; font-size: 0.9rem; padding-top: 8px; }
-tr.total td:last-child { color: #c0392b; }
 tr.pos td:last-child { color: #27ae60; }
 tr.sub td { background: #f8f9fa; font-weight: 700; }
 tr.sub td:last-child { color: #2e6da4; }
@@ -930,17 +929,17 @@ function calcular() {
     '<tr><td>(−) Energia</td><td>−' + fmtE(energiaF) + '</td></tr>' +
     '<tr><td>(−) Estrutura (seguros + contab. + tel. + garagem)</td><td>−' + fmtE(estruturaF) + '</td></tr>' +
     '<tr><td>(−) Custos variáveis</td><td>−' + fmtE(varF) + '</td></tr>' +
-    '<tr class="total"><td>= EBITDA</td><td>' + fmtE(ebitdaF) + '</td></tr>' +
+    '<tr class="total"><td>= EBITDA</td><td style="color:' + (ebitdaF>=0?'#27ae60':'#c0392b') + '">' + fmtE(ebitdaF) + '</td></tr>' +
     '<tr class="sub"><td colspan="2">GASTOS COM PESSOAL</td></tr>' +
     '<tr><td>(−) Salário bruto</td><td>−' + fmtE(salario*f) + '</td></tr>' +
     '<tr><td>(−) SS patronal (23,75%)</td><td>−' + fmtE(ssPatronal*f) + '</td></tr>' +
     '<tr class="sub"><td colspan="2">OUTROS GASTOS OPERACIONAIS</td></tr>' +
     '<tr><td>(−) Ajudas de custo (isentas até ' + fmtE(AJUDAS_LIMITE_DIA) + '/dia)</td><td>−' + fmtE(ajudasF) + '</td></tr>' +
     '<tr><td>(−) Subsídio de refeição (cartão, isento até ' + fmtE(SUB_REF_LIMITE_DIA) + '/dia)</td><td>−' + fmtE(subRefF) + '</td></tr>' +
-    '<tr class="total"><td>= EBIT (Resultado Operacional)</td><td>' + fmtE(ebitF) + '</td></tr>' +
+    '<tr class="total"><td>= EBIT (Resultado Operacional)</td><td style="color:' + (ebitF>=0?'#27ae60':'#c0392b') + '">' + fmtE(ebitF) + '</td></tr>' +
     '<tr class="sub"><td colspan="2">GASTOS FINANCEIROS</td></tr>' +
     '<tr><td>(−) Juros crédito automóvel' + (drModo==="anual"?' (meses '+mesAtual+'-'+(mesAtual+11)+', plano real)':'') + '</td><td>−' + fmtE(jurosF) + '</td></tr>' +
-    '<tr class="total"><td>= EBT (Resultado antes do IRC)</td><td>' + fmtE(resultadoAntesF) + '</td></tr>' +
+    '<tr class="total"><td>= EBT (Resultado antes do IRC)</td><td style="color:' + (resultadoAntesF>=0?'#27ae60':'#c0392b') + '">' + fmtE(resultadoAntesF) + '</td></tr>' +
     '<tr><td>(−) IRC (15% PME — Lei n.º 64/2025)</td><td>−' + fmtE(ircF) + '</td></tr>' +
     '<tr class="' + (resultLiqF >= 0 ? 'result-pos' : 'result-neg') + '"><td>= RESULTADO LÍQUIDO</td><td>' + fmtE(resultLiqF) + '</td></tr>' +
     '<tr><td style="color:#666;font-size:0.8rem">(−) Reembolso capital crédito (não é gasto)' + (drModo==="anual"?' — real plano':'') + '</td><td style="color:#666;font-size:0.8rem">−' + fmtE(amortCapF) + '</td></tr>' +
