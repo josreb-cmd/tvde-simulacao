@@ -7,6 +7,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Simulação TVDE — Alexandre Rebelo</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; color: #222; font-size: 15px; }
@@ -132,11 +133,39 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
 .cn-kpi.verde .val { color: #27ae60; }
 .cn-kpi.azul .val { color: #2e6da4; }
 .cn-kpi.vermelho .val { color: #c0392b; }
+.login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #f0f4f8; padding: 16px; }
+.login-box { background: white; border-radius: 12px; padding: 28px 24px; width: 100%; max-width: 340px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+.login-box h1 { font-size: 1.1rem; color: #1a3a5c; margin-bottom: 4px; }
+.login-box p { font-size: 0.8rem; color: #666; margin-bottom: 18px; }
+.login-box label { display: block; font-size: 0.75rem; font-weight: 700; color: #1a3a5c; margin: 10px 0 4px; }
+.login-box input { width: 100%; padding: 9px 10px; border: 1px solid #c5d8f0; border-radius: 6px; font-size: 0.9rem; }
+.login-box button[type="submit"] { width: 100%; margin-top: 16px; padding: 10px; font-size: 0.85rem; }
+.login-erro { color: #c0392b; font-size: 0.78rem; margin-top: 10px; min-height: 1em; }
+.logout-btn { background: rgba(255,255,255,0.15); color: white; border: none; border-radius: 6px; padding: 4px 10px; font-size: 0.7rem; cursor: pointer; float: right; }
+.logout-btn:hover { background: rgba(255,255,255,0.25); }
 </style>
 </head>
 <body>
 
+<div id="login-screen" class="login-screen">
+  <div class="login-box">
+    <h1>📊 Simulação TVDE</h1>
+    <p>Inicia sessão para aceder à calculadora.</p>
+    <form id="login-form" onsubmit="return fazerLogin(event)">
+      <label for="login-email">Email</label>
+      <input type="email" id="login-email" required autocomplete="username">
+      <label for="login-password">Palavra-passe</label>
+      <input type="password" id="login-password" required autocomplete="current-password">
+      <button type="submit" class="sb-btn save" id="login-submit">Entrar</button>
+      <div class="login-erro" id="login-erro"></div>
+    </form>
+  </div>
+</div>
+
+<div id="app-shell" style="display:none">
+
 <header>
+  <button class="logout-btn" onclick="fazerLogout()" title="Terminar sessão">⎋ Sair</button>
   <h1>📊 Simulação TVDE — Alexandre Rebelo</h1>
   <p>Unipessoal Lda. · Custos editáveis · Dados reais Abr–Mai 2026</p>
   <div class="badges">
@@ -459,10 +488,81 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
 <footer>Soluções Eficazes · Simulação TVDE Alexandre Rebelo · 2026</footer>
 <button class="export-btn" onclick="window.print()">⬇ Exportar PDF</button>
 
+</div><!-- /app-shell -->
+
 <script>
 const SB_URL = 'https://kjrsatechyfdvdmiheuu.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqcnNhdGVjaHlmZHZkbWloZXV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3NzU0NTIsImV4cCI6MjEwNDM1MTQ1Mn0.nZl6Xm1PxPDRUQ5LZmCumfEBTTirtzwjTO7rJjQSaag';
 const SHARED_ID = 'tvde_alexandre';
+
+const sbClient = supabase.createClient(SB_URL, SB_KEY);
+
+async function sbAuthHeader() {
+  const { data: { session } } = await sbClient.auth.getSession();
+  return session ? session.access_token : SB_KEY;
+}
+
+function mostrarApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-shell').style.display = '';
+}
+
+function mostrarLogin() {
+  document.getElementById('app-shell').style.display = 'none';
+  document.getElementById('login-screen').style.display = '';
+}
+
+function mostrarErroLogin(msg) {
+  document.getElementById('login-erro').textContent = msg || '';
+}
+
+function traduzErroLogin(error) {
+  const msg = (error && error.message) || '';
+  if (/Invalid login credentials/i.test(msg)) return 'Email ou palavra-passe incorrectos.';
+  if (/Email not confirmed/i.test(msg)) return 'Email ainda não confirmado.';
+  if (/rate limit/i.test(msg)) return 'Demasiadas tentativas. Aguarda um pouco e tenta de novo.';
+  return msg ? msg : 'Não foi possível iniciar sessão.';
+}
+
+async function fazerLogin(ev) {
+  ev.preventDefault();
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const btn = document.getElementById('login-submit');
+  mostrarErroLogin('');
+  btn.disabled = true;
+  btn.textContent = 'A entrar…';
+  try {
+    const { error } = await sbClient.auth.signInWithPassword({ email, password });
+    if (error) mostrarErroLogin(traduzErroLogin(error));
+    else mostrarApp();
+  } catch (e) {
+    mostrarErroLogin('Erro de ligação. Tenta novamente.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Entrar';
+  }
+  return false;
+}
+
+async function fazerLogout() {
+  await sbClient.auth.signOut();
+  document.getElementById('login-form').reset();
+  mostrarErroLogin('');
+  mostrarLogin();
+}
+
+async function iniciarApp() {
+  const { data: { session } } = await sbClient.auth.getSession();
+  if (session) mostrarApp();
+  else mostrarLogin();
+}
+
+sbClient.auth.onAuthStateChange((event) => {
+  if (event === 'SIGNED_OUT') mostrarLogin();
+});
+
+iniciarApp();
 
 function sbStatus(msg, tipo) {
   const el = document.getElementById('sb-status');
@@ -487,12 +587,13 @@ async function guardarConfig() {
     atualizado_em: new Date().toISOString()
   };
   try {
+    const token = await sbAuthHeader();
     const r = await fetch(SB_URL + '/rest/v1/tvde_simulacao_config', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'apikey': SB_KEY,
-        'Authorization': 'Bearer ' + SB_KEY,
+        'Authorization': 'Bearer ' + token,
         'Prefer': 'resolution=merge-duplicates'
       },
       body: JSON.stringify(payload)
@@ -505,8 +606,9 @@ async function guardarConfig() {
 async function carregarConfig() {
   sbStatus('A carregar…', '');
   try {
+    const token = await sbAuthHeader();
     const r = await fetch(SB_URL + '/rest/v1/tvde_simulacao_config?id=eq.' + SHARED_ID + '&select=*', {
-      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + token }
     });
     const data = await r.json();
     if (data && data.length > 0) {
