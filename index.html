@@ -73,6 +73,9 @@ input[type=range] { width: 100%; accent-color: #2e6da4; }
 .a-validar { display: inline-block; font-size: 0.6rem; font-weight: 700; padding: 1px 6px; border-radius: 10px; background: #fff3cd; color: #8a6d00; border: 1px solid #f0d78c; margin-left: 4px; vertical-align: middle; white-space: nowrap; }
 .aviso { border-left: 4px solid #e67e22; background: #fff4e5; padding: 8px 12px; border-radius: 6px; font-size: 0.77rem; color: #5a3d00; margin-bottom: 6px; line-height: 1.45; }
 .aviso.erro { border-left-color: #c0392b; background: #fdecea; color: #7a1f16; }
+.verificacao { margin-top: 8px; padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 800; }
+.verificacao.ok { background: #e8f5e9; color: #1e7e34; border-left: 4px solid #27ae60; }
+.verificacao.falha { background: #fdecea; color: #a93226; border-left: 4px solid #c0392b; }
 .result-box { text-align: center; padding: 14px; border-radius: 10px; border: 2px solid; margin-top: 11px; transition: background 0.3s, border-color 0.3s; }
 .result-box.pos { background: linear-gradient(135deg,#e8f5e9,#f1f8e9); border-color: #a5d6a7; }
 .result-box.neg { background: linear-gradient(135deg,#fdecea,#fff3f3); border-color: #ef9a9a; }
@@ -410,10 +413,25 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
       <div class="kpi-grid" id="kpi-dr"></div>
     </div>
     <div class="section">
-      <h2>⚖️ Balanço Estimado</h2>
-      <div class="aviso">⚠ Balanço provisório: a metodologia antiga não fecha; reconstrução prevista na Etapa 2.</div>
+      <h2 id="balanco-titulo">⚖️ Balanço</h2>
+      <table id="balanco-config">
+        <tr class="sub"><td colspan="2">PARÂMETROS DO BALANÇO</td></tr>
+        <tr><td>Balanço ao fim do mês N (1 a 24)</td><td><input class="edit-input" id="bal_horizonte" type="number" value="12" step="1" min="1" max="24" oninput="calcular()"> º mês</td></tr>
+        <tr><td>Mês civil do 1.º mês de actividade <span class="a-validar">a validar</span></td><td><select class="sel" id="bal_mes_inicio" onchange="calcular()"><option value="1" selected>janeiro</option><option value="2">fevereiro</option><option value="3">março</option><option value="4">abril</option><option value="5">maio</option><option value="6">junho</option><option value="7">julho</option><option value="8">agosto</option><option value="9">setembro</option><option value="10">outubro</option><option value="11">novembro</option><option value="12">dezembro</option></select></td></tr>
+        <tr><td>Prazo de recebimento das plataformas <span class="a-validar">a validar</span></td><td><input class="edit-input" id="bal_prazo_receber" type="number" value="7" step="1" min="0" max="365" oninput="calcular()"> dias</td></tr>
+        <tr><td>Periodicidade do IVA (CIVA, art. 41.º) <span class="a-validar">a validar</span></td><td><select class="sel" id="bal_iva_periodicidade" onchange="calcular()"><option value="trimestral" selected>Trimestral</option><option value="mensal">Mensal</option></select></td></tr>
+        <tr><td>Prazo de pagamento das comissões a independentes</td><td><input class="edit-input" id="bal_prazo_comissoes" type="number" value="1" step="1" min="0" max="12" oninput="calcular()"> mês(es)</td></tr>
+        <tr><td>Mês de pagamento do subsídio de férias <span class="a-validar">a validar</span></td><td><select class="sel" id="bal_mes_ferias" onchange="calcular()"><option value="1">janeiro</option><option value="2">fevereiro</option><option value="3">março</option><option value="4">abril</option><option value="5">maio</option><option value="6" selected>junho</option><option value="7">julho</option><option value="8">agosto</option><option value="9">setembro</option><option value="10">outubro</option><option value="11">novembro</option><option value="12">dezembro</option></select></td></tr>
+        <tr><td>Mês de pagamento do subsídio de Natal <span class="a-validar">a validar</span></td><td><select class="sel" id="bal_mes_natal" onchange="calcular()"><option value="1">janeiro</option><option value="2">fevereiro</option><option value="3">março</option><option value="4">abril</option><option value="5">maio</option><option value="6">junho</option><option value="7">julho</option><option value="8">agosto</option><option value="9">setembro</option><option value="10">outubro</option><option value="11">novembro</option><option value="12" selected>dezembro</option></select></td></tr>
+        <tr><td>Capital social <span class="a-validar">a validar</span></td><td><input class="edit-input" id="bal_capital_social" type="number" value="1" step="1" min="0" oninput="calcular()"> €</td></tr>
+        <tr><td>Suprimentos da sócia (entrada em caixa no mês 1) <span class="a-validar">a validar</span></td><td><input class="edit-input" id="bal_suprimentos" type="number" value="0" step="100" min="0" oninput="calcular()"> €</td></tr>
+        <tr><td>Incluir distribuição de resultados no Balanço</td><td><input type="checkbox" id="bal_distribuicao" onchange="calcular()"></td></tr>
+      </table>
+      <div id="balanco-avisos"></div>
       <table id="balanco-table"></table>
-      <div class="nota" style="margin-top:10px">Balanço estimado com base nos fluxos mensais do simulador (modelo provisório, a reconstruir por acumulação de fluxos). O ativo fixo representa o valor de aquisição da viatura (IFRS 16 / SNC). Não substitui o balanço contabilístico real — validar com contabilista certificado.</div>
+      <div id="balanco-verificacao"></div>
+      <div class="nota" id="balanco-pressupostos"></div>
+      <div class="nota" style="margin-top:10px">Balanço construído por partidas dobradas a partir dos fluxos mensais do simulador. Não substitui o balanço contabilístico real — validar com contabilista certificado.</div>
     </div>
     <div class="section">
       <h2>💳 Plano de Amortização do Crédito</h2>
@@ -493,10 +511,10 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
     <!-- BALANÇO -->
     <div class="cn-section" id="cn-sec-balanco">
       <div class="section" style="margin-bottom:11px">
-        <h2>⚖️ Balanço Estimado — comparação</h2>
-        <div class="aviso">⚠ Balanço provisório: a metodologia antiga não fecha; reconstrução prevista na Etapa 2.</div>
+        <h2 id="cn-balanco-titulo">⚖️ Balanço — comparação</h2>
+        <div id="cn-balanco-avisos"></div>
         <div class="cn-grid" id="cn-grid-balanco"></div>
-        <div class="nota" style="margin-top:9px">Balanço estimado a 6 meses. <strong>Nota metodológica:</strong> num crédito recente, o passivo (dívida remanescente ~28k) supera o ativo líquido enquanto os resultados acumulados são ainda baixos — situação normal e esperada. O balanço estimado não equilibra por simplificação do modelo de caixa; o balanço contabilístico real equilibra sempre. Validar com contabilista certificado.</div>
+        <div class="nota" style="margin-top:9px">Balanço por partidas dobradas (o mesmo do separador DR &amp; Balanço), com os parâmetros do Balanço definidos nesse separador. Cada cenário muda apenas o salário do Alexandre como Dependente. Pressupostos e simplificações: ver "Pressupostos do Balanço" no separador DR &amp; Balanço. Validar com contabilista certificado.</div>
       </div>
     </div>
 
@@ -773,6 +791,43 @@ const LIMITE_HORAS_TVDE   = 10;
 const HORAS_DIA_VIATURA   = 24;
 const DIAS_SEMANA         = 7;
 
+// ── BALANÇO: PRAZOS E PRESSUPOSTOS ────────────────────────────────
+// CIVA, art. 41.º n.º 1: declaração periódica mensal (volume de negócios ≥ 650 000 €) ou trimestral.
+// CIVA, art. 27.º n.º 1: pagamento até ao dia 25 do 2.º mês seguinte ao mês ou trimestre;
+// art. 27.º n.º 10: o IVA de junho e do 2.º trimestre paga-se até 25 de setembro (Portal das Finanças).
+const IVA_MESES_PAGAMENTO = 2;
+const IVA_MES_PRORROGADO = 6;
+// CIVA, art. 27.º n.º 3 (redação do DL n.º 97/2026): quem não entrega declaração periódica paga o IVA
+// autoliquidado até ao final do mês seguinte → aplicado ao regime de isenção do art. 53.º, a validar.
+const IVA_ISENTO_MESES_PAGAMENTO = 1;
+// Código Contributivo, art. 43.º: contribuições e quotizações pagas até ao dia 20 do mês seguinte.
+const SS_MESES_PAGAMENTO = 1;
+// CIRS, art. 98.º n.º 3: retenções na fonte entregues até ao dia 20 do mês seguinte.
+const IRS_MESES_PAGAMENTO = 1;
+// CIRC, art. 120.º n.º 1 (declaração Modelo 22 até ao último dia de maio) e art. 104.º n.º 1 b)
+// (pagamento até ao fim do prazo da declaração): IRC do ano pago em maio do ano seguinte.
+// Pagamentos por conta (CIRC, arts. 104.º e 105.º) não modelados → a validar.
+const IRC_MES_PAGAMENTO = 5;
+// CSC, art. 65.º n.º 5: contas aprovadas nos 3 meses seguintes ao fim do exercício → distribuição
+// paga em março do ano seguinte (a validar). Limites dos arts. 32.º e 33.º só de forma simplificada.
+const DIST_MES_PAGAMENTO = 3;
+const MESES_ANO = 12;
+const HORIZONTE_MAX = 24;
+const NOMES_MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+// Parâmetros do Balanço por omissão (config_extra.balanco). Prazos marcados "a validar" na UI.
+const BALANCO_OMISSAO = {
+  horizonte: 12,
+  mes_inicio: 1,              // mês civil do 1.º mês de actividade (define trimestres, subsídios e exercício)
+  prazo_receber_dias: 7,      // prazo de recebimento das plataformas, a validar
+  iva_periodicidade: 'trimestral',
+  prazo_comissoes_meses: 1,   // prazo de pagamento das comissões a independentes
+  mes_ferias: 6,              // Código do Trabalho, art. 264.º: antes do início das férias, a validar
+  mes_natal: 12,              // Código do Trabalho, art. 263.º n.º 1: até 15 de dezembro
+  capital_social: 1,          // valor usado no modelo anterior, a validar
+  suprimentos: 0,
+  distribuicao: false
+};
+
 const PLATAFORMAS = [ { id: 'uber', nome: 'Uber' }, { id: 'bolt', nome: 'Bolt' } ];
 const CONTRATOS = { dependente: 'Dependente', independente: 'Independente (recibos verdes)', inactivo: 'Inactivo' };
 const MOTORISTAS_BASE = [ { id: 'alexandre', nome: 'Alexandre' }, { id: 'motorista2', nome: 'Motorista 2' } ];
@@ -1000,7 +1055,8 @@ function extraPorOmissao(planas) {
       { id: 'motorista2', nome: 'Motorista 2', contrato: 'independente', dependencia: 'gt80', iva_recibo: 'isento',
         dias_sem: 0, horas_dia: 0, receita: receitaVazia(), pct: { uber: 0, bolt: 0 },
         dep: { salario: 0, sit_familiar: 'NC', ajudas: 0, sub_ref_dias: 0, sub_ref_val: 0 } }
-    ]
+    ],
+    balanco: Object.assign({}, BALANCO_OMISSAO)
   };
 }
 
@@ -1055,6 +1111,32 @@ function aplicarExtra(extra) {
       setVal('m' + i + '_pct_' + p.id, m.pct ? m.pct[p.id] : 0);
     });
   });
+  const bal = Object.assign({}, BALANCO_OMISSAO, extra.balanco || {});
+  setVal('bal_horizonte', bal.horizonte);
+  setVal('bal_mes_inicio', bal.mes_inicio);
+  setVal('bal_prazo_receber', bal.prazo_receber_dias);
+  setVal('bal_iva_periodicidade', bal.iva_periodicidade);
+  setVal('bal_prazo_comissoes', bal.prazo_comissoes_meses);
+  setVal('bal_mes_ferias', bal.mes_ferias);
+  setVal('bal_mes_natal', bal.mes_natal);
+  setVal('bal_capital_social', bal.capital_social);
+  setVal('bal_suprimentos', bal.suprimentos);
+  setChk('bal_distribuicao', bal.distribuicao);
+}
+
+function lerBalancoDoDOM() {
+  return {
+    horizonte: getVal('bal_horizonte'),
+    mes_inicio: getVal('bal_mes_inicio'),
+    prazo_receber_dias: getVal('bal_prazo_receber'),
+    iva_periodicidade: getSel('bal_iva_periodicidade', BALANCO_OMISSAO.iva_periodicidade),
+    prazo_comissoes_meses: getVal('bal_prazo_comissoes'),
+    mes_ferias: getVal('bal_mes_ferias'),
+    mes_natal: getVal('bal_mes_natal'),
+    capital_social: getVal('bal_capital_social'),
+    suprimentos: getVal('bal_suprimentos'),
+    distribuicao: getChk('bal_distribuicao')
+  };
 }
 
 function lerCfgDoDOM() {
@@ -1101,6 +1183,7 @@ function lerCfgDoDOM() {
       }
     };
   });
+  cfg.balanco = lerBalancoDoDOM();
   return cfg;
 }
 
@@ -1122,7 +1205,8 @@ function construirExtra(cfg) {
       };
       if (i === 0) return base;
       return Object.assign(base, { dias_sem: m.dias_sem, horas_dia: m.horas_dia, dep: Object.assign({}, m.dep) });
-    })
+    }),
+    balanco: Object.assign({}, cfg.balanco)
   };
 }
 
@@ -1154,6 +1238,20 @@ function validarCfg(cfg) {
       if (!inteiro(m.dep.sub_ref_dias) || !entre(m.dep.sub_ref_dias, 0, 31)) erros.push(m.nome + ': os dias de subsídio de refeição têm de ser um número inteiro entre 0 e 31.');
     }
   });
+  return erros.concat(validarBalanco(cfg.balanco));
+}
+
+function validarBalanco(b) {
+  const erros = [];
+  const entre = (v, min, max) => typeof v === 'number' && isFinite(v) && v >= min && v <= max;
+  const inteiroEntre = (v, min, max) => Number.isInteger(v) && v >= min && v <= max;
+  if (!inteiroEntre(b.horizonte, 1, HORIZONTE_MAX)) erros.push('Balanço: o mês N tem de ser um número inteiro entre 1 e ' + HORIZONTE_MAX + '.');
+  if (!inteiroEntre(b.mes_inicio, 1, MESES_ANO)) erros.push('Balanço: o mês civil de início tem de estar entre 1 e 12.');
+  if (!entre(b.prazo_receber_dias, 0, 365)) erros.push('Balanço: o prazo de recebimento das plataformas tem de estar entre 0 e 365 dias.');
+  if (b.iva_periodicidade !== 'mensal' && b.iva_periodicidade !== 'trimestral') erros.push('Balanço: a periodicidade do IVA tem de ser mensal ou trimestral.');
+  if (!inteiroEntre(b.prazo_comissoes_meses, 0, MESES_ANO)) erros.push('Balanço: o prazo de pagamento das comissões tem de ser um número inteiro de meses entre 0 e 12.');
+  if (!inteiroEntre(b.mes_ferias, 1, MESES_ANO) || !inteiroEntre(b.mes_natal, 1, MESES_ANO)) erros.push('Balanço: os meses de pagamento dos subsídios de férias e de Natal têm de estar entre 1 e 12.');
+  if (!entre(b.capital_social, 0, Infinity) || !entre(b.suprimentos, 0, Infinity)) erros.push('Balanço: o capital social e os suprimentos não podem ser negativos.');
   return erros;
 }
 
@@ -1600,51 +1698,286 @@ function renderRealVsPlano(cfg, mod, semVal) {
     kpi(fmtE(mod.resLiq), 'resultado líquido', mod.resLiq >= 0 ? 'verde' : 'vermelho');
 }
 
-// Balanço provisório (mesma metodologia do modelo anterior; reconstrução por fluxos prevista).
-function balancoProvisorio(cfg, mod) {
-  const valorAquisicao = cfg.fin_capital;
-  const deprAcum = mod.deprMes * 6;
-  const viaturaLiq = Math.max(0, valorAquisicao - deprAcum);
-  const caixaEst = Math.max(0, mod.fluxo * 3);
-  const contasReceber = mod.receitaLiq * 0.1;
-  const ativoTotal = viaturaLiq + caixaEst + contasReceber;
-  const divida = Math.max(0, cfg.fin_capital - mod.fin.amort * 6);
-  const passivoMlPrazo = divida * (1 - 12 / Math.max(cfg.fin_prazo, 12));
-  const passivoCorrente = (divida - passivoMlPrazo) + mod.ssAPagarMes + mod.irsAPagarMes + mod.irc;
-  const passivoTotal = passivoCorrente + passivoMlPrazo;
-  const resultAcum = Math.max(0, mod.resLiq * 6);
-  const capProprio = 1 + resultAcum;
-  const totalPCP = passivoTotal + capProprio;
-  const autonomia = totalPCP > 0 ? (capProprio / totalPCP * 100) : 0;
-  return { valorAquisicao, deprAcum, viaturaLiq, caixaEst, contasReceber, ativoTotal, divida, passivoMlPrazo, passivoTotal, resultAcum, capProprio, autonomia };
+// ── BALANÇO POR ACUMULAÇÃO DE FLUXOS (partidas dobradas) ───────────
+// Cada lançamento debita e credita o mesmo valor (saldo devedor > 0, credor < 0), pelo que
+// Ativo = Passivo + Capital próprio por construção. O mês 1 é o 1.º mês da actividade e do crédito.
+// A conta "resultado" recebe todos os gastos (débito) e rendimentos (crédito): o seu saldo, com
+// sinal trocado, é a soma dos resultados líquidos dos meses 1 a N.
+const TOLERANCIA_BALANCO = 0.005;
+// Prazo de recebimento em dias convertido em meses com o mês médio (independente das semanas por mês).
+const DIAS_MES_MEDIO = 365 / 12;
+
+function normalizarBalanco(b) {
+  const v = Object.assign({}, BALANCO_OMISSAO, b || {});
+  const inteiro = (x, min, max, omissao) => { const n = Math.round(x); return isFinite(n) && n >= min && n <= max ? n : omissao; };
+  const naoNegativo = x => (isFinite(x) && x > 0 ? +x : 0);
+  return {
+    horizonte: inteiro(v.horizonte, 1, HORIZONTE_MAX, BALANCO_OMISSAO.horizonte),
+    mes_inicio: inteiro(v.mes_inicio, 1, MESES_ANO, BALANCO_OMISSAO.mes_inicio),
+    prazo_receber_dias: naoNegativo(v.prazo_receber_dias),
+    iva_periodicidade: v.iva_periodicidade === 'mensal' ? 'mensal' : 'trimestral',
+    prazo_comissoes_meses: inteiro(v.prazo_comissoes_meses, 0, MESES_ANO, BALANCO_OMISSAO.prazo_comissoes_meses),
+    mes_ferias: inteiro(v.mes_ferias, 1, MESES_ANO, BALANCO_OMISSAO.mes_ferias),
+    mes_natal: inteiro(v.mes_natal, 1, MESES_ANO, BALANCO_OMISSAO.mes_natal),
+    capital_social: naoNegativo(v.capital_social),
+    suprimentos: naoNegativo(v.suprimentos),
+    distribuicao: !!v.distribuicao
+  };
+}
+
+function mesCivil(b, k) { return (b.mes_inicio - 1 + k - 1) % MESES_ANO + 1; }
+function exercicio(b, k) { return Math.floor((b.mes_inicio - 1 + k - 1) / MESES_ANO); }
+
+// Mês (da simulação) em que se paga o IVA apurado no mês k.
+function mesPagamentoIVA(b, k, isento) {
+  if (isento) return k + IVA_ISENTO_MESES_PAGAMENTO;
+  const fimPeriodo = b.iva_periodicidade === 'mensal' ? k : k + (2 - (mesCivil(b, k) - 1) % 3);
+  return fimPeriodo + IVA_MESES_PAGAMENTO + (mesCivil(b, fimPeriodo) === IVA_MES_PRORROGADO ? 1 : 0);
+}
+
+// Livro de lançamentos: contas com saldo, pagamentos agendados e reporte do crédito de IVA (CIVA, art. 22.º).
+function criarLivro() {
+  const contas = {};
+  const agenda = {};
+  let ivaReporte = 0;
+  const saldo = c => contas[c] || 0;
+  const lancar = movs => { movs.forEach(([c, v]) => { contas[c] = saldo(c) + v; }); };
+  return {
+    contas, saldo, lancar,
+    agendar(conta, mes, valor) { if (valor) (agenda[mes] = agenda[mes] || []).push([conta, valor]); },
+    liquidar(mes) {
+      let iva = ivaReporte;
+      (agenda[mes] || []).forEach(([conta, valor]) => {
+        if (conta === 'iva') iva += valor;
+        else lancar([[conta, valor], ['caixa', -valor]]);
+      });
+      if (iva > 0) { lancar([['iva', iva], ['caixa', -iva]]); ivaReporte = 0; }
+      else ivaReporte = iva;
+    }
+  };
+}
+
+function lancarReceitas(livro, ctx, k) {
+  const m = ctx.mod;
+  // Depósito = bruto − comissão + gorjetas e bónus; o IVA das viagens vai para a conta de IVA, nunca para proveitos.
+  livro.lancar([['receber', m.deposito], ['resultado', m.comPlat - m.Fsem - m.gorjBonus], ['iva', -m.ivaLiquidado]]);
+  livro.agendar('iva', mesPagamentoIVA(ctx.b, k, ctx.isento), m.ivaLiquidado);
+  // Autoliquidação da comissão: no regime normal, liquidado = dedutível (sem lançamento líquido);
+  // no regime isento é custo e é entregue ao Estado.
+  if (m.autoliqNaoDed > 0) {
+    livro.lancar([['resultado', m.autoliqNaoDed], ['iva', -m.autoliqNaoDed]]);
+    livro.agendar('iva', mesPagamentoIVA(ctx.b, k, true), m.autoliqNaoDed);
+  }
+  const cobradoAteK = m.deposito * (k - Math.min(k, ctx.mesesReceber));
+  const cobrado = cobradoAteK - ctx.cobrado;
+  ctx.cobrado = cobradoAteK;
+  livro.lancar([['caixa', cobrado], ['receber', -cobrado]]);
+  const custos = m.energia + m.estrutura + m.varTotal;
+  livro.lancar([['resultado', custos], ['caixa', -custos]]);
+}
+
+// Subsídio pago: parte salarial (com SS do trabalhador e IRS retidos) e TSU patronal acrescida.
+function pagarSubsidio(livro, d, conta, valor, k) {
+  if (!(valor > 0) || !(d.sal + d.ssP > 0)) return;
+  const bruto = valor * d.sal / (d.sal + d.ssP);
+  const ssT = bruto * SS_TRAB_TAXA;
+  const irs = d.sal > 0 ? bruto * d.irs / d.sal : 0;
+  const ss = valor - bruto + ssT;
+  livro.lancar([[conta, valor], ['caixa', -(bruto - ssT - irs)], ['ss', -ss], ['irs', -irs]]);
+  livro.agendar('ss', k + SS_MESES_PAGAMENTO, ss);
+  livro.agendar('irs', k + IRS_MESES_PAGAMENTO, irs);
+}
+
+function lancarPessoal(livro, ctx, k) {
+  const civil = mesCivil(ctx.b, k);
+  ctx.mod.motoristas.filter(m => m.dep).forEach((m, j) => {
+    const d = m.dep;
+    const ss = d.ssP + d.ssT;
+    livro.lancar([['resultado', d.sal + d.ssP + d.ajudas + d.subRefMes], ['caixa', -(d.salLiq + d.ajudas + d.subRefMes)], ['ss', -ss], ['irs', -d.irs]]);
+    livro.agendar('ss', k + SS_MESES_PAGAMENTO, ss);
+    livro.agendar('irs', k + IRS_MESES_PAGAMENTO, d.irs);
+    // Acréscimo mensal de 1/12 do subsídio de férias e de 1/12 do de Natal, com TSU patronal (14 meses na DR).
+    const acrescimo = (d.sal + d.ssP) / MESES_ANO;
+    livro.lancar([['resultado', 2 * acrescimo], ['ferias', -acrescimo], ['natal', -acrescimo]]);
+    const prov = ctx.provisoes[j] = ctx.provisoes[j] || { ferias: 0, natal: 0 };
+    prov.ferias += acrescimo;
+    prov.natal += acrescimo;
+    if (civil === ctx.b.mes_ferias) { pagarSubsidio(livro, d, 'ferias', prov.ferias, k); prov.ferias = 0; }
+    if (civil === ctx.b.mes_natal) { pagarSubsidio(livro, d, 'natal', prov.natal, k); prov.natal = 0; }
+  });
+}
+
+function lancarIndependentes(livro, ctx, k) {
+  const m = ctx.mod;
+  const ivaRecibos = m.motoristas.reduce((s, x) => s + x.ivaRecibo, 0);
+  const aPagar = m.comInd + ivaRecibos;
+  livro.lancar([['resultado', m.comInd + m.encSS + m.ivaNaoDed], ['iva', m.ivaRecibosDedutivel], ['comissoes', -aPagar], ['ssContratante', -m.encSS]]);
+  livro.agendar('comissoes', k + ctx.b.prazo_comissoes_meses, aPagar);
+  if (m.ivaRecibosDedutivel > 0) livro.agendar('iva', mesPagamentoIVA(ctx.b, k, false), -m.ivaRecibosDedutivel);
+  // Encargos da entidade contratante: apurados pela SS no ano seguinte (Código Contributivo, art. 155.º n.º 3) → ficam no passivo.
+}
+
+function lancarViaturaEFinanciamento(livro, ctx, k) {
+  const depr = Math.min(ctx.mod.deprMes, ctx.custo + livro.saldo('deprAcum'));
+  if (depr > 0) livro.lancar([['resultado', depr], ['deprAcum', -depr]]);
+  const linha = ctx.mod.fin.plano[k - 1];
+  if (!linha) return;
+  const amort = Math.min(linha.amort, -livro.saldo('divida'));
+  livro.lancar([['resultado', linha.juros], ['divida', amort], ['caixa', -(linha.juros + amort)]]);
+  ctx.jurosMes[k - 1] = linha.juros;
+}
+
+// IRC: provisão do exercício (ano civil) = 15% × resultado antes de imposto acumulado no ano, se positivo.
+function lancarIRC(livro, ctx, k, ebtMes) {
+  const ano = exercicio(ctx.b, k);
+  ctx.ebtAno[ano] = (ctx.ebtAno[ano] || 0) + ebtMes;
+  const provisao = Math.max(0, ctx.ebtAno[ano]) * IRC_PME_TAXA;
+  const delta = provisao - (ctx.ircAno[ano] || 0);
+  ctx.ircAno[ano] = provisao;
+  livro.lancar([['resultado', delta], ['irc', -delta]]);
+  ctx.resAno[ano] = (ctx.resAno[ano] || 0) + ebtMes - delta;
+  if (mesCivil(ctx.b, k) !== MESES_ANO) return;
+  livro.agendar('irc', k + IRC_MES_PAGAMENTO, provisao);
+  if (ctx.b.distribuicao) ctx.distAgenda[k + DIST_MES_PAGAMENTO] = { ano, resAcum: -livro.saldo('resultado') };
+}
+
+// Distribuição à sócia: 60% do resultado do exercício, limitada aos resultados acumulados ainda não distribuídos.
+function lancarDistribuicao(livro, ctx, k) {
+  const d = ctx.distAgenda[k];
+  if (!d) return;
+  const valor = Math.min(Math.max(0, ctx.resAno[d.ano]) * DIST_SOCIA_PCT, Math.max(0, d.resAcum - livro.saldo('distribuicoes')));
+  if (!(valor > 0)) return;
+  const irs = valor * IRS_DIV_TAXA;
+  livro.lancar([['distribuicoes', valor], ['caixa', -(valor - irs)], ['irs', -irs]]);
+  livro.agendar('irs', k + IRS_MESES_PAGAMENTO, irs);
+}
+
+function calcBalanco(cfg, mod) {
+  const b = normalizarBalanco(cfg.balanco);
+  const livro = criarLivro();
+  const custo = Math.max(0, cfg.fin_capital);
+  const ctx = { mod, b, custo, isento: mod.regimeIva === 'isento', mesesReceber: b.prazo_receber_dias / DIAS_MES_MEDIO,
+    cobrado: 0, provisoes: [], jurosMes: [], ebtAno: {}, ircAno: {}, resAno: {}, distAgenda: {}, caixaMin: b.capital_social + b.suprimentos, mesCaixaMin: 0 };
+  // Abertura: viatura pelo custo, financiada pela dívida; capital social e suprimentos entram em caixa.
+  livro.lancar([['viatura', custo], ['divida', -custo]]);
+  livro.lancar([['caixa', b.capital_social + b.suprimentos], ['capital', -b.capital_social], ['suprimentos', -b.suprimentos]]);
+  for (let k = 1; k <= b.horizonte; k++) {
+    const resultadoAntes = livro.saldo('resultado');
+    lancarReceitas(livro, ctx, k);
+    lancarPessoal(livro, ctx, k);
+    lancarIndependentes(livro, ctx, k);
+    lancarViaturaEFinanciamento(livro, ctx, k);
+    lancarIRC(livro, ctx, k, resultadoAntes - livro.saldo('resultado'));
+    lancarDistribuicao(livro, ctx, k);
+    livro.liquidar(k);
+    if (livro.saldo('caixa') < ctx.caixaMin) { ctx.caixaMin = livro.saldo('caixa'); ctx.mesCaixaMin = k; }
+  }
+  return classificarBalanco(livro, ctx);
+}
+
+function classificarBalanco(livro, ctx) {
+  const s = livro.saldo, b = ctx.b, N = b.horizonte;
+  const viatura = s('viatura'), deprAcum = -s('deprAcum');
+  const ativo = { viatura, deprAcum, viaturaLiq: viatura - deprAcum, caixa: s('caixa'), receber: s('receber'), ivaRecuperar: Math.max(0, s('iva')) };
+  ativo.total = ativo.viaturaLiq + ativo.caixa + ativo.receber + ativo.ivaRecuperar;
+  const divida = -s('divida');
+  const proximos12 = ctx.mod.fin.plano.slice(N, N + MESES_ANO).reduce((t, l) => t + l.amort, 0);
+  const dividaCorrente = Math.min(divida, proximos12);
+  const passivo = { dividaNaoCorrente: divida - dividaCorrente, suprimentos: -s('suprimentos'), dividaCorrente,
+    ivaPagar: Math.max(0, -s('iva')), irc: -s('irc'), irs: -s('irs'), ss: -s('ss'), ssContratante: -s('ssContratante'),
+    comissoes: -s('comissoes'), feriasNatal: -s('ferias') - s('natal') };
+  passivo.total = Object.values(passivo).reduce((t, v) => t + v, 0);
+  const cp = { capital: -s('capital'), resultados: -s('resultado'), distribuicoes: s('distribuicoes') };
+  cp.total = cp.capital + cp.resultados - cp.distribuicoes;
+  const diferenca = ativo.total - (passivo.total + cp.total);
+  return {
+    b, N, mesCivilFim: mesCivil(b, N), anoFim: exercicio(b, N) + 1, ativo, passivo, cp, diferenca,
+    fecha: Math.abs(diferenca) < TOLERANCIA_BALANCO,
+    caixaMin: ctx.caixaMin, mesCaixaMin: ctx.mesCaixaMin,
+    jurosMes: ctx.jurosMes, jurosAcum: ctx.jurosMes.reduce((t, j) => t + (j || 0), 0),
+    autonomia: ativo.total !== 0 ? cp.total / ativo.total * 100 : 0
+  };
+}
+
+function linhaBal(lbl, valor, opcoes) {
+  const v = Math.abs(valor) < TOLERANCIA_BALANCO ? 0 : valor;
+  return linhaDR(lbl, v < 0 ? '−' + fmtE(-v) : fmtE(v), opcoes);
+}
+
+function htmlBalanco(bal) {
+  const a = bal.ativo, p = bal.passivo, c = bal.cp, b = bal.b;
+  return '<tr class="sub"><td colspan="2">ATIVO NÃO CORRENTE</td></tr>' +
+    linhaBal('Viatura — custo de aquisição (capital financiado)', a.viatura) +
+    linhaBal('(−) Depreciações acumuladas (' + bal.N + ' meses, quota da DR) ' + A_VALIDAR, -a.deprAcum) +
+    linhaBal('= Viatura — valor líquido', a.viaturaLiq, { cls: 'total' }) +
+    '<tr class="sub"><td colspan="2">ATIVO CORRENTE</td></tr>' +
+    linhaBal('Caixa e depósitos (saldo acumulado dos fluxos)', a.caixa, { cor: corSinal(a.caixa) }) +
+    linhaBal('Plataformas — valores a receber (' + fmt(b.prazo_receber_dias, 0) + ' dias) ' + A_VALIDAR, a.receber) +
+    (a.ivaRecuperar > 0 ? linhaBal('Estado — IVA a recuperar (reporte)', a.ivaRecuperar) : '') +
+    linhaBal('= TOTAL DO ATIVO', a.total, { cls: 'total', cor: '#2e6da4', forte: true }) +
+    '<tr class="sub"><td colspan="2">CAPITAL PRÓPRIO</td></tr>' +
+    linhaBal('Capital social ' + A_VALIDAR, c.capital) +
+    linhaBal('Resultados acumulados (soma dos resultados líquidos dos meses 1 a ' + bal.N + ')', c.resultados, { cor: corSinal(c.resultados) }) +
+    (b.distribuicao ? linhaBal('(−) Distribuição de resultados à sócia (' + Math.round(DIST_SOCIA_PCT * 100) + '%) ' + A_VALIDAR, -c.distribuicoes) : '') +
+    linhaBal('= Total do capital próprio', c.total, { cls: 'total', cor: corSinal(c.total) }) +
+    '<tr class="sub"><td colspan="2">PASSIVO NÃO CORRENTE</td></tr>' +
+    linhaBal('Financiamento da viatura — capital a mais de 12 meses', p.dividaNaoCorrente) +
+    (p.suprimentos > 0 ? linhaBal('Suprimentos da sócia (CSC, art. 243.º)', p.suprimentos) : '') +
+    '<tr class="sub"><td colspan="2">PASSIVO CORRENTE</td></tr>' +
+    linhaBal('Financiamento da viatura — capital a 12 meses', p.dividaCorrente) +
+    linhaBal('Estado — IVA a pagar (' + b.iva_periodicidade + ') ' + A_VALIDAR, p.ivaPagar) +
+    linhaBal('Estado — IRC a pagar (provisão do exercício) ' + A_VALIDAR, p.irc) +
+    linhaBal('Estado — retenções de IRS a entregar', p.irs) +
+    linhaBal('Segurança Social a pagar (dependentes)', p.ss) +
+    linhaBal('Segurança Social — entidade contratante (apurada no ano seguinte) ' + A_VALIDAR, p.ssContratante) +
+    linhaBal('Motoristas independentes — comissões a pagar', p.comissoes) +
+    linhaBal('Férias e subsídio de Natal a pagar (dependentes, com TSU) ' + A_VALIDAR, p.feriasNatal) +
+    linhaBal('= TOTAL DO PASSIVO', p.total, { cls: 'total', cor: '#c0392b', forte: true }) +
+    linhaBal('= TOTAL DO CAPITAL PRÓPRIO E DO PASSIVO', c.total + p.total, { cls: 'total', cor: '#2e6da4', forte: true }) +
+    '<tr class="sub"><td colspan="2">INDICADORES DE BALANÇO</td></tr>' +
+    '<tr><td>Autonomia financeira (capital próprio / ativo)</td><td style="color:' + (bal.autonomia >= 30 ? '#27ae60' : '#e67e22') + '">' + pct(bal.autonomia) + '</td></tr>' +
+    '<tr><td>Endividamento (passivo / ativo)</td><td>' + pct(100 - bal.autonomia) + '</td></tr>';
+}
+
+function htmlPressupostosBalanco(b) {
+  const itens = [
+    'Mês 1 = 1.º mês da actividade e do crédito, em ' + NOMES_MESES[b.mes_inicio - 1] + ' ' + A_VALIDAR + '. Exercício = ano civil.',
+    'Abertura: viatura pelo custo de aquisição (= capital financiado, a mesma base da depreciação da DR); dívida do financiamento sem juros; capital social e suprimentos entram em caixa.',
+    'Prestação do crédito: os juros são gasto (DR); o capital reduz a caixa e a dívida e não entra na DR. O Balanço segue o plano real desde o mês 1: o juro do mês M do Balanço é o juro da DR com "Mês actual do crédito" = M, e com mês actual 1 e N = 12 os juros acumulados são os juros da DR anual. O "Mês actual do crédito" escolhe só o mês mostrado na DR; não altera o Balanço.',
+    'Plataformas: depósito recebido ' + fmt(b.prazo_receber_dias, 0) + ' dias depois ' + A_VALIDAR + '.',
+    'IVA: liquidado nas viagens (6%) e autoliquidado nas comissões vai para a conta de IVA, nunca para proveitos. Regime normal: autoliquidação liquidada = dedutível. Regime isento: autoliquidação é custo, paga até ao fim do mês seguinte (CIVA, art. 27.º n.º 3) ' + A_VALIDAR + '.',
+    'IVA ' + b.iva_periodicidade + ' (CIVA, art. 41.º n.º 1): pago até dia 25 do 2.º mês seguinte ao período; junho e 2.º trimestre em setembro (CIVA, art. 27.º n.os 1 e 10) ' + A_VALIDAR + '. Crédito de IVA reportado para o período seguinte.',
+    'Segurança Social (dependentes) e retenções de IRS: pagas no mês seguinte (Código Contributivo, art. 43.º; CIRS, art. 98.º n.º 3).',
+    'Entidade contratante (independentes): a contribuição reporta-se ao ano civil anterior e é paga após o documento de cobrança (Código Contributivo, art. 155.º n.º 3) → mantém-se no passivo dentro do horizonte ' + A_VALIDAR + '.',
+    'Comissões a independentes: pagas ' + b.prazo_comissoes_meses + ' mês(es) depois, com o IVA do recibo quando existir.',
+    'Férias e subsídio de Natal (só dependentes, com TSU patronal): acréscimo de 1/12 por mês; pagos em ' + NOMES_MESES[b.mes_ferias - 1] + ' (Código do Trabalho, art. 264.º) e ' + NOMES_MESES[b.mes_natal - 1] + ' (art. 263.º), pelo valor acumulado ' + A_VALIDAR + '. IRS retido sobre os subsídios à taxa do salário mensal ' + A_VALIDAR + '.',
+    'IRC: provisão simplificada de 15% sobre o resultado antes de imposto acumulado no exercício; pago em maio do ano seguinte (CIRC, arts. 120.º n.º 1 e 104.º n.º 1 b)). Pagamentos por conta e reporte de prejuízos fiscais (CIRC, art. 52.º) não modelados ' + A_VALIDAR + '.',
+    'Suprimentos tratados como passivo: são empréstimos da sócia à sociedade (CSC, art. 243.º).',
+    'Distribuição à sócia: ' + (b.distribuicao ? 'incluída' : 'não incluída') + '. Quando incluída, ' + Math.round(DIST_SOCIA_PCT * 100) + '% do resultado de cada exercício fechado, paga em março do ano seguinte (CSC, art. 65.º n.º 5), com retenção de IRS de 28%, sem verificar a caixa disponível ' + A_VALIDAR + '.',
+    'Reserva legal (CSC, art. 295.º; art. 218.º nas sociedades por quotas) não modelada ' + A_VALIDAR + '.',
+    'Custos de energia, estrutura e variáveis pagos no próprio mês; IVA suportado nesses custos não modelado (como na DR) ' + A_VALIDAR + '.'
+  ];
+  return '<strong>Pressupostos do Balanço</strong><ul style="margin:6px 0 0 18px;padding:0">' + itens.map(t => '<li>' + t + '</li>').join('') + '</ul>';
 }
 
 function renderBalanco(cfg, mod) {
-  const b = balancoProvisorio(cfg, mod);
-  document.getElementById('balanco-table').innerHTML =
-    '<tr class="sub"><td colspan="2">ATIVO NÃO CORRENTE</td></tr>' +
-    '<tr><td>Viatura — custo de aquisição</td><td style="color:#2e6da4">' + fmtE(b.valorAquisicao) + '</td></tr>' +
-    '<tr><td>(−) Depreciação acumulada (est. 6 meses)</td><td style="color:#c0392b">−' + fmtE(b.deprAcum) + '</td></tr>' +
-    '<tr><td>= Viatura — valor líquido</td><td style="color:#2e6da4">' + fmtE(b.viaturaLiq) + '</td></tr>' +
-    '<tr class="sub"><td colspan="2">ATIVO CORRENTE</td></tr>' +
-    '<tr><td>Caixa e depósitos (estimado)</td><td style="color:#2e6da4">' + fmtE(b.caixaEst) + '</td></tr>' +
-    '<tr><td>Clientes / receitas a receber</td><td style="color:#2e6da4">' + fmtE(b.contasReceber) + '</td></tr>' +
-    '<tr class="total"><td>= Total Ativo</td><td>' + fmtE(b.ativoTotal) + '</td></tr>' +
-    '<tr class="sub"><td colspan="2">PASSIVO NÃO CORRENTE</td></tr>' +
-    '<tr><td>Crédito automóvel — parcela > 12 meses</td><td style="color:#c0392b">−' + fmtE(b.passivoMlPrazo) + '</td></tr>' +
-    '<tr class="sub"><td colspan="2">PASSIVO CORRENTE</td></tr>' +
-    '<tr><td>Crédito automóvel — parcela corrente</td><td style="color:#c0392b">−' + fmtE(b.divida - b.passivoMlPrazo) + '</td></tr>' +
-    '<tr><td>SS a entregar (mês, dependentes)</td><td style="color:#c0392b">−' + fmtE(mod.ssAPagarMes) + '</td></tr>' +
-    '<tr><td>IRS a entregar (mês, dependentes)</td><td style="color:#c0392b">−' + fmtE(mod.irsAPagarMes) + '</td></tr>' +
-    '<tr><td>IRC a entregar (estimado)</td><td style="color:#c0392b">−' + fmtE(mod.irc) + '</td></tr>' +
-    '<tr class="total"><td>= Total Passivo</td><td style="color:#c0392b">' + fmtE(b.passivoTotal) + '</td></tr>' +
-    '<tr class="sub"><td colspan="2">CAPITAL PRÓPRIO</td></tr>' +
-    '<tr><td>Capital social</td><td>' + fmtE(1) + '</td></tr>' +
-    '<tr><td>Resultados acumulados (est. 6 meses)</td><td>' + fmtE(b.resultAcum) + '</td></tr>' +
-    '<tr class="total highlight"><td>= Capital Próprio Total</td><td>' + fmtE(b.capProprio) + '</td></tr>' +
-    '<tr class="sub"><td colspan="2">INDICADORES DE BALANÇO</td></tr>' +
-    '<tr><td>Autonomia financeira</td><td style="color:' + (b.autonomia >= 30 ? '#27ae60' : '#e67e22') + '">' + pct(b.autonomia) + '</td></tr>' +
-    '<tr><td>Endividamento</td><td>' + pct(100 - b.autonomia) + '</td></tr>';
+  const bal = calcBalanco(cfg, mod);
+  const dif = Math.abs(bal.diferenca) < TOLERANCIA_BALANCO ? 0 : bal.diferenca;
+  document.getElementById('balanco-titulo').textContent = '⚖️ Balanço ao fim do mês ' + bal.N + ' (' + NOMES_MESES[bal.mesCivilFim - 1] + ' do ano ' + bal.anoFim + ')';
+  document.getElementById('balanco-table').innerHTML = htmlBalanco(bal);
+  document.getElementById('balanco-verificacao').innerHTML =
+    '<div class="verificacao ' + (bal.fecha ? 'ok' : 'falha') + '">Verificação: Ativo − (Passivo + CP) = ' + fmtE(dif) + (bal.fecha ? ' ✔' : ' ✗') + '</div>';
+  let avisos = validarBalanco(cfg.balanco).map(e => '<div class="aviso erro">✗ ' + escHtml(e) + ' O Balanço usa o valor por omissão.</div>').join('');
+  if (bal.anoFim > 1 && bal.passivo.ssContratante > 0) {
+    avisos += '<div class="aviso">⚠ A contribuição da entidade contratante do ano anterior continua no passivo: é paga após o documento de cobrança da Segurança Social, cuja data não está modelada ' + A_VALIDAR + '.</div>';
+  }
+  if (!bal.fecha) avisos += '<div class="aviso erro">✗ Balanço provisório: a verificação não fecha (diferença de ' + fmtE(bal.diferenca) + '). Os valores não devem ser usados.</div>';
+  if (bal.ativo.caixa < 0 || bal.caixaMin < 0) {
+    avisos += '<div class="aviso">⚠ Necessidade de financiamento: a caixa fica negativa (mínimo de ' + fmtE(bal.caixaMin) + ' no mês ' + bal.mesCaixaMin +
+      '; ' + fmtE(bal.ativo.caixa) + ' no fim do mês ' + bal.N + '). O balanço continua a fechar; é preciso reforçar capital, suprimentos ou outro financiamento.</div>';
+  }
+  document.getElementById('balanco-avisos').innerHTML = avisos;
+  document.getElementById('balanco-pressupostos').innerHTML = htmlPressupostosBalanco(bal.b);
 }
 
 function renderPlanoAmort(mod) {
@@ -1688,7 +2021,7 @@ function calcCenarios() {
     const d = a.dep;
     const horasMesAlex = a.horasSem * mod.semMes;
     return {
-      mod, sal, ssP: d.ssP, ssT: d.ssT, irsR: d.irs, salLiq: d.salLiq, ajudas: d.ajudas, subRefMes: d.subRefMes, subRefIsento: d.subRefIsento,
+      cfg: c, mod, sal, ssP: d.ssP, ssT: d.ssT, irsR: d.irs, salLiq: d.salLiq, ajudas: d.ajudas, subRefMes: d.subRefMes, subRefIsento: d.subRefIsento,
       custoPessoal: d.custoMensal, custTotalEmp: mod.totalGastos,
       ebitda: mod.ebitda, ebit: mod.ebit, ebt: mod.ebt, irc: mod.irc, resLiq: mod.resLiq, fluxo: mod.fluxo,
       ebtA: mod.ebtA, ircA: mod.ircA, resA: mod.resA, fluxoA: mod.fluxoA,
@@ -1804,34 +2137,43 @@ function calcCenarios() {
     `<div class="cn-lbl" style="font-weight:700">= Fluxo de caixa livre/ano</div>` +
     cn.map(r => `<div class="cn-cell ${r.fluxoA>=0?'rpos':'rneg'}">${fmtE(r.fluxoA,0)}</div>`).join('');
 
-  // ── BALANÇO (estimado a 6 meses, provisório)
-  const bs = cn.map(r => balancoProvisorio(cfg, r.mod));
-  const rowB = (lbl, fn, cls) => `<div class="cn-lbl">${lbl}</div>` + cn.map((r, i) => `<div class="cn-cell ${cls || ''}">${fn(r, bs[i])}</div>`).join('');
+  // ── BALANÇO (partidas dobradas, mesmo cálculo do separador DR & Balanço)
+  const bs = cn.map(r => calcBalanco(r.cfg, r.mod));
+  const rowB = (lbl, fn, cls) => `<div class="cn-lbl">${lbl}</div>` + cn.map((r, i) => `<div class="cn-cell ${cls || ''}">${fn(bs[i], r)}</div>`).join('');
+  const eB = v => (Math.abs(v) < TOLERANCIA_BALANCO ? fmtE(0, 0) : (v < 0 ? '−' + fmtE(-v, 0) : fmtE(v, 0)));
+  const estado = p => p.ivaPagar + p.irc + p.irs + p.ss + p.ssContratante;
+  const b0 = bs[0];
+  document.getElementById('cn-balanco-titulo').textContent = '⚖️ Balanço ao fim do mês ' + b0.N + ' (' + NOMES_MESES[b0.mesCivilFim - 1] + ' do ano ' + b0.anoFim + ') — comparação';
+  document.getElementById('cn-balanco-avisos').innerHTML = bs.every(b => b.fecha) ? '' :
+    '<div class="aviso erro">✗ Balanço provisório: a verificação não fecha num dos cenários. Os valores não devem ser usados.</div>';
   document.getElementById('cn-grid-balanco').innerHTML = hdr() +
     sec('Ativo não corrente') +
-    rowB('Viatura — custo aquisição', (r, b) => fmtE(b.valorAquisicao,0), 'blue') +
-    rowB('(−) Depreciação acum. (6 meses)', (r, b) => '−' + fmtE(b.deprAcum,0), 'red') +
-    rowB('= Viatura — valor líquido', (r, b) => fmtE(b.viaturaLiq,0), 'total') +
+    rowB('Viatura — custo de aquisição', b => eB(b.ativo.viatura), 'blue') +
+    rowB('(−) Depreciações acumuladas (' + b0.N + ' meses)', b => eB(-b.ativo.deprAcum), 'red') +
+    rowB('= Viatura — valor líquido', b => eB(b.ativo.viaturaLiq), 'total') +
     sec('Ativo corrente') +
-    rowB('Caixa estimada (3× fluxo)', (r, b) => fmtE(b.caixaEst,0), 'blue') +
-    rowB('Clientes / receitas a receber', (r, b) => fmtE(b.contasReceber,0), '') +
-    rowB('= Total Ativo', (r, b) => fmtE(b.ativoTotal,0), 'total') +
-    sec('Passivo não corrente') +
-    rowB('Crédito auto — parcela > 12m', (r, b) => '−' + fmtE(b.passivoMlPrazo,0), 'red') +
-    sec('Passivo corrente') +
-    rowB('Crédito auto — parcela corrente', (r, b) => '−' + fmtE(b.divida - b.passivoMlPrazo,0), 'red') +
-    rowB('SS a entregar (dependentes)', r => '−' + fmtE(r.mod.ssAPagarMes,0), 'red') +
-    rowB('IRS a entregar (dependentes)', r => '−' + fmtE(r.mod.irsAPagarMes,0), 'red') +
-    rowB('IRC a entregar', r => '−' + fmtE(r.irc,0), 'red') +
-    rowB('= Total Passivo', (r, b) => fmtE(b.passivoTotal,0), 'rneg') +
+    rowB('Caixa e depósitos', b => eB(b.ativo.caixa), 'blue') +
+    rowB('Plataformas — a receber', b => eB(b.ativo.receber), '') +
+    rowB('Estado — IVA a recuperar', b => eB(b.ativo.ivaRecuperar), '') +
+    rowB('= Total do Ativo', b => eB(b.ativo.total), 'total') +
     sec('Capital próprio') +
-    rowB('Capital social', () => fmtE(1,0), '') +
-    rowB('Resultados acum. (6 meses)', (r, b) => fmtE(b.resultAcum,0), 'green') +
-    rowB('= Capital Próprio Total', (r, b) => fmtE(b.capProprio,0), 'rpos') +
-    sec('Indicadores de balanço') +
-    rowB('Autonomia financeira', (r, b) => pct(b.autonomia), 'green') +
-    rowB('Endividamento', (r, b) => pct(100 - b.autonomia), 'red') +
-    rowB('Δ Capital Próprio vs B', (r, b) => { const d = b.capProprio - bs[1].capProprio; return (d >= 0 ? '+' : '') + fmtE(d,0); }, '');
+    rowB('Capital social', b => eB(b.cp.capital), '') +
+    rowB('Resultados acumulados (meses 1 a ' + b0.N + ')', b => eB(b.cp.resultados), 'green') +
+    (b0.b.distribuicao ? rowB('(−) Distribuição à sócia', b => eB(-b.cp.distribuicoes), 'red') : '') +
+    rowB('= Total do capital próprio', b => eB(b.cp.total), 'rpos') +
+    sec('Passivo') +
+    rowB('Financiamento — capital a mais de 12 meses', b => eB(b.passivo.dividaNaoCorrente), 'red') +
+    rowB('Financiamento — capital a 12 meses', b => eB(b.passivo.dividaCorrente), 'red') +
+    rowB('Suprimentos da sócia', b => eB(b.passivo.suprimentos), 'red') +
+    rowB('Estado e Segurança Social', b => eB(estado(b.passivo)), 'red') +
+    rowB('Comissões a independentes', b => eB(b.passivo.comissoes), 'red') +
+    rowB('Férias e subsídio de Natal a pagar', b => eB(b.passivo.feriasNatal), 'red') +
+    rowB('= Total do Passivo', b => eB(b.passivo.total), 'rneg') +
+    sec('Verificação e indicadores') +
+    rowB('Ativo − (Passivo + CP)', b => eB(b.fecha ? 0 : b.diferenca) + (b.fecha ? ' ✔' : ' ✗'), bs.every(b => b.fecha) ? 'rpos' : 'rneg') +
+    rowB('Autonomia financeira', b => pct(b.autonomia), 'green') +
+    rowB('Endividamento', b => pct(100 - b.autonomia), 'red') +
+    rowB('Δ Capital próprio vs B', b => { const d = b.cp.total - bs[1].cp.total; return (d >= 0 ? '+' : '−') + fmtE(Math.abs(d), 0); }, '');
 
   // ── DISTRIBUIÇÃO À SÓCIA
   document.getElementById('cn-grid-div').innerHTML = hdr() +
