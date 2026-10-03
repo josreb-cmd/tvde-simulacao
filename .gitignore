@@ -2,3 +2,4 @@
 tests/baseline-76e75e1-supabase.json
 tests/config-supabase-*.json
 tests/baseline-*-supabase.json
+tests/analise-*.js
