@@ -14,13 +14,8 @@ function verificar(condicao, descricao) {
 const perto = (a, b, tol) => Math.abs(a - b) <= (tol === undefined ? 0.01 : tol);
 const r2 = v => Math.round(v * 100) / 100;
 
-function definir(app, valores) {
-  const js = Object.entries(valores).map(([id, v]) =>
-    typeof v === 'boolean'
-      ? `setChk(${JSON.stringify(id)}, ${v});`
-      : `document.getElementById(${JSON.stringify(id)}).value = ${JSON.stringify(String(v))};`).join('\n');
-  app.correr(js + '\ncalcular();');
-}
+// Etapa 3: definir partilhado (converte a facturação e as gorjetas mensais em valores por dia ativo).
+const { definir } = require('./cenarios-teste');
 const modelo = app => app.correr('calcModelo(lerCfgDoDOM())');
 const cfgDom = app => JSON.parse(app.correr('JSON.stringify(lerCfgDoDOM())'));
 
@@ -66,7 +61,8 @@ async function main() {
   verificar(perto(mEq.deposito, bReceita, 0.01), `depósito da plataforma = receita líquida antiga (${r2(mEq.deposito)} vs ${bReceita})`);
   verificar(perto(mEq.comPlat, F * 0.25) && perto(mEq.ivaLiquidado, ivaParte), `comissão = 25% × bruto (${r2(mEq.comPlat)}); IVA liquidado = bruto × 6/106 (${r2(ivaParte)})`);
   verificar(perto(mEq.receitaLiq, bReceita - ivaParte, 0.02), `receita líquida = depósito − IVA (${r2(mEq.receitaLiq)} = ${bReceita} − ${r2(ivaParte)})`);
-  verificar(perto(mEq.ebitda, bEbitda - ivaParte, 0.02), `EBITDA = baseline − IVA (${r2(mEq.ebitda)})`);
+  // Etapa 3: o EBITDA antigo (antes dos custos com motoristas) chama-se agora "margem antes de pessoal".
+  verificar(perto(mEq.margemAntesPessoal, bEbitda - ivaParte, 0.02), `margem antes de pessoal (EBITDA anterior à Etapa 3) = baseline − IVA (${r2(mEq.margemAntesPessoal)})`);
   verificar(perto(mEq.fin.juros, bJuros), `juros do mês actual (mês 1) iguais ao baseline (${r2(mEq.fin.juros)})`);
   verificar(perto(mEq.autoliqNaoDed, 0) && perto(mEq.autoliq, mEq.comPlat * 0.23), `autoliquidação 23% sobre comissões (${r2(mEq.autoliq)}) com efeito nulo no regime normal`);
   const dif14 = (bSal + bSS) * 2 / 12;
@@ -93,7 +89,8 @@ async function main() {
     const c = cfgDom(antiga);
     console.log('  Estado:', antiga.el('sb-status').textContent);
     verificar(c.motoristas.every(m => m.contrato === 'independente'), 'dois motoristas Activos e Independentes');
-    verificar(c.motoristas[0].receita.uber.faturacao === r2(linha.rec_dia * linha.dias_sem * linha.sem_mes / 0.75), 'bruto Uber do Alexandre = (rec_dia × dias × semanas) / (1 − 25%)');
+    // Etapa 3: a facturação é guardada por dia ativo; o bruto mensal vem do modelo (por dia × dias × semanas).
+    verificar(perto(modelo(antiga).motoristas[0].F, r2(linha.rec_dia * linha.dias_sem * linha.sem_mes / 0.75), 1e-6), 'bruto Uber do Alexandre = (rec_dia × dias × semanas) / (1 − 25%)');
     verificar(c.salario === linha.salario && c.sub_ref_dias === linha.sub_ref_dias && c.ajudas === linha.ajudas, 'dados do dependente preservados nas colunas planas');
     verificar(c.fin_taxa === 0 && /sem juros/.test(antiga.el('badge-credito').textContent), 'TAN 0% mantida; cabeçalho "sem juros"');
     verificar(/não inclui comissões/.test(antiga.texto('dr-avisos')), 'aviso de percentagens por definir visível');

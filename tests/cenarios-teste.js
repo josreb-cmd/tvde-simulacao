@@ -30,12 +30,25 @@ function cenariosDR() {
   return lista;
 }
 
+// Campos mensais da versão 1 (m{i}_fat_{p}, m{i}_gorj_{p}): na versão 2 a página pede valores por dia ativo.
+// Se a página não tiver o campo mensal, converte-o com os dias e semanas já definidos (como a migração da v1).
+const CAMPO_MENSAL_V1 = /^m(\d)_(fat|gorj)_(\w+)$/;
+
 function definir(app, valores) {
-  const js = Object.entries(valores).map(([id, v]) =>
+  const directos = Object.entries(valores).filter(([id]) => !CAMPO_MENSAL_V1.test(id));
+  const mensais = Object.entries(valores).filter(([id]) => CAMPO_MENSAL_V1.test(id));
+  const js = directos.map(([id, v]) =>
     typeof v === 'boolean'
       ? `setChk(${JSON.stringify(id)}, ${v});`
       : `document.getElementById(${JSON.stringify(id)}).value = ${JSON.stringify(String(v))};`).join('\n');
-  app.correr(js + '\ncalcular();');
+  const jsMensais = mensais.map(([id, v]) => {
+    const [, i, tipo, p] = CAMPO_MENSAL_V1.exec(id);
+    return `(function(){ const el = document.getElementById(${JSON.stringify(id)});
+      if (el) { el.value = ${JSON.stringify(String(v))}; return; }
+      const d = getVal(idCampo(${i}, 'dias_sem')) * getVal('sem_mes'); const v = ${Number(v)};
+      setVal('m${i}_${tipo}dia_${p}', d > 0 ? v / d : 0); setVal('m${i}_${tipo}fixo_${p}', d > 0 ? 0 : v); })();`;
+  }).join('\n');
+  app.correr(js + '\n' + jsMensais + '\ncalcular();');
 }
 
 // Tudo o que a DR, os Cenários e os restantes separadores mostram (o Balanço do separador DR fica de fora).
@@ -58,4 +71,54 @@ function capturarDR(app) {
   return r;
 }
 
-module.exports = { TIPOS, valoresCombinacao, valoresVariante, cenariosDR, definir, capturarDR };
+// ── Etapa 3: comparação com baselines anteriores
+// Os cenários definidos campo a campo mudam os dias depois do carregamento; na versão 2 a receita, os km e os
+// custos variáveis escalam com os dias. Para comparar com os baselines das etapas anteriores, a configuração é
+// guardada pela página do commit f4aba6b (versão 1) e carregada pela página actual (migração para a versão 2).
+const COMMIT_V1 = 'f4aba6b';
+let htmlV1 = null;
+function htmlDaVersao1() {
+  if (!htmlV1) {
+    const { execSync } = require('child_process');
+    htmlV1 = execSync('git show ' + COMMIT_V1 + ':index.html', { cwd: require('path').join(__dirname, '..'), encoding: 'utf8', maxBuffer: 8 * 1024 * 1024 });
+  }
+  return htmlV1;
+}
+async function definirComoV1(valores) {
+  const { carregarApp } = require('./dom-simulado');
+  let corpo = null;
+  const antiga = carregarApp({ html: htmlDaVersao1(), fetch: async (url, op) => { corpo = op.body; return { ok: true, status: 201 }; } });
+  definir(antiga, valores);
+  await antiga.correr('guardarConfig()');
+  if (!corpo) throw new Error('A página da versão 1 não guardou a configuração');
+  const app = carregarApp({ fetch: async () => ({ ok: true, status: 200, json: async () => [JSON.parse(corpo)] }) });
+  await app.correr('carregarConfig()');
+  return app;
+}
+
+// Desfaz na captura as alterações pedidas na Etapa 3 (correcção 1: "= EBITDA" passou a "= Margem antes de pessoal"
+// e entrou o EBITDA depois dos custos com motoristas; campos novos do modelo), para comparar o resto ao cêntimo.
+const CAMPOS_NOVOS_MODELO = ['margemAntesPessoal', 'kmSemana', 'diasSemViatura', 'diasMesViatura', 'custosVar', 'usaFixosViatura', 'margemContribuicao', 'mcDia'];
+function desfazerEtapa3(captura) {
+  const r = JSON.parse(JSON.stringify(captura));
+  const linhasDR = t => (t || []).filter(l => !l.startsWith('= EBITDA (antes de depreciações, juros e impostos) |'))
+    .map(l => l.replace(/^= Margem antes de pessoal \|/, '= EBITDA |'));
+  ['drMensal', 'drAnual', 'conta-table'].forEach(k => { if (r[k]) r[k] = linhasDR(r[k]); });
+  ['kpiDrMensal', 'kpiDrAnual'].forEach(k => { if (r[k]) r[k] = r[k].replace(/[−\-\d.,]+% margem EBITDA/, '#% margem EBITDA'); });
+  if (r.modelo) {
+    if ('margemAntesPessoal' in r.modelo) r.modelo.ebitda = r.modelo.margemAntesPessoal;
+    CAMPOS_NOVOS_MODELO.forEach(k => { delete r.modelo[k]; });
+    (r.modelo.motoristas || []).forEach(m => {
+      ['diasMes', 'usaFixo', 'regimeRecibo'].forEach(k => { delete m[k]; });
+      (m.plataformas || []).forEach(p => { delete p.usaFixo; });
+    });
+  }
+  return r;
+}
+function normalizarMargemEbitda(captura) {
+  const r = JSON.parse(JSON.stringify(captura));
+  ['kpiDrMensal', 'kpiDrAnual'].forEach(k => { if (r[k]) r[k] = r[k].replace(/[−\-\d.,]+% margem EBITDA/, '#% margem EBITDA'); });
+  return r;
+}
+
+module.exports = { TIPOS, valoresCombinacao, valoresVariante, cenariosDR, definir, capturarDR, definirComoV1, desfazerEtapa3, normalizarMargemEbitda };

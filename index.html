@@ -51,6 +51,11 @@ tr.info td { color: #888; font-size: 0.78rem; }
 .edit-input { width: 80px; text-align: right; border: 1px solid #c5d8f0; border-radius: 5px; padding: 3px 6px; font-size: 0.83rem; font-weight: 600; color: #1a3a5c; background: #f0f7ff; outline: none; }
 .edit-input:focus { border-color: #2e6da4; background: #e3f0ff; }
 .edit-input[readonly] { background: #f4f4f4; color: #555; border-color: #ddd; }
+.edit-input[readonly][tabindex="-1"] { cursor: not-allowed; }
+tr:has(+ tr.origem-row) td { border-bottom: none; }
+tr.origem-row td { padding: 0 4px 6px; text-align: left; font-weight: 400; }
+.origem { font-size: 0.7rem; color: #888; line-height: 1.4; }
+.origem a { color: #2e6da4; }
 .sel { border: 1px solid #c5d8f0; border-radius: 5px; padding: 3px 6px; font-size: 0.8rem; color: #1a3a5c; background: #f0f7ff; outline: none; width: 100%; text-align: right; }
 .slider-wrap { margin: 7px 0 2px; }
 .slider-wrap label { font-size: 0.8rem; color: #555; display: flex; justify-content: space-between; margin-bottom: 2px; }
@@ -213,7 +218,8 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
     <div class="section">
       <h2>⚙️ Receita</h2>
       <table>
-        <tr><td>Depósito da plataforma do Alexandre / dia ativo (após comissão, calculado no separador Motoristas)</td><td><input class="edit-input" id="rec_dia" type="number" value="151.81" step="1" readonly> €</td></tr>
+        <tr><td>Depósito da plataforma do Alexandre / dia ativo (após comissão, sem gorjetas nem bónus; calculado no separador Motoristas)</td><td><input type="hidden" id="rec_dia" value="151.81"><input class="edit-input" id="rec_dia_vis" type="text" value="151,81" readonly tabindex="-1" title="Valor calculado (só de leitura)"> €</td></tr>
+        <tr class="origem-row"><td colspan="2"><div class="origem" id="rec_dia_origem"></div></td></tr>
         <tr><td>Fator mensal (semanas/mês)</td><td><input class="edit-input" id="sem_mes" type="number" value="4.3" step="0.1" min="1" max="5" oninput="calcular()"></td></tr>
       </table>
       <div class="nota" id="nota-receita-calc" style="margin-top:10px">
@@ -305,6 +311,7 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
         <tr><td>Prazo</td><td><input class="edit-input" id="fin_prazo" type="number" value="72" step="6" oninput="calcular()"> meses</td></tr>
         <tr><td>Mês actual do crédito</td><td><input class="edit-input" id="fin_mes_atual" type="number" value="1" step="1" min="1" max="72" oninput="calcular()"> º mês</td></tr>
         <tr><td>Prestação mensal (calculada)</td><td id="fin_prestacao_display" style="color:#1a3a5c;font-weight:800">—</td></tr>
+        <tr class="origem-row"><td colspan="2"><div class="origem" id="fin_prestacao_origem"></div></td></tr>
         <tr><td style="padding-left:12px;color:#666;font-size:0.8rem" id="fin_juros_lbl">· dos quais juros (mês 1)</td><td id="fin_juros_display" style="color:#c0392b;font-size:0.8rem">—</td></tr>
         <tr><td style="padding-left:12px;color:#666;font-size:0.8rem" id="fin_amort_lbl">· dos quais amortização (mês 1)</td><td id="fin_amort_display" style="color:#27ae60;font-size:0.8rem">—</td></tr>
         <tr><td>Vida útil da viatura (depreciação) <span class="a-validar">a validar</span></td><td><input class="edit-input" id="vida_util_anos" type="number" value="6" step="1" min="1" max="20" oninput="calcular()"> anos</td></tr>
@@ -314,12 +321,17 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
         <tr><td>Contabilista certificado</td><td><input class="edit-input" id="contab" type="number" value="100" oninput="calcular()"> €/mês</td></tr>
         <tr><td>Telemóvel / dados</td><td><input class="edit-input" id="telemovel" type="number" value="25" oninput="calcular()"> €/mês</td></tr>
         <tr><td>Renda de garagem</td><td><input class="edit-input" id="garagem" type="number" value="80" oninput="calcular()"> €/mês</td></tr>
-        <tr class="sub"><td colspan="2">CUSTOS VARIÁVEIS MENSAIS</td></tr>
-        <tr><td>Portagens</td><td><input class="edit-input" id="portagens" type="number" value="80" oninput="calcular()"> €/mês</td></tr>
-        <tr><td>Manutenção / pneus</td><td><input class="edit-input" id="manut" type="number" value="60" oninput="calcular()"> €/mês</td></tr>
-        <tr><td>Limpeza / desinfeção</td><td><input class="edit-input" id="limpeza" type="number" value="30" oninput="calcular()"> €/mês</td></tr>
+        <tr class="sub"><td colspan="2">CUSTOS VARIÁVEIS POR DIA ATIVO (× dias ativos dos motoristas × semanas/mês)</td></tr>
+        <tr><td>Portagens</td><td><input class="edit-input" id="portagens_dia" type="number" value="0" step="0.1" min="0" oninput="aoEditarPorDia(this.id)" onfocus="focoPorDia(this, true)" onblur="focoPorDia(this, false)"> €/dia ativo → <input type="hidden" id="portagens" value="80"><input class="edit-input" id="portagens_vis" type="text" value="80" readonly tabindex="-1" title="Valor calculado (só de leitura)"> €/mês</td></tr>
+        <tr class="origem-row"><td colspan="2"><div class="origem" id="portagens_origem"></div></td></tr>
+        <tr><td>Manutenção / pneus</td><td><input class="edit-input" id="manut_dia" type="number" value="0" step="0.1" min="0" oninput="aoEditarPorDia(this.id)" onfocus="focoPorDia(this, true)" onblur="focoPorDia(this, false)"> €/dia ativo → <input type="hidden" id="manut" value="60"><input class="edit-input" id="manut_vis" type="text" value="60" readonly tabindex="-1" title="Valor calculado (só de leitura)"> €/mês</td></tr>
+        <tr class="origem-row"><td colspan="2"><div class="origem" id="manut_origem"></div></td></tr>
+        <tr><td>Limpeza / desinfeção</td><td><input class="edit-input" id="limpeza_dia" type="number" value="0" step="0.1" min="0" oninput="aoEditarPorDia(this.id)" onfocus="focoPorDia(this, true)" onblur="focoPorDia(this, false)"> €/dia ativo → <input type="hidden" id="limpeza" value="30"><input class="edit-input" id="limpeza_vis" type="text" value="30" readonly tabindex="-1" title="Valor calculado (só de leitura)"> €/mês</td></tr>
+        <tr class="origem-row"><td colspan="2"><div class="origem" id="limpeza_origem"></div></td></tr>
         <tr class="total"><td>Total custos fixos e variáveis (excl. energia, motoristas e financiamento)</td><td id="total-custos-fixvar">—</td></tr>
       </table>
+      <input type="hidden" id="portagens_fixo" value="0"><input type="hidden" id="manut_fixo" value="0"><input type="hidden" id="limpeza_fixo" value="0">
+      <div class="nota" id="nota-variaveis-dia"></div>
       <button class="reset-btn" onclick="resetCustos()">↩ Repor valores padrão</button>
       <div class="nota"><strong>Nota:</strong> Energia, motoristas e financiamento são calculados automaticamente. Os salários, subsídios e comissões dos motoristas configuram-se no separador Motoristas. Os juros do crédito são gasto fiscal dedutível; a amortização do capital não é gasto — reduz o passivo do balanço. A renda de garagem é dedutível em IRC (art. 23.º CIRC) quando a garagem é usada exclusivamente na atividade TVDE. A depreciação usa o capital financiado como valor de aquisição e a vida útil indicada; taxas e limites fiscais da viatura (Decreto Regulamentar n.º 25/2009) a validar.</div>
     </div>
@@ -330,7 +342,9 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
     <div class="section">
       <h2>⚡ Custo de Energia</h2>
       <table style="margin-bottom:12px">
-        <tr><td>Km percorridos / semana (viatura, todos os motoristas)</td><td><input class="edit-input" id="km_sem" type="number" value="1970" step="10" min="100" oninput="calcular()"> km</td></tr>
+        <tr><td>Km por dia ativo (média por motorista)</td><td><input class="edit-input" id="km_dia" type="number" value="0" step="1" min="0" oninput="aoEditarPorDia(this.id)" onfocus="focoPorDia(this, true)" onblur="focoPorDia(this, false)"> km</td></tr>
+        <tr><td>Km percorridos / semana (viatura, todos os motoristas; = km por dia × dias ativos)</td><td><input type="hidden" id="km_sem" value="1970"><input class="edit-input" id="km_sem_vis" type="text" value="1970" readonly tabindex="-1" title="Valor calculado (só de leitura)"> km<input type="hidden" id="km_sem_fixo" value="0"></td></tr>
+        <tr class="origem-row"><td colspan="2"><div class="origem" id="km_sem_origem"></div></td></tr>
         <tr><td>Consumo médio</td><td><input class="edit-input" id="consumo_kwh" type="number" value="18" step="0.5" min="5" max="40" oninput="calcular()"> kWh/100km</td></tr>
       </table>
       <div class="energia-split">
@@ -418,9 +432,13 @@ footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 10px; }
         <tr class="sub"><td colspan="2">PARÂMETROS DO BALANÇO</td></tr>
         <tr><td>Balanço ao fim do mês N (1 a 24)</td><td><input class="edit-input" id="bal_horizonte" type="number" value="12" step="1" min="1" max="24" oninput="calcular()"> º mês</td></tr>
         <tr><td>Mês civil do 1.º mês de actividade <span class="a-validar">a validar</span></td><td><select class="sel" id="bal_mes_inicio" onchange="calcular()"><option value="1" selected>janeiro</option><option value="2">fevereiro</option><option value="3">março</option><option value="4">abril</option><option value="5">maio</option><option value="6">junho</option><option value="7">julho</option><option value="8">agosto</option><option value="9">setembro</option><option value="10">outubro</option><option value="11">novembro</option><option value="12">dezembro</option></select></td></tr>
+        <tr><td>Ano civil do 1.º mês de actividade (retribuição mínima)</td><td><input class="edit-input" id="bal_ano_inicio" type="number" value="2026" step="1" min="2000" max="2100" oninput="calcular()"></td></tr>
         <tr><td>Prazo de recebimento das plataformas <span class="a-validar">a validar</span></td><td><input class="edit-input" id="bal_prazo_receber" type="number" value="7" step="1" min="0" max="365" oninput="calcular()"> dias</td></tr>
         <tr><td>Periodicidade do IVA (CIVA, art. 41.º) <span class="a-validar">a validar</span></td><td><select class="sel" id="bal_iva_periodicidade" onchange="calcular()"><option value="trimestral" selected>Trimestral</option><option value="mensal">Mensal</option></select></td></tr>
+        <tr><td>Recuperação do crédito de IVA (CIVA, art. 22.º) <span class="a-validar">a validar</span></td><td><select class="sel" id="bal_iva_recuperacao" onchange="calcular()"><option value="reporte" selected>Reportado para os períodos seguintes</option><option value="reembolso">Reembolso pedido ao fim de N meses</option></select></td></tr>
+        <tr><td>N: meses de crédito antes do pedido de reembolso <span class="a-validar">a validar</span></td><td><input class="edit-input" id="bal_iva_reembolso_meses" type="number" value="12" step="1" min="1" max="24" oninput="calcular()"> meses</td></tr>
         <tr><td>Prazo de pagamento das comissões a independentes</td><td><input class="edit-input" id="bal_prazo_comissoes" type="number" value="1" step="1" min="0" max="12" oninput="calcular()"> mês(es)</td></tr>
+        <tr><td>SS da entidade contratante: mês de pagamento no ano seguinte <span class="a-validar">a validar</span></td><td><select class="sel" id="bal_mes_ss_contratante" onchange="calcular()"><option value="1">janeiro</option><option value="2">fevereiro</option><option value="3" selected>março</option><option value="4">abril</option><option value="5">maio</option><option value="6">junho</option><option value="7">julho</option><option value="8">agosto</option><option value="9">setembro</option><option value="10">outubro</option><option value="11">novembro</option><option value="12">dezembro</option></select></td></tr>
         <tr><td>Mês de pagamento do subsídio de férias <span class="a-validar">a validar</span></td><td><select class="sel" id="bal_mes_ferias" onchange="calcular()"><option value="1">janeiro</option><option value="2">fevereiro</option><option value="3">março</option><option value="4">abril</option><option value="5">maio</option><option value="6" selected>junho</option><option value="7">julho</option><option value="8">agosto</option><option value="9">setembro</option><option value="10">outubro</option><option value="11">novembro</option><option value="12">dezembro</option></select></td></tr>
         <tr><td>Mês de pagamento do subsídio de Natal <span class="a-validar">a validar</span></td><td><select class="sel" id="bal_mes_natal" onchange="calcular()"><option value="1">janeiro</option><option value="2">fevereiro</option><option value="3">março</option><option value="4">abril</option><option value="5">maio</option><option value="6">junho</option><option value="7">julho</option><option value="8">agosto</option><option value="9">setembro</option><option value="10">outubro</option><option value="11">novembro</option><option value="12" selected>dezembro</option></select></td></tr>
         <tr><td>Capital social <span class="a-validar">a validar</span></td><td><input class="edit-input" id="bal_capital_social" type="number" value="1" step="1" min="0" oninput="calcular()"> €</td></tr>
@@ -636,7 +654,8 @@ const COLUNAS_PLANAS = [
   'seg_tvde','seg_at','contab','telemovel','garagem','salario','ajudas','sub_ref_dias','sub_ref_val',
   'portagens','manut','limpeza'
 ];
-const VERSAO_EXTRA = 1;
+// Versão 2: receita e gorjetas por dia ativo; km e custos variáveis por dia ativo; parâmetros novos do Balanço.
+const VERSAO_EXTRA = 2;
 
 async function guardarConfig() {
   calcular();
@@ -693,8 +712,7 @@ async function carregarConfig() {
       document.getElementById('pct_fora_lbl').textContent = (100 - cfg.pct_casa) + '%';
     }
     const temExtra = cfg.config_extra && typeof cfg.config_extra === 'object';
-    const extra = temExtra ? fundir(extraPorOmissao(cfg), cfg.config_extra) : extraPorOmissao(cfg);
-    aplicarExtra(extra);
+    aplicarExtra(extraDaLinha(cfg));
     calcular();
     sbStatus(temExtra ? '✔ Configuração carregada' : '✔ Configuração antiga carregada: motoristas como Independentes', 'ok');
   } catch(e) { sbStatus('✗ Sem ligação ou resposta inválida ao carregar', 'err'); }
@@ -731,17 +749,49 @@ const DEFAULTS = {
 };
 
 function resetCustos() {
-  ['fin_capital','fin_taxa','fin_prazo','vida_util_anos','seg_tvde','seg_at','contab','telemovel','garagem',
-   'portagens','manut','limpeza'].forEach(k => {
+  ['fin_capital','fin_taxa','fin_prazo','vida_util_anos','seg_tvde','seg_at','contab','telemovel','garagem'].forEach(k => {
     document.getElementById(k).value = DEFAULTS[k];
+  });
+  // Custos variáveis: o valor mensal por omissão, convertido em valor por dia ativo com a actividade actual.
+  const cfg = lerCfgDoDOM();
+  const diasMes = diasAtivosSemana(cfg) * cfg.sem_mes;
+  CUSTOS_VARIAVEIS.forEach(k => {
+    setVal(k + '_dia', diasMes > 0 ? DEFAULTS[k] / diasMes : 0);
+    setVal(k + '_fixo', diasMes > 0 ? 0 : DEFAULTS[k]);
   });
   calcular();
 }
 
-function getVal(id) { const el = document.getElementById(id); return el ? (parseFloat(el.value) || 0) : 0; }
+// Campos editáveis por dia ativo: com mais de 2 casas decimais (ex.: vindos da conversão da versão 1), a caixa mostra
+// 2 casas fora de foco e os cálculos usam o valor exacto enquanto a caixa mostrar esse valor (editar substitui-o).
+const RE_CAMPO_POR_DIA = /^(?:km|portagens|manut|limpeza)_dia$|^md+_(?:fat|gorj)dia_w+$/;
+const valoresExactos = {};
+function getVal(id) {
+  const el = document.getElementById(id);
+  if (!el) return 0;
+  const ex = valoresExactos[id];
+  if (ex && (el.value === ex.mostrado || el.value === String(ex.valor))) return ex.valor;
+  return parseFloat(el.value) || 0;
+}
 function getSel(id, omissao) { const el = document.getElementById(id); return el && el.value !== undefined && el.value !== null ? String(el.value) : omissao; }
 function getChk(id) { const el = document.getElementById(id); return !!(el && el.checked); }
-function setVal(id, v) { const el = document.getElementById(id); if (el && v !== undefined && v !== null) el.value = v; }
+function setVal(id, v) {
+  const el = document.getElementById(id);
+  if (!el || v === undefined || v === null) return;
+  delete valoresExactos[id];
+  const n = Number(v);
+  if (RE_CAMPO_POR_DIA.test(id) && isFinite(n) && Math.round(n * 100) / 100 !== n) {
+    valoresExactos[id] = { valor: n, mostrado: n.toFixed(2) };
+    el.value = n.toFixed(2);
+  } else el.value = v;
+}
+// Em foco mostra o valor exacto; fora de foco volta às 2 casas se não tiver sido editado.
+function focoPorDia(el, emFoco) {
+  const ex = valoresExactos[el.id];
+  if (!ex) return;
+  if (emFoco && el.value === ex.mostrado) el.value = String(ex.valor);
+  else if (!emFoco && el.value === String(ex.valor)) el.value = ex.mostrado;
+}
 function setChk(id, v) { const el = document.getElementById(id); if (el) el.checked = !!v; }
 function mostrar(id, visivel) { const el = document.getElementById(id); if (el) el.style.display = visivel ? '' : 'none'; }
 function fmtE(v, dec) { dec = (dec === undefined) ? 2 : dec; return v.toLocaleString('pt-PT',{minimumFractionDigits:dec,maximumFractionDigits:dec}) + ' €'; }
@@ -790,6 +840,15 @@ const COMISSAO_PLATAFORMA_OMISSAO = 25;
 const LIMITE_HORAS_TVDE   = 10;
 const HORAS_DIA_VIATURA   = 24;
 const DIAS_SEMANA         = 7;
+// Código do Trabalho, art. 203.º n.º 1: o período normal de trabalho não pode exceder 8 horas por dia
+// e 40 horas por semana (excepções nos arts. 204.º a 210.º) → a validar.
+const PERIODO_NORMAL_SEMANA = 40;
+// Retribuição mínima mensal garantida (Portugal continental). 2026: 920 € (Decreto-Lei n.º 139/2025,
+// de 29 de dezembro; DGERT). 2027 e 2028: valores de referência do Acordo 2025-2028, ainda sem
+// decreto-lei → a validar. Proporcional ao período normal de trabalho no tempo parcial
+// (Código do Trabalho, art. 154.º) → a validar.
+const RMMG = { 2026: 920, 2027: 970, 2028: 1020 };
+const RMMG_CONFIRMADA = { 2026: true };
 
 // ── BALANÇO: PRAZOS E PRESSUPOSTOS ────────────────────────────────
 // CIVA, art. 41.º n.º 1: declaração periódica mensal (volume de negócios ≥ 650 000 €) ou trimestral.
@@ -811,6 +870,19 @@ const IRC_MES_PAGAMENTO = 5;
 // CSC, art. 65.º n.º 5: contas aprovadas nos 3 meses seguintes ao fim do exercício → distribuição
 // paga em março do ano seguinte (a validar). Limites dos arts. 32.º e 33.º só de forma simplificada.
 const DIST_MES_PAGAMENTO = 3;
+// CIVA, art. 22.º (Portal das Finanças): n.º 4 o excesso de imposto dedutível é deduzido nos períodos
+// seguintes; n.º 5 passados 12 meses do período em que se iniciou o excesso, com crédito superior a 250 €,
+// pode pedir-se o reembolso; n.º 6 antes dos 12 meses só se o crédito exceder 3 000 € (ou cessação/mudança
+// de regime, não modeladas); n.º 8 a AT reembolsa até ao fim do 2.º mês seguinte ao do pedido.
+// O pedido é feito na declaração periódica do período (mês do prazo de pagamento) → a validar.
+const IVA_REEMBOLSO_MESES = 12;
+const IVA_REEMBOLSO_MINIMO = 250;
+const IVA_REEMBOLSO_ANTECIPADO_MINIMO = 3000;
+const IVA_REEMBOLSO_MESES_PAGAMENTO = 2;
+// Entidade contratante: a contribuição do ano civil é apurada pela Segurança Social no ano seguinte e paga
+// até ao dia 20 do mês seguinte ao da notificação (Código Contributivo, arts. 140.º e 155.º; Guia Prático
+// "Entidades Contratantes", seg-social.pt). O mês da notificação não está fixado → por omissão março, a validar.
+const SS_CONTRATANTE_MES_OMISSAO = 3;
 const MESES_ANO = 12;
 const HORIZONTE_MAX = 24;
 const NOMES_MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
@@ -825,8 +897,13 @@ const BALANCO_OMISSAO = {
   mes_natal: 12,              // Código do Trabalho, art. 263.º n.º 1: até 15 de dezembro
   capital_social: 1,          // valor usado no modelo anterior, a validar
   suprimentos: 0,
-  distribuicao: false
+  distribuicao: false,
+  iva_recuperacao: 'reporte', // CIVA, art. 22.º n.º 4 (comportamento do modelo anterior)
+  iva_reembolso_meses: IVA_REEMBOLSO_MESES,
+  mes_ss_contratante: SS_CONTRATANTE_MES_OMISSAO
 };
+// Ano civil do 1.º mês de actividade: por omissão o ano em curso (só afecta o aviso da retribuição mínima).
+function anoEmCurso() { return new Date().getFullYear(); }
 
 const PLATAFORMAS = [ { id: 'uber', nome: 'Uber' }, { id: 'bolt', nome: 'Bolt' } ];
 const CONTRATOS = { dependente: 'Dependente', independente: 'Independente (recibos verdes)', inactivo: 'Inactivo' };
@@ -954,11 +1031,14 @@ function htmlMotorista(i) {
   const blocosPlataforma = PLATAFORMAS.map(p => `
       <tbody id="m${i}_plat_${p.id}">
         <tr class="sub"><td colspan="2">${p.nome.toUpperCase()}</td></tr>
-        <tr><td>Facturação bruta aos passageiros (Gross Fare, inclui IVA 6 %)</td><td><input class="edit-input" id="m${i}_fat_${p.id}" type="number" value="0" step="10" min="0" oninput="calcular()"> €/mês</td></tr>
-        <tr><td>Gorjetas</td><td><input class="edit-input" id="m${i}_gorj_${p.id}" type="number" value="0" step="5" min="0" oninput="calcular()"> €/mês</td></tr>
-        <tr><td>Bónus da plataforma</td><td><input class="edit-input" id="m${i}_bonus_${p.id}" type="number" value="0" step="5" min="0" oninput="calcular()"> €/mês</td></tr>
+        <tr><td>Gross Fare médio por dia ativo (IVA incluído)</td><td><input class="edit-input" id="m${i}_fatdia_${p.id}" type="number" value="0" step="1" min="0" oninput="aoEditarPorDia(this.id)" onfocus="focoPorDia(this, true)" onblur="focoPorDia(this, false)"> €/dia<input type="hidden" id="m${i}_fatfixo_${p.id}" value="0"></td></tr>
+        <tr class="info"><td>Facturação bruta mensal (por dia × dias ativos/semana × semanas/mês)</td><td id="m${i}_fatmes_${p.id}">—</td></tr>
+        <tr class="origem-row"><td colspan="2"><div class="origem" id="m${i}_fatmes_${p.id}_origem"></div></td></tr>
+        <tr><td>Gorjetas por dia ativo</td><td><input class="edit-input" id="m${i}_gorjdia_${p.id}" type="number" value="0" step="0.5" min="0" oninput="aoEditarPorDia(this.id)" onfocus="focoPorDia(this, true)" onblur="focoPorDia(this, false)"> €/dia<input type="hidden" id="m${i}_gorjfixo_${p.id}" value="0"></td></tr>
+        <tr><td>Bónus da plataforma (campanhas; não escala com os dias)</td><td><input class="edit-input" id="m${i}_bonus_${p.id}" type="number" value="0" step="5" min="0" oninput="calcular()"> €/mês</td></tr>
         <tr id="m${i}_pctrow_${p.id}"><td>Percentagem do motorista sobre o valor líquido</td><td><input class="edit-input" id="m${i}_pct_${p.id}" type="number" value="0" step="1" min="0" max="100" oninput="calcular()"> %</td></tr>
         <tr class="info"><td>Valor líquido (base da percentagem)</td><td id="m${i}_liq_${p.id}">—</td></tr>
+        <tr class="origem-row"><td colspan="2"><div class="origem" id="m${i}_liq_${p.id}_origem"></div></td></tr>
       </tbody>`).join('');
   return `
   <div class="section" id="m${i}_card">
@@ -1028,9 +1108,37 @@ function montarMotoristas() {
 }
 
 // ── CONFIGURAÇÃO (objecto puro) ───────────────────────────────────
-// Configuração por omissão dos campos novos: dois motoristas activos, ambos Independentes,
-// percentagens a 0. A facturação Uber do Alexandre é herdada de rec_dia × dias × semanas.
-function extraPorOmissao(planas) {
+// Custos que escalam com os dias ativos (× dias ativos/semana de todos os motoristas activos × semanas/mês).
+const CUSTOS_VARIAVEIS = ['portagens', 'manut', 'limpeza'];
+// O modelo anterior usava 1970 km/semana quando o valor guardado era 0.
+const KM_SEM_OMISSAO = 1970;
+function contratoActivo(contrato) { return contrato === 'dependente' || contrato === 'independente'; }
+// Soma dos dias ativos por semana dos motoristas activos (dias-motorista por semana da viatura).
+function diasAtivosSemana(cfg) {
+  return cfg.motoristas.reduce((s, m) => s + (contratoActivo(m.contrato) ? (m.dias_sem || 0) : 0), 0);
+}
+// Valor mensal de uma entrada por dia ativo; o valor mensal fixo só é usado quando não há valor por dia
+// (configuração antiga carregada com dias ou semanas a 0).
+function mensalPorDia(porDia, fixo, diasMes) {
+  if (porDia > 0) return porDia * diasMes;
+  return fixo > 0 ? fixo : 0;
+}
+// Campo fixo (valor mensal herdado da versão 1) correspondente a um campo por dia ativo.
+function campoFixo(idPorDia) {
+  if (idPorDia === 'km_dia') return 'km_sem_fixo';
+  return idPorDia.replace(/_dia$/, '_fixo').replace(/^(m\d+_(?:fat|gorj))dia_/, '$1fixo_');
+}
+// Ao editar um valor por dia ativo, o valor mensal fixo herdado deixa de valer (mesmo que o valor por dia seja 0).
+function aoEditarPorDia(idPorDia) {
+  delete valoresExactos[idPorDia];
+  setVal(campoFixo(idPorDia), 0);
+  calcular();
+}
+function balancoPorOmissao() { return Object.assign({}, BALANCO_OMISSAO, { ano_inicio: anoEmCurso() }); }
+
+// Configuração da versão 1 (facturação, gorjetas, km e custos variáveis mensais). Dois motoristas activos,
+// ambos Independentes, percentagens a 0. A facturação Uber do Alexandre é herdada de rec_dia × dias × semanas.
+function extraV1PorOmissao(planas) {
   const recDia = parseFloat(planas.rec_dia) || 0;
   const diasSem = parseFloat(planas.dias_sem) || 0;
   const semMes = parseFloat(planas.sem_mes) || 0;
@@ -1039,7 +1147,7 @@ function extraPorOmissao(planas) {
   // Configuração antiga (opção B): rec_dia = depósito após comissão → bruto = depósito / (1 − comissão).
   receitaAlexandre.uber.faturacao = Math.round(recDia * diasSem * semMes / (1 - COMISSAO_PLATAFORMA_OMISSAO / 100) * 100) / 100;
   return {
-    versao: VERSAO_EXTRA,
+    versao: 1,
     fin_mes_atual: 1,
     sit_familiar: 'NC',
     vida_util_anos: DEFAULTS.vida_util_anos,
@@ -1058,6 +1166,49 @@ function extraPorOmissao(planas) {
     ],
     balanco: Object.assign({}, BALANCO_OMISSAO)
   };
+}
+
+// Converte a versão 1 na versão 2 sem alterar os resultados: valor por dia = valor mensal / (dias × semanas);
+// km por dia = km/semana / dias ativos por semana. Com dias ou semanas a 0 mantém o valor mensal (fixo) e
+// o modelo assinala-o. Os dias do Alexandre e as semanas vêm das colunas planas.
+function migrarExtraV1(v1, planas) {
+  const sem = parseFloat(planas.sem_mes) || 0;
+  const dias = (m, i) => i === 0 ? (parseFloat(planas.dias_sem) || 0) : (parseFloat(m.dias_sem) || 0);
+  const motoristas = v1.motoristas.map((m, i) => {
+    const diasMes = dias(m, i) * sem;
+    const receita = {};
+    PLATAFORMAS.forEach(p => {
+      const r = (m.receita && m.receita[p.id]) || {};
+      const fat = r.faturacao || 0, gorj = r.gorjetas || 0;
+      receita[p.id] = diasMes > 0
+        ? { fat_dia: fat / diasMes, gorj_dia: gorj / diasMes, bonus: r.bonus || 0, fat_mes_fixo: 0, gorj_mes_fixo: 0 }
+        : { fat_dia: 0, gorj_dia: 0, bonus: r.bonus || 0, fat_mes_fixo: fat, gorj_mes_fixo: gorj };
+    });
+    return Object.assign({}, m, { receita });
+  });
+  const diasSem = v1.motoristas.reduce((s, m, i) => s + (contratoActivo(m.contrato) ? dias(m, i) : 0), 0);
+  const diasMes = diasSem * sem;
+  const km = parseFloat(planas.km_sem) || KM_SEM_OMISSAO;
+  const actividade = { km_dia: diasSem > 0 ? km / diasSem : 0, fixos: { km_sem: diasSem > 0 ? 0 : km } };
+  CUSTOS_VARIAVEIS.forEach(k => {
+    const v = parseFloat(planas[k]) || 0;
+    actividade[k + '_dia'] = diasMes > 0 ? v / diasMes : 0;
+    actividade.fixos[k] = diasMes > 0 ? 0 : v;
+  });
+  return Object.assign({}, v1, {
+    versao: VERSAO_EXTRA, motoristas, actividade,
+    balanco: Object.assign(balancoPorOmissao(), v1.balanco || {})
+  });
+}
+
+function extraPorOmissao(planas) { return migrarExtraV1(extraV1PorOmissao(planas), planas); }
+
+// config_extra guardado → versão actual. NULL: configuração antiga só com colunas planas.
+function extraDaLinha(linha) {
+  const raw = linha.config_extra && typeof linha.config_extra === 'object' ? linha.config_extra : null;
+  if (!raw) return extraPorOmissao(linha);
+  if ((raw.versao || 1) < 2) return migrarExtraV1(fundir(extraV1PorOmissao(linha), raw), linha);
+  return fundir(extraPorOmissao(linha), raw);
 }
 
 // Fusão profunda sem mutação: valores de "extra" sobrepõem-se a "base".
@@ -1085,6 +1236,11 @@ function aplicarExtra(extra) {
   setVal('iva_taxa_recibo', extra.iva.taxa_recibo);
   setVal('iva_taxa_autoliq', extra.iva.taxa_autoliq);
   setVal('base_iva', extra.base_iva);
+  const act = extra.actividade || {};
+  const fixos = act.fixos || {};
+  setVal('km_dia', act.km_dia || 0);
+  setVal('km_sem_fixo', fixos.km_sem || 0);
+  CUSTOS_VARIAVEIS.forEach(k => { setVal(k + '_dia', act[k + '_dia'] || 0); setVal(k + '_fixo', fixos[k] || 0); });
   PLATAFORMAS.forEach(p => {
     const pl = extra.plataformas[p.id] || {};
     setChk('plat_' + p.id + '_activa', pl.activa);
@@ -1105,18 +1261,24 @@ function aplicarExtra(extra) {
     }
     PLATAFORMAS.forEach(p => {
       const r = (m.receita && m.receita[p.id]) || {};
-      setVal('m' + i + '_fat_' + p.id, r.faturacao);
-      setVal('m' + i + '_gorj_' + p.id, r.gorjetas);
-      setVal('m' + i + '_bonus_' + p.id, r.bonus);
+      setVal('m' + i + '_fatdia_' + p.id, r.fat_dia || 0);
+      setVal('m' + i + '_gorjdia_' + p.id, r.gorj_dia || 0);
+      setVal('m' + i + '_bonus_' + p.id, r.bonus || 0);
+      setVal('m' + i + '_fatfixo_' + p.id, r.fat_mes_fixo || 0);
+      setVal('m' + i + '_gorjfixo_' + p.id, r.gorj_mes_fixo || 0);
       setVal('m' + i + '_pct_' + p.id, m.pct ? m.pct[p.id] : 0);
     });
   });
-  const bal = Object.assign({}, BALANCO_OMISSAO, extra.balanco || {});
+  const bal = Object.assign(balancoPorOmissao(), extra.balanco || {});
   setVal('bal_horizonte', bal.horizonte);
   setVal('bal_mes_inicio', bal.mes_inicio);
+  setVal('bal_ano_inicio', bal.ano_inicio);
   setVal('bal_prazo_receber', bal.prazo_receber_dias);
   setVal('bal_iva_periodicidade', bal.iva_periodicidade);
+  setVal('bal_iva_recuperacao', bal.iva_recuperacao);
+  setVal('bal_iva_reembolso_meses', bal.iva_reembolso_meses);
   setVal('bal_prazo_comissoes', bal.prazo_comissoes_meses);
+  setVal('bal_mes_ss_contratante', bal.mes_ss_contratante);
   setVal('bal_mes_ferias', bal.mes_ferias);
   setVal('bal_mes_natal', bal.mes_natal);
   setVal('bal_capital_social', bal.capital_social);
@@ -1128,9 +1290,13 @@ function lerBalancoDoDOM() {
   return {
     horizonte: getVal('bal_horizonte'),
     mes_inicio: getVal('bal_mes_inicio'),
+    ano_inicio: getVal('bal_ano_inicio'),
     prazo_receber_dias: getVal('bal_prazo_receber'),
     iva_periodicidade: getSel('bal_iva_periodicidade', BALANCO_OMISSAO.iva_periodicidade),
+    iva_recuperacao: getSel('bal_iva_recuperacao', BALANCO_OMISSAO.iva_recuperacao),
+    iva_reembolso_meses: getVal('bal_iva_reembolso_meses'),
     prazo_comissoes_meses: getVal('bal_prazo_comissoes'),
+    mes_ss_contratante: getVal('bal_mes_ss_contratante'),
     mes_ferias: getVal('bal_mes_ferias'),
     mes_natal: getVal('bal_mes_natal'),
     capital_social: getVal('bal_capital_social'),
@@ -1141,11 +1307,14 @@ function lerBalancoDoDOM() {
 
 function lerCfgDoDOM() {
   const cfg = {};
+  // km_sem, portagens, manut e limpeza (colunas planas) são valores calculados: o modelo usa cfg.actividade.
   COLUNAS_PLANAS.forEach(k => { cfg[k] = getVal(k); });
   cfg.fin_mes_atual = getVal('fin_mes_atual');
   cfg.vida_util_anos = getVal('vida_util_anos');
   cfg.iva = { regime: getSel('iva_regime', 'normal'), taxa: getVal('iva_taxa'), taxa_autoliq: getVal('iva_taxa_autoliq'), taxa_recibo: getVal('iva_taxa_recibo') };
   cfg.base_iva = getSel('base_iva', 'sem');
+  cfg.actividade = { km_dia: getVal('km_dia'), fixos: { km_sem: getVal('km_sem_fixo') } };
+  CUSTOS_VARIAVEIS.forEach(k => { cfg.actividade[k + '_dia'] = getVal(k + '_dia'); cfg.actividade.fixos[k] = getVal(k + '_fixo'); });
   cfg.plataformas = {};
   PLATAFORMAS.forEach(p => {
     cfg.plataformas[p.id] = {
@@ -1159,9 +1328,11 @@ function lerCfgDoDOM() {
     const receita = {}, pctPlat = {};
     PLATAFORMAS.forEach(p => {
       receita[p.id] = {
-        faturacao: getVal('m' + i + '_fat_' + p.id),
-        gorjetas: getVal('m' + i + '_gorj_' + p.id),
-        bonus: getVal('m' + i + '_bonus_' + p.id)
+        fat_dia: getVal('m' + i + '_fatdia_' + p.id),
+        gorj_dia: getVal('m' + i + '_gorjdia_' + p.id),
+        bonus: getVal('m' + i + '_bonus_' + p.id),
+        fat_mes_fixo: getVal('m' + i + '_fatfixo_' + p.id),
+        gorj_mes_fixo: getVal('m' + i + '_gorjfixo_' + p.id)
       };
       pctPlat[p.id] = getVal('m' + i + '_pct_' + p.id);
     });
@@ -1187,6 +1358,21 @@ function lerCfgDoDOM() {
   return cfg;
 }
 
+// Receita por dia ativo + campos mensais da versão 1 (faturacao, gorjetas), recalculados em cada Guardar.
+// Só servem o recuo para a versão 1 (commit f4aba6b): a versão actual lê apenas os campos por dia.
+function receitaComMensalV1(m, semMes) {
+  const diasMes = (m.dias_sem || 0) * semMes;
+  const receita = {};
+  Object.keys(m.receita).forEach(p => {
+    const r = m.receita[p];
+    receita[p] = Object.assign({}, r, {
+      faturacao: mensalPorDia(r.fat_dia, r.fat_mes_fixo, diasMes),
+      gorjetas: mensalPorDia(r.gorj_dia, r.gorj_mes_fixo, diasMes)
+    });
+  });
+  return receita;
+}
+
 // Campos novos para a coluna config_extra. Os dados do Alexandre que têm coluna plana
 // (dias, horas, salário, ajudas, subsídio de refeição) não são duplicados aqui.
 function construirExtra(cfg) {
@@ -1197,11 +1383,12 @@ function construirExtra(cfg) {
     vida_util_anos: cfg.vida_util_anos,
     iva: Object.assign({}, cfg.iva),
     base_iva: cfg.base_iva,
+    actividade: JSON.parse(JSON.stringify(cfg.actividade)),
     plataformas: JSON.parse(JSON.stringify(cfg.plataformas)),
     motoristas: cfg.motoristas.map((m, i) => {
       const base = {
         id: m.id, nome: m.nome, contrato: m.contrato, dependencia: m.dependencia, iva_recibo: m.iva_recibo,
-        receita: JSON.parse(JSON.stringify(m.receita)), pct: Object.assign({}, m.pct)
+        receita: receitaComMensalV1(m, cfg.sem_mes), pct: Object.assign({}, m.pct)
       };
       if (i === 0) return base;
       return Object.assign(base, { dias_sem: m.dias_sem, horas_dia: m.horas_dia, dep: Object.assign({}, m.dep) });
@@ -1221,6 +1408,8 @@ function validarCfg(cfg) {
   if (!entre(cfg.pct_casa, 0, 100)) erros.push('Carregamento em casa: tem de estar entre 0 e 100%.');
   if (!(cfg.vida_util_anos > 0)) erros.push('Vida útil da viatura: tem de ser superior a 0 anos.');
   if (!inteiro(cfg.fin_prazo) || cfg.fin_prazo < 1) erros.push('Prazo do crédito: tem de ser um número inteiro de meses, igual ou superior a 1.');
+  const act = cfg.actividade;
+  if (!(act.km_dia >= 0) || CUSTOS_VARIAVEIS.some(k => !(act[k + '_dia'] >= 0))) erros.push('Km e custos variáveis por dia ativo não podem ser negativos.');
   PLATAFORMAS.forEach(p => {
     if (!entre(cfg.plataformas[p.id].comissao, 0, 100)) erros.push(p.nome + ': a comissão da plataforma tem de estar entre 0 e 100%.');
   });
@@ -1230,7 +1419,7 @@ function validarCfg(cfg) {
     if (!entre(m.horas_dia, 0, HORAS_DIA_VIATURA)) erros.push(m.nome + ': as horas por dia têm de estar entre 0 e 24.');
     PLATAFORMAS.forEach(p => {
       const r = m.receita[p.id];
-      if (r.faturacao < 0 || r.gorjetas < 0 || r.bonus < 0) erros.push(m.nome + ' — ' + p.nome + ': facturação, gorjetas e bónus não podem ser negativos.');
+      if (r.fat_dia < 0 || r.gorj_dia < 0 || r.bonus < 0) erros.push(m.nome + ' — ' + p.nome + ': Gross Fare por dia, gorjetas por dia e bónus não podem ser negativos.');
       if (m.contrato === 'independente' && !entre(m.pct[p.id], 0, 100)) erros.push(m.nome + ' — ' + p.nome + ': a percentagem do motorista tem de estar entre 0 e 100%.');
     });
     if (m.contrato === 'dependente') {
@@ -1252,11 +1441,67 @@ function validarBalanco(b) {
   if (!inteiroEntre(b.prazo_comissoes_meses, 0, MESES_ANO)) erros.push('Balanço: o prazo de pagamento das comissões tem de ser um número inteiro de meses entre 0 e 12.');
   if (!inteiroEntre(b.mes_ferias, 1, MESES_ANO) || !inteiroEntre(b.mes_natal, 1, MESES_ANO)) erros.push('Balanço: os meses de pagamento dos subsídios de férias e de Natal têm de estar entre 1 e 12.');
   if (!entre(b.capital_social, 0, Infinity) || !entre(b.suprimentos, 0, Infinity)) erros.push('Balanço: o capital social e os suprimentos não podem ser negativos.');
+  if (!inteiroEntre(b.ano_inicio, 2000, 2100)) erros.push('Balanço: o ano de início tem de ser um ano entre 2000 e 2100.');
+  if (b.iva_recuperacao !== 'reporte' && b.iva_recuperacao !== 'reembolso') erros.push('Balanço: a recuperação do crédito de IVA tem de ser "reporte" ou "reembolso".');
+  if (!inteiroEntre(b.iva_reembolso_meses, 1, HORIZONTE_MAX)) erros.push('Balanço: os meses antes do pedido de reembolso de IVA têm de ser um número inteiro entre 1 e ' + HORIZONTE_MAX + '.');
+  if (!inteiroEntre(b.mes_ss_contratante, 1, MESES_ANO)) erros.push('Balanço: o mês de pagamento da SS da entidade contratante tem de estar entre 1 e 12.');
   return erros;
+}
+
+// Retribuição mínima do ano (tabela RMMG); fora da tabela usa o ano mais próximo e assinala-o.
+function rmmgDoAno(ano) {
+  const anos = Object.keys(RMMG).map(Number).sort((a, b) => a - b);
+  const usado = anos.reduce((melhor, a) => Math.abs(a - ano) < Math.abs(melhor - ano) ? a : melhor, anos[0]);
+  return { valor: RMMG[usado], ano: usado, confirmada: !!RMMG_CONFIRMADA[usado] && usado === ano };
+}
+// Salário mínimo de um dependente proporcional às horas semanais (até ao período normal de 40 h).
+function salarioMinimoDependente(m, ano) {
+  const horasSem = (m.horas_dia || 0) * (m.dias_sem || 0);
+  const r = rmmgDoAno(ano);
+  return Object.assign({ horasSem, minimo: r.valor * Math.min(horasSem, PERIODO_NORMAL_SEMANA) / PERIODO_NORMAL_SEMANA }, r);
+}
+function textoRmmg(r) {
+  return fmtE(r.valor, 0) + ' em ' + r.ano + (r.ano === 2026 ? ' (Decreto-Lei n.º 139/2025)' : ' (Acordo 2025-2028)') + (r.confirmada ? '' : ' ' + A_VALIDAR);
+}
+// Avisos do cenário dependente (retribuição mínima e período normal de trabalho). Não bloqueiam o Guardar.
+function avisosDependente(m, salario, ano) {
+  const avisos = [];
+  const sm = salarioMinimoDependente(m, ano);
+  if (sm.horasSem > 0 && salario < sm.minimo - 0.005) {
+    avisos.push(escHtml(m.nome) + ' (dependente): salário de ' + fmtE(salario) + ' abaixo da retribuição mínima proporcional de ' + fmtE(sm.minimo) +
+      ' (' + fmt(Math.min(sm.horasSem, PERIODO_NORMAL_SEMANA), 1) + ' h de ' + PERIODO_NORMAL_SEMANA + ' h/semana; RMMG ' + textoRmmg(sm) + '; tempo parcial: Código do Trabalho, art. 154.º ' + A_VALIDAR + ').');
+  }
+  if (sm.horasSem > PERIODO_NORMAL_SEMANA) {
+    avisos.push(escHtml(m.nome) + ' (dependente): ' + fmt(sm.horasSem, 1) + ' h/semana excedem o período normal de ' + PERIODO_NORMAL_SEMANA +
+      ' h (Código do Trabalho, art. 203.º n.º 1) ' + A_VALIDAR + '. As horas suplementares não estão modeladas.');
+  }
+  return avisos;
 }
 
 function avisosModelo(cfg, mod) {
   const avisos = [];
+  const ano = cfg.balanco && cfg.balanco.ano_inicio > 0 ? cfg.balanco.ano_inicio : anoEmCurso();
+  if (mod.usaFixosViatura) avisos.push(mod.diasMesViatura > 0
+    ? 'Km ou custos variáveis com valor mensal fixo (configuração antiga carregada com dias ativos ou semanas a 0): não escalam com os dias. Introduza os valores por dia ativo.'
+    : 'Sem dias ativos: km e custos variáveis mantidos com o valor mensal da configuração antiga (não escalam com os dias). Introduza os valores por dia ativo quando houver motoristas activos.');
+  mod.motoristas.forEach((m, i) => {
+    const mc = cfg.motoristas[i];
+    if (m.usaFixo) avisos.push(escHtml(m.nome) + ': facturação ou gorjetas com valor mensal fixo (configuração antiga carregada com dias ativos ou semanas a 0): não escalam com os dias. Introduza o Gross Fare por dia ativo.');
+    if (m.dep) {
+      avisosDependente(mc, m.dep.sal, ano).forEach(a => avisos.push(a));
+      const diasAtivosMes = (mc.dias_sem || 0) * cfg.sem_mes;
+      if (mc.dep.sub_ref_dias > 0 && Math.abs(mc.dep.sub_ref_dias - diasAtivosMes) > 1) {
+        avisos.push(escHtml(m.nome) + ': subsídio de refeição em ' + fmt(mc.dep.sub_ref_dias, 0) + ' dias/mês, mas os dias ativos dão ' + fmt(diasAtivosMes, 1) +
+          ' dias/mês (o subsídio de refeição não escala com os dias; confirmar os dias de trabalho efectivo) ' + A_VALIDAR + '.');
+      }
+    }
+    // CIVA, art. 53.º n.º 1: isenção só com volume de negócios anual em território nacional até 15 000 € no ano
+    // civil anterior (Portal das Finanças). As comissões pagas pela empresa são parte desse volume.
+    if (m.independente && m.regimeRecibo === 'isento' && m.pagamento * MESES_ANO > IVA_LIMITE_ISENCAO) {
+      avisos.push(escHtml(m.nome) + ': comissões anuais estimadas de ' + fmtE(m.pagamento * MESES_ANO, 0) + ' excedem o limite de ' + fmtE(IVA_LIMITE_ISENCAO, 0) +
+        ' do art. 53.º CIVA: o recibo isento pode não ser aplicável (o limite conta todo o volume de negócios do motorista) ' + A_VALIDAR + '.');
+    }
+  });
   mod.motoristas.forEach(m => {
     if (m.semPercentagem) avisos.push('A percentagem de ' + escHtml(m.nome) + ' (independente) não está definida em todas as plataformas com receita: a DR não inclui comissões a motoristas independentes enquanto não forem definidas.');
     if (m.activo && m.horas_dia > LIMITE_HORAS_TVDE) avisos.push(escHtml(m.nome) + ': ' + fmt(m.horas_dia, 1) + ' h/dia excede o limite de ' + LIMITE_HORAS_TVDE + ' h de condução em 24 h (Lei n.º 45/2018, art. 13.º) ' + A_VALIDAR + '.');
@@ -1300,14 +1545,17 @@ function calcDependente(dep) {
 }
 
 function calcMotorista(m, cfg, tIva) {
-  const activo = m.contrato === 'dependente' || m.contrato === 'independente';
+  const activo = contratoActivo(m.contrato);
   const independente = m.contrato === 'independente';
+  // Dias ativos do motorista no mês: dias/semana × semanas/mês (as mesmas variáveis da energia e dos custos variáveis).
+  const diasMes = (m.dias_sem || 0) * cfg.sem_mes;
   const plataformas = PLATAFORMAS.filter(p => cfg.plataformas[p.id] && cfg.plataformas[p.id].activa).map(p => {
     const pl = cfg.plataformas[p.id];
     const r = (m.receita && m.receita[p.id]) || {};
-    const F = activo ? (r.faturacao || 0) : 0;
-    const G = activo ? (r.gorjetas || 0) : 0;
+    const F = activo ? mensalPorDia(r.fat_dia, r.fat_mes_fixo, diasMes) : 0;
+    const G = activo ? mensalPorDia(r.gorj_dia, r.gorj_mes_fixo, diasMes) : 0;
     const B = activo ? (r.bonus || 0) : 0;
+    const usaFixo = activo && ((!(r.fat_dia > 0) && r.fat_mes_fixo > 0) || (!(r.gorj_dia > 0) && r.gorj_mes_fixo > 0));
     // F = facturação bruta aos passageiros (Gross Fare, inclui IVA). Regime normal: IVA = F × t/(1+t).
     const Fsem = F / (1 + tIva);
     const iva = F - Fsem;
@@ -1318,7 +1566,7 @@ function calcMotorista(m, cfg, tIva) {
     const liquido = Fsem - com + G + B;
     const base = (cfg.base_iva === 'com' ? F - com : Fsem - com) + (pl.incl_gorjetas ? G : 0) + (pl.incl_bonus ? B : 0);
     const pctMot = independente ? ((m.pct && m.pct[p.id]) || 0) : 0;
-    return { id: p.id, nome: p.nome, F, Fsem, iva, com, autoliq, deposito, G, B, liquido, base, pct: pctMot, pagamento: base * pctMot / 100 };
+    return { id: p.id, nome: p.nome, F, Fsem, iva, com, autoliq, deposito, G, B, liquido, base, pct: pctMot, pagamento: base * pctMot / 100, usaFixo };
   });
   const soma = k => plataformas.reduce((s, x) => s + x[k], 0);
   const pagamento = soma('pagamento');
@@ -1327,7 +1575,8 @@ function calcMotorista(m, cfg, tIva) {
   const dep = m.contrato === 'dependente' ? calcDependente(m.dep) : null;
   return {
     id: m.id, nome: m.nome, contrato: m.contrato, activo, independente,
-    dias_sem: m.dias_sem, horas_dia: m.horas_dia,
+    dias_sem: m.dias_sem, horas_dia: m.horas_dia, diasMes: activo ? diasMes : 0,
+    usaFixo: plataformas.some(x => x.usaFixo), regimeRecibo: m.iva_recibo,
     horasSem: activo ? m.horas_dia * m.dias_sem : 0,
     plataformas,
     F: soma('F'), Fsem: soma('Fsem'), iva: soma('iva'), com: soma('com'), autoliq: soma('autoliq'), deposito: soma('deposito'), GB: soma('G') + soma('B'),
@@ -1352,7 +1601,12 @@ function calcModelo(cfg) {
   };
 
   const pctCasa = cfg.pct_casa / 100;
-  const kmSemana = cfg.km_sem || 1970;
+  // Km e custos variáveis escalam com os dias ativos dos motoristas activos (valores por dia ativo).
+  const act = cfg.actividade || { fixos: {} };
+  const fixos = act.fixos || {};
+  const diasSemViatura = diasAtivosSemana(cfg);
+  const diasMesViatura = diasSemViatura * semMes;
+  const kmSemana = act.km_dia > 0 ? act.km_dia * diasSemViatura : (fixos.km_sem > 0 ? fixos.km_sem : 0);
   const consumo = cfg.consumo_kwh || 18;
   const kwhMes = (kmSemana * semMes * consumo) / 100;
   const kwhCasa = kwhMes * pctCasa;
@@ -1363,7 +1617,10 @@ function calcModelo(cfg) {
   const poupancaEnergia = kwhMes * cfg.tarifa_fora - energia;
 
   const estrutura = cfg.seg_tvde + cfg.seg_at + cfg.contab + cfg.telemovel + cfg.garagem;
-  const varTotal = cfg.portagens + cfg.manut + cfg.limpeza;
+  const custosVar = {};
+  CUSTOS_VARIAVEIS.forEach(k => { custosVar[k] = mensalPorDia(act[k + '_dia'], fixos[k], diasMesViatura); });
+  const varTotal = CUSTOS_VARIAVEIS.reduce((s, k) => s + custosVar[k], 0);
+  const usaFixosViatura = (!(act.km_dia > 0) && fixos.km_sem > 0) || CUSTOS_VARIAVEIS.some(k => !(act[k + '_dia'] > 0) && fixos[k] > 0);
 
   const tIva = cfg.iva.regime === 'normal' ? cfg.iva.taxa / 100 : 0;
   const motoristas = cfg.motoristas.map(m => calcMotorista(m, cfg, tIva));
@@ -1386,8 +1643,13 @@ function calcModelo(cfg) {
   const custoMotoristas = custoPessoal + comInd + encSS + ivaNaoDed;
 
   const deprMes = cfg.vida_util_anos > 0 ? cfg.fin_capital / (cfg.vida_util_anos * 12) : 0;
-  const ebitda = receitaLiq - energia - estrutura - varTotal - autoliqNaoDed;
-  const ebit = ebitda - custoMotoristas - deprMes;
+  // Margem antes de pessoal: receita líquida − energia − estrutura − variáveis − autoliquidação não dedutível.
+  // EBITDA: depois de todos os custos com motoristas (pessoal dos dependentes com encargos, ajudas e subsídio de
+  // refeição; comissões e SS da entidade contratante dos independentes; IVA não dedutível dos recibos),
+  // antes de depreciações, juros e impostos.
+  const margemAntesPessoal = receitaLiq - energia - estrutura - varTotal - autoliqNaoDed;
+  const ebitda = margemAntesPessoal - custoMotoristas;
+  const ebit = ebitda - deprMes;
   const ebt = ebit - fin.juros;
   const irc = ebt > 0 ? ebt * IRC_PME_TAXA : 0;
   const resLiq = ebt - irc;
@@ -1411,7 +1673,12 @@ function calcModelo(cfg) {
     ivaRecibosDedutivel: soma(m => m.ivaRecibo - m.ivaReciboNaoDed),
     ssAPagarMes: somaDep('ssP') + somaDep('ssT'),
     irsAPagarMes: somaDep('irs'),
-    deprMes, ebitda, ebit, ebt, irc, resLiq, fluxo,
+    deprMes, margemAntesPessoal, ebitda, ebit, ebt, irc, resLiq, fluxo,
+    kmSemana, diasSemViatura, diasMesViatura, custosVar, usaFixosViatura,
+    // Margem de contribuição: receita líquida − custos que escalam com os dias ativos (energia, variáveis,
+    // autoliquidação não dedutível, comissões, SS da entidade contratante e IVA não dedutível dos independentes).
+    margemContribuicao: receitaLiq - energia - varTotal - autoliqNaoDed - comInd - encSS - ivaNaoDed,
+    mcDia: diasMesViatura > 0 ? (receitaLiq - energia - varTotal - autoliqNaoDed - comInd - encSS - ivaNaoDed) / diasMesViatura : 0,
     ebtA, ircA, resA, fluxoA,
     totalGastos,
     breakEven: semMes > 0 ? totalGastos / semMes : 0,
@@ -1459,7 +1726,7 @@ function htmlDR(mod, modo) {
     linhaDR('(−) Estrutura (seguros, incl. AT ' + A_VALIDAR + ' + contab. + tel. + garagem)', neg(mod.estrutura)) +
     linhaDR('(−) Custos variáveis', neg(mod.varTotal)) +
     (mod.autoliqNaoDed > 0 ? linhaDR('(−) IVA autoliquidado sobre comissões (não dedutível, regime isento) ' + A_VALIDAR, neg(mod.autoliqNaoDed)) : '') +
-    linhaDR('= EBITDA', fmtE(mod.ebitda * f), { cls: 'total', cor: corSinal(mod.ebitda) }) +
+    linhaDR('= Margem antes de pessoal', fmtE(mod.margemAntesPessoal * f), { cls: 'total', cor: corSinal(mod.margemAntesPessoal) }) +
     '<tr class="sub"><td colspan="2">CUSTOS COM PESSOAL (DEPENDENTES)</td></tr>' +
     linhaDR('(−) Salários (14 meses/ano: 12 + férias + Natal)', neg(mod.pessoal.salario14)) +
     linhaDR('(−) SS patronal (23,75%, 14 meses)', neg(mod.pessoal.ssP14)) +
@@ -1470,6 +1737,7 @@ function htmlDR(mod, modo) {
     linhaDR('(−) Encargos SS entidade contratante (7% / 10%) ' + A_VALIDAR, neg(mod.encSS));
   if (mod.ivaNaoDed > 0) h += linhaDR('(−) IVA não dedutível dos recibos dos motoristas', neg(mod.ivaNaoDed));
   h +=
+    linhaDR('= EBITDA (antes de depreciações, juros e impostos)', fmtE(mod.ebitda * f), { cls: 'total', cor: corSinal(mod.ebitda) }) +
     '<tr class="sub"><td colspan="2">DEPRECIAÇÕES</td></tr>' +
     linhaDR('(−) Depreciação da viatura ' + A_VALIDAR, neg(mod.deprMes)) +
     linhaDR('= EBIT (Resultado Operacional)', fmtE(mod.ebit * f), { cls: 'total', cor: corSinal(mod.ebit) }) +
@@ -1503,6 +1771,8 @@ function renderMotoristas(cfg, mod) {
     m.plataformas.forEach(p => {
       const el = document.getElementById('m' + i + '_liq_' + p.id);
       if (el) el.textContent = fmtE(p.base);
+      const elMes = document.getElementById('m' + i + '_fatmes_' + p.id);
+      if (elMes) elMes.textContent = fmtE(p.F) + (p.usaFixo ? ' (valor mensal fixo)' : '');
     });
     if (m.dep) {
       document.getElementById('m' + i + '_irs_display').textContent = fmtE(m.dep.irs);
@@ -1521,6 +1791,91 @@ function renderMotoristas(cfg, mod) {
     '<br><strong>Total da viatura: ' + fmt(mod.horasDiaViatura, 1) + ' h/dia · ' + fmt(mod.horasSemViatura, 1) + ' h/semana</strong> (capacidade: 24 h/dia, 168 h/semana)';
 }
 
+// ── CAMPOS CALCULADOS: linhas "Origem:" ──────────────────────────
+const CAMPOS_CALCULADOS = ['rec_dia', 'km_sem'].concat(CUSTOS_VARIAVEIS);
+
+// rec_dia (coluna plana) = depósito da plataforma do Alexandre (Gross Fare − comissão) por dia ativo, sem gorjetas
+// nem bónus, mesmo que esteja Inactivo.
+function depositoDiaAlexandre(cfg) {
+  const m = cfg.motoristas[0];
+  const diasMes = (m.dias_sem || 0) * cfg.sem_mes;
+  const porDia = v => diasMes > 0 ? v / diasMes : 0;
+  const plataformas = PLATAFORMAS.map(p => {
+    const r = m.receita[p.id];
+    return { nome: p.nome, grossDia: porDia(mensalPorDia(r.fat_dia, r.fat_mes_fixo, diasMes)), comissao: cfg.plataformas[p.id].comissao,
+      gorjDia: porDia(mensalPorDia(r.gorj_dia, r.gorj_mes_fixo, diasMes)), bonus: r.bonus || 0 };
+  });
+  const valor = plataformas.reduce((s, x) => s + x.grossDia * (1 - x.comissao / 100), 0);
+  return { plataformas, diasSem: m.dias_sem || 0, diasMes, valor, activo: contratoActivo(m.contrato) };
+}
+
+function irParaTab(id) {
+  const btn = Array.from(document.querySelectorAll('.tab')).find(b => (b.getAttribute('onclick') || '').indexOf("'" + id + "'") >= 0);
+  if (btn) { showTab(id, btn); window.scrollTo(0, 0); }
+}
+
+function setOrigem(id, texto) {
+  const el = document.getElementById(id + '_origem');
+  if (el) el.innerHTML = 'Origem: ' + texto;
+}
+
+function origemRecDia(d, semMes) {
+  const link = ' <a href="#" onclick="irParaTab(\'motoristas\');return false">Editar no separador Motoristas.</a>';
+  if (!(d.diasMes > 0)) return 'sem dias ativos do Alexandre; valor mantido da configuração carregada.' + link;
+  const comGross = d.plataformas.filter(x => x.grossDia > 0);
+  const termos = (comGross.length ? comGross : d.plataformas.slice(0, 1)).map(x =>
+    (comGross.length > 1 ? x.nome + ' ' : '') + 'Gross Fare ' + fmtE(x.grossDia) + '/dia × (1 − comissão ' + fmt(x.comissao, Number.isInteger(x.comissao) ? 0 : 2) + ' %)');
+  const gorj = d.plataformas.reduce((s, x) => s + x.gorjDia, 0), bonus = d.plataformas.reduce((s, x) => s + x.bonus, 0);
+  return termos.join(' + ') + ' = ' + fmtE(d.valor) + ' por dia ativo (' + fmt(d.diasSem, 0) + ' dias/semana × ' + fmt(semMes, 2) +
+    ' semanas = ' + fmt(d.diasMes, 1) + ' dias/mês). Não inclui gorjetas (' + fmtE(gorj) + '/dia) nem bónus (' + fmtE(bonus) + '/mês).' +
+    (d.activo ? '' : ' <strong>Alexandre Inactivo: valor só de referência</strong> (a receita dele não entra no modelo).') + link;
+}
+
+// Km/semana e custos variáveis mensais: valor por dia ativo × dias ativos, ou valor fixo herdado da versão 1.
+function origemVariavel(porDia, fixo, mod, valor, ehKm) {
+  const fmtV = v => ehKm ? fmt(v, 2) + ' km/semana' : fmtE(v) + '/mês';
+  const diasSem = fmt(mod.diasSemViatura, 0) + ' dias ativos/semana (soma dos motoristas activos)';
+  if (porDia > 0 && ehKm) return fmt(porDia, 1) + ' km por dia ativo × ' + diasSem + ' = ' + fmtV(valor) + '.';
+  if (porDia > 0) return fmtE(porDia) + '/dia ativo × ' + fmt(mod.diasMesViatura, 1) + ' dias ativos/mês (' + fmt(mod.diasSemViatura, 0) + ' dias/semana × ' +
+    fmt(mod.semMes, 2) + ' semanas) = ' + fmtV(valor) + '.';
+  if (fixo > 0) return 'valor fixo da configuração antiga, ' + fmtV(valor) + ' (não escala com os dias). Introduza o valor por dia ativo.';
+  return 'valor por dia ativo a 0 = ' + fmtV(0) + '.';
+}
+
+function origemPrestacao(cfg, fin) {
+  const base = 'capital ' + fmtE(cfg.fin_capital) + ', prazo ' + fin.prazo + ' meses';
+  return (cfg.fin_taxa > 0 ? base + ', TAN ' + fmt(cfg.fin_taxa, 2) + ' % (prestação constante)' : base + ', sem juros (capital ÷ prazo)') +
+    '; mês ' + fin.mesAtual + ' do crédito.';
+}
+
+// Facturação bruta mensal e valor líquido (base da percentagem) de cada motorista e plataforma.
+function origemMotoristas(cfg, mod) {
+  mod.motoristas.forEach((m, i) => {
+    m.plataformas.forEach(p => {
+      const id = 'm' + i + '_';
+      const r = cfg.motoristas[i].receita[p.id] || {};
+      const pl = cfg.plataformas[p.id];
+      setOrigem(id + 'fatmes_' + p.id, !m.activo ? 'motorista Inactivo: não conta para o modelo.'
+        : p.usaFixo ? 'valor mensal fixo da configuração antiga (não escala com os dias).'
+        : fmtE(r.fat_dia || 0) + '/dia × ' + fmt(m.dias_sem || 0, 0) + ' dias/semana × ' + fmt(mod.semMes, 2) + ' semanas = ' + fmtE(p.F) + '.');
+      const termos = [(cfg.base_iva === 'com' ? 'Gross Fare com IVA ' + fmtE(p.F) : 'Gross Fare sem IVA ' + fmtE(p.Fsem)),
+        '− comissão ' + fmtE(p.com)];
+      if (pl.incl_gorjetas) termos.push('+ gorjetas ' + fmtE(p.G));
+      if (pl.incl_bonus) termos.push('+ bónus ' + fmtE(p.B));
+      setOrigem(id + 'liq_' + p.id, termos.join(' ') + ' = ' + fmtE(p.base) + '.');
+    });
+  });
+}
+
+function renderOrigens(cfg, mod, depAlex) {
+  const act = cfg.actividade;
+  setOrigem('rec_dia', origemRecDia(depAlex, mod.semMes));
+  setOrigem('km_sem', origemVariavel(act.km_dia, act.fixos.km_sem, mod, mod.kmSemana, true));
+  CUSTOS_VARIAVEIS.forEach(k => setOrigem(k, origemVariavel(act[k + '_dia'], act.fixos[k], mod, mod.custosVar[k], false)));
+  setOrigem('fin_prestacao', origemPrestacao(cfg, mod.fin));
+  origemMotoristas(cfg, mod);
+}
+
 function calcular() {
   const cfg = lerCfgDoDOM();
   actualizarVisibilidade(cfg);
@@ -1533,9 +1888,17 @@ function calcular() {
   const alex = mod.motoristas[0];
   const diasAlex = cfg.motoristas[0].dias_sem;
   const semMes = mod.semMes;
-  // rec_dia (coluna plana) = depósito da plataforma do Alexandre (bruto − comissão) por dia ativo, mesmo que esteja Inactivo.
-  const fatAlex = PLATAFORMAS.reduce((s, p) => s + cfg.motoristas[0].receita[p.id].faturacao * (1 - cfg.plataformas[p.id].comissao / 100), 0);
-  if (diasAlex * semMes > 0) setVal('rec_dia', Math.round(fatAlex / (diasAlex * semMes) * 10000) / 10000);
+  const depAlex = depositoDiaAlexandre(cfg);
+  if (depAlex.diasMes > 0) setVal('rec_dia', Math.round(depAlex.valor * 10000) / 10000);
+  // Colunas planas calculadas (km/semana e custos variáveis mensais), guardadas para compatibilidade.
+  const r4 = v => Math.round(v * 10000) / 10000;
+  setVal('km_sem', r4(mod.kmSemana));
+  CUSTOS_VARIAVEIS.forEach(k => setVal(k, r4(mod.custosVar[k])));
+  // Caixas visíveis com 2 casas decimais; o valor guardado (campo escondido) mantém a precisão total.
+  CAMPOS_CALCULADOS.forEach(k => setVal(k + '_vis', fmt(getVal(k), 2)));
+  renderOrigens(cfg, mod, depAlex);
+  document.getElementById('nota-variaveis-dia').innerHTML = 'Dias ativos: ' + fmt(mod.diasSemViatura, 0) + ' dias-motorista/semana × ' + fmt(semMes, 2) +
+    ' semanas = ' + fmt(mod.diasMesViatura, 1) + ' dias/mês. Margem de contribuição por dia ativo: <strong>' + fmtE(mod.mcDia) + '</strong> (receita líquida − energia, variáveis e custos dos independentes).';
 
   document.getElementById('badge-credito').textContent = '🚗 Crédito ' + fmt(cfg.fin_capital, 0) + '€ / ' + mod.fin.prazo + 'm / ' +
     (cfg.fin_taxa > 0 ? fmt(cfg.fin_taxa, 2) + '%' : 'sem juros');
@@ -1721,7 +2084,11 @@ function normalizarBalanco(b) {
     mes_natal: inteiro(v.mes_natal, 1, MESES_ANO, BALANCO_OMISSAO.mes_natal),
     capital_social: naoNegativo(v.capital_social),
     suprimentos: naoNegativo(v.suprimentos),
-    distribuicao: !!v.distribuicao
+    distribuicao: !!v.distribuicao,
+    ano_inicio: inteiro(v.ano_inicio, 2000, 2100, anoEmCurso()),
+    iva_recuperacao: v.iva_recuperacao === 'reembolso' ? 'reembolso' : 'reporte',
+    iva_reembolso_meses: inteiro(v.iva_reembolso_meses, 1, HORIZONTE_MAX, BALANCO_OMISSAO.iva_reembolso_meses),
+    mes_ss_contratante: inteiro(v.mes_ss_contratante, 1, MESES_ANO, BALANCO_OMISSAO.mes_ss_contratante)
   };
 }
 
@@ -1735,24 +2102,48 @@ function mesPagamentoIVA(b, k, isento) {
   return fimPeriodo + IVA_MESES_PAGAMENTO + (mesCivil(b, fimPeriodo) === IVA_MES_PRORROGADO ? 1 : 0);
 }
 
-// Livro de lançamentos: contas com saldo, pagamentos agendados e reporte do crédito de IVA (CIVA, art. 22.º).
-function criarLivro() {
+// Reembolso do crédito de IVA permitido no mês de declaração (CIVA, art. 22.º n.os 5 e 6): ao fim de 12 meses
+// com crédito > 250 €, ou antes (a partir de N meses) só com crédito > 3 000 €.
+function reembolsoIvaPermitido(meses, credito, N) {
+  if (meses >= Math.max(N, IVA_REEMBOLSO_MESES) && credito > IVA_REEMBOLSO_MINIMO) return true;
+  return N < IVA_REEMBOLSO_MESES && meses >= N && credito > IVA_REEMBOLSO_ANTECIPADO_MINIMO;
+}
+
+// Livro de lançamentos: contas com saldo, pagamentos agendados e crédito de IVA (CIVA, art. 22.º):
+// reportado para os períodos seguintes (n.º 4) ou, na opção "reembolso", pedido e recebido 2 meses depois (n.os 5, 6 e 8).
+function criarLivro(opcoesIva) {
+  const oIva = opcoesIva || { reembolso: false, meses: IVA_REEMBOLSO_MESES };
   const contas = {};
   const agenda = {};
+  const fluxos = { ivaPago: 0, ivaReembolsado: 0, ivaReembolsoPedido: 0, ssContratantePago: 0 };
   let ivaReporte = 0;
+  let inicioCredito = null;
   const saldo = c => contas[c] || 0;
   const lancar = movs => { movs.forEach(([c, v]) => { contas[c] = saldo(c) + v; }); };
   return {
-    contas, saldo, lancar,
+    contas, saldo, lancar, fluxos,
     agendar(conta, mes, valor) { if (valor) (agenda[mes] = agenda[mes] || []).push([conta, valor]); },
     liquidar(mes) {
       let iva = ivaReporte;
       (agenda[mes] || []).forEach(([conta, valor]) => {
-        if (conta === 'iva') iva += valor;
-        else lancar([[conta, valor], ['caixa', -valor]]);
+        if (conta === 'iva') { iva += valor; return; }
+        lancar([[conta, valor], ['caixa', -valor]]);
+        if (conta === 'ivaReembolso') fluxos.ivaReembolsado -= valor;
+        if (conta === 'ssContratante') fluxos.ssContratantePago += valor;
       });
-      if (iva > 0) { lancar([['iva', iva], ['caixa', -iva]]); ivaReporte = 0; }
-      else ivaReporte = iva;
+      if (iva > 0) { lancar([['iva', iva], ['caixa', -iva]]); fluxos.ivaPago += iva; ivaReporte = 0; inicioCredito = null; return; }
+      ivaReporte = iva;
+      if (iva === 0) { inicioCredito = null; return; }
+      if (inicioCredito === null) inicioCredito = mes;
+      const credito = -iva;
+      if (oIva.reembolso && reembolsoIvaPermitido(mes - inicioCredito, credito, oIva.meses)) {
+        // Pedido na declaração do período: o crédito passa a reembolso a receber do Estado.
+        lancar([['ivaReembolso', credito], ['iva', -credito]]);
+        this.agendar('ivaReembolso', mes + IVA_REEMBOLSO_MESES_PAGAMENTO, -credito);
+        fluxos.ivaReembolsoPedido += credito;
+        ivaReporte = 0;
+        inicioCredito = null;
+      }
     }
   };
 }
@@ -1814,7 +2205,11 @@ function lancarIndependentes(livro, ctx, k) {
   livro.lancar([['resultado', m.comInd + m.encSS + m.ivaNaoDed], ['iva', m.ivaRecibosDedutivel], ['comissoes', -aPagar], ['ssContratante', -m.encSS]]);
   livro.agendar('comissoes', k + ctx.b.prazo_comissoes_meses, aPagar);
   if (m.ivaRecibosDedutivel > 0) livro.agendar('iva', mesPagamentoIVA(ctx.b, k, false), -m.ivaRecibosDedutivel);
-  // Encargos da entidade contratante: apurados pela SS no ano seguinte (Código Contributivo, art. 155.º n.º 3) → ficam no passivo.
+  // Encargos da entidade contratante: a contribuição do ano civil é apurada pela SS no ano seguinte e paga até ao dia 20
+  // do mês seguinte ao da notificação (Código Contributivo, arts. 140.º e 155.º) → paga no mês configurado do ano seguinte.
+  const ano = exercicio(ctx.b, k);
+  ctx.ssContrAno[ano] = (ctx.ssContrAno[ano] || 0) + m.encSS;
+  if (mesCivil(ctx.b, k) === MESES_ANO) livro.agendar('ssContratante', k + ctx.b.mes_ss_contratante, ctx.ssContrAno[ano]);
 }
 
 function lancarViaturaEFinanciamento(livro, ctx, k) {
@@ -1854,10 +2249,10 @@ function lancarDistribuicao(livro, ctx, k) {
 
 function calcBalanco(cfg, mod) {
   const b = normalizarBalanco(cfg.balanco);
-  const livro = criarLivro();
+  const livro = criarLivro({ reembolso: b.iva_recuperacao === 'reembolso', meses: b.iva_reembolso_meses });
   const custo = Math.max(0, cfg.fin_capital);
   const ctx = { mod, b, custo, isento: mod.regimeIva === 'isento', mesesReceber: b.prazo_receber_dias / DIAS_MES_MEDIO,
-    cobrado: 0, provisoes: [], jurosMes: [], ebtAno: {}, ircAno: {}, resAno: {}, distAgenda: {}, caixaMin: b.capital_social + b.suprimentos, mesCaixaMin: 0 };
+    cobrado: 0, provisoes: [], jurosMes: [], ebtAno: {}, ircAno: {}, resAno: {}, distAgenda: {}, ssContrAno: {}, caixaMin: b.capital_social + b.suprimentos, mesCaixaMin: 0 };
   // Abertura: viatura pelo custo, financiada pela dívida; capital social e suprimentos entram em caixa.
   livro.lancar([['viatura', custo], ['divida', -custo]]);
   livro.lancar([['caixa', b.capital_social + b.suprimentos], ['capital', -b.capital_social], ['suprimentos', -b.suprimentos]]);
@@ -1878,8 +2273,8 @@ function calcBalanco(cfg, mod) {
 function classificarBalanco(livro, ctx) {
   const s = livro.saldo, b = ctx.b, N = b.horizonte;
   const viatura = s('viatura'), deprAcum = -s('deprAcum');
-  const ativo = { viatura, deprAcum, viaturaLiq: viatura - deprAcum, caixa: s('caixa'), receber: s('receber'), ivaRecuperar: Math.max(0, s('iva')) };
-  ativo.total = ativo.viaturaLiq + ativo.caixa + ativo.receber + ativo.ivaRecuperar;
+  const ativo = { viatura, deprAcum, viaturaLiq: viatura - deprAcum, caixa: s('caixa'), receber: s('receber'), ivaRecuperar: Math.max(0, s('iva')), ivaReembolso: s('ivaReembolso') };
+  ativo.total = ativo.viaturaLiq + ativo.caixa + ativo.receber + ativo.ivaRecuperar + ativo.ivaReembolso;
   const divida = -s('divida');
   const proximos12 = ctx.mod.fin.plano.slice(N, N + MESES_ANO).reduce((t, l) => t + l.amort, 0);
   const dividaCorrente = Math.min(divida, proximos12);
@@ -1893,7 +2288,7 @@ function classificarBalanco(livro, ctx) {
   return {
     b, N, mesCivilFim: mesCivil(b, N), anoFim: exercicio(b, N) + 1, ativo, passivo, cp, diferenca,
     fecha: Math.abs(diferenca) < TOLERANCIA_BALANCO,
-    caixaMin: ctx.caixaMin, mesCaixaMin: ctx.mesCaixaMin,
+    caixaMin: ctx.caixaMin, mesCaixaMin: ctx.mesCaixaMin, fluxos: Object.assign({}, livro.fluxos),
     jurosMes: ctx.jurosMes, jurosAcum: ctx.jurosMes.reduce((t, j) => t + (j || 0), 0),
     autonomia: ativo.total !== 0 ? cp.total / ativo.total * 100 : 0
   };
@@ -1912,8 +2307,12 @@ function htmlBalanco(bal) {
     linhaBal('= Viatura — valor líquido', a.viaturaLiq, { cls: 'total' }) +
     '<tr class="sub"><td colspan="2">ATIVO CORRENTE</td></tr>' +
     linhaBal('Caixa e depósitos (saldo acumulado dos fluxos)', a.caixa, { cor: corSinal(a.caixa) }) +
+    linhaBal('<span style="color:#666;font-size:0.8rem">· dos quais: IVA entregue ao Estado (meses 1 a ' + bal.N + ')</span>', -bal.fluxos.ivaPago, { cls: 'info' }) +
+    linhaBal('<span style="color:#666;font-size:0.8rem">· dos quais: reembolsos de IVA recebidos (meses 1 a ' + bal.N + ')</span>', bal.fluxos.ivaReembolsado, { cls: 'info' }) +
+    linhaBal('<span style="color:#666;font-size:0.8rem">· dos quais: SS da entidade contratante paga (meses 1 a ' + bal.N + ')</span>', -bal.fluxos.ssContratantePago, { cls: 'info' }) +
     linhaBal('Plataformas — valores a receber (' + fmt(b.prazo_receber_dias, 0) + ' dias) ' + A_VALIDAR, a.receber) +
-    (a.ivaRecuperar > 0 ? linhaBal('Estado — IVA a recuperar (reporte)', a.ivaRecuperar) : '') +
+    (a.ivaRecuperar > 0 ? linhaBal('Estado — IVA a recuperar (crédito reportado, CIVA art. 22.º n.º 4)', a.ivaRecuperar) : '') +
+    (a.ivaReembolso > 0 ? linhaBal('Estado — reembolso de IVA pedido, por receber (CIVA art. 22.º n.º 8) ' + A_VALIDAR, a.ivaReembolso) : '') +
     linhaBal('= TOTAL DO ATIVO', a.total, { cls: 'total', cor: '#2e6da4', forte: true }) +
     '<tr class="sub"><td colspan="2">CAPITAL PRÓPRIO</td></tr>' +
     linhaBal('Capital social ' + A_VALIDAR, c.capital) +
@@ -1929,7 +2328,7 @@ function htmlBalanco(bal) {
     linhaBal('Estado — IRC a pagar (provisão do exercício) ' + A_VALIDAR, p.irc) +
     linhaBal('Estado — retenções de IRS a entregar', p.irs) +
     linhaBal('Segurança Social a pagar (dependentes)', p.ss) +
-    linhaBal('Segurança Social — entidade contratante (apurada no ano seguinte) ' + A_VALIDAR, p.ssContratante) +
+    linhaBal('Segurança Social — entidade contratante (paga em ' + NOMES_MESES[b.mes_ss_contratante - 1] + ' do ano seguinte) ' + A_VALIDAR, p.ssContratante) +
     linhaBal('Motoristas independentes — comissões a pagar', p.comissoes) +
     linhaBal('Férias e subsídio de Natal a pagar (dependentes, com TSU) ' + A_VALIDAR, p.feriasNatal) +
     linhaBal('= TOTAL DO PASSIVO', p.total, { cls: 'total', cor: '#c0392b', forte: true }) +
@@ -1948,7 +2347,10 @@ function htmlPressupostosBalanco(b) {
     'IVA: liquidado nas viagens (6%) e autoliquidado nas comissões vai para a conta de IVA, nunca para proveitos. Regime normal: autoliquidação liquidada = dedutível. Regime isento: autoliquidação é custo, paga até ao fim do mês seguinte (CIVA, art. 27.º n.º 3) ' + A_VALIDAR + '.',
     'IVA ' + b.iva_periodicidade + ' (CIVA, art. 41.º n.º 1): pago até dia 25 do 2.º mês seguinte ao período; junho e 2.º trimestre em setembro (CIVA, art. 27.º n.os 1 e 10) ' + A_VALIDAR + '. Crédito de IVA reportado para o período seguinte.',
     'Segurança Social (dependentes) e retenções de IRS: pagas no mês seguinte (Código Contributivo, art. 43.º; CIRS, art. 98.º n.º 3).',
-    'Entidade contratante (independentes): a contribuição reporta-se ao ano civil anterior e é paga após o documento de cobrança (Código Contributivo, art. 155.º n.º 3) → mantém-se no passivo dentro do horizonte ' + A_VALIDAR + '.',
+    'Entidade contratante (independentes): a contribuição de cada ano civil é apurada pela Segurança Social no ano seguinte e paga até ao dia 20 do mês seguinte ao da notificação (Código Contributivo, arts. 140.º e 155.º; Guia Prático "Entidades Contratantes"). Fica no passivo até ' + NOMES_MESES[b.mes_ss_contratante - 1] + ' do ano seguinte, quando sai da caixa ' + A_VALIDAR + '.',
+    'Crédito de IVA (IVA dedutível dos recibos com IVA superior ao IVA liquidado nas viagens): ' + (b.iva_recuperacao === 'reembolso'
+      ? 'reembolso pedido na declaração do período quando o crédito persiste há ' + b.iva_reembolso_meses + ' meses (CIVA, art. 22.º n.º 5: 12 meses e crédito superior a ' + fmtE(IVA_REEMBOLSO_MINIMO, 0) + '; n.º 6: antes dos 12 meses só se o crédito exceder ' + fmtE(IVA_REEMBOLSO_ANTECIPADO_MINIMO, 0) + '), recebido até ao fim do 2.º mês seguinte (n.º 8) '
+      : 'reportado para os períodos seguintes e compensado com IVA liquidado futuro (CIVA, art. 22.º n.º 4) ') + A_VALIDAR + '.',
     'Comissões a independentes: pagas ' + b.prazo_comissoes_meses + ' mês(es) depois, com o IVA do recibo quando existir.',
     'Férias e subsídio de Natal (só dependentes, com TSU patronal): acréscimo de 1/12 por mês; pagos em ' + NOMES_MESES[b.mes_ferias - 1] + ' (Código do Trabalho, art. 264.º) e ' + NOMES_MESES[b.mes_natal - 1] + ' (art. 263.º), pelo valor acumulado ' + A_VALIDAR + '. IRS retido sobre os subsídios à taxa do salário mensal ' + A_VALIDAR + '.',
     'IRC: provisão simplificada de 15% sobre o resultado antes de imposto acumulado no exercício; pago em maio do ano seguinte (CIRC, arts. 120.º n.º 1 e 104.º n.º 1 b)). Pagamentos por conta e reporte de prejuízos fiscais (CIRC, art. 52.º) não modelados ' + A_VALIDAR + '.',
@@ -1968,8 +2370,11 @@ function renderBalanco(cfg, mod) {
   document.getElementById('balanco-verificacao').innerHTML =
     '<div class="verificacao ' + (bal.fecha ? 'ok' : 'falha') + '">Verificação: Ativo − (Passivo + CP) = ' + fmtE(dif) + (bal.fecha ? ' ✔' : ' ✗') + '</div>';
   let avisos = validarBalanco(cfg.balanco).map(e => '<div class="aviso erro">✗ ' + escHtml(e) + ' O Balanço usa o valor por omissão.</div>').join('');
-  if (bal.anoFim > 1 && bal.passivo.ssContratante > 0) {
-    avisos += '<div class="aviso">⚠ A contribuição da entidade contratante do ano anterior continua no passivo: é paga após o documento de cobrança da Segurança Social, cuja data não está modelada ' + A_VALIDAR + '.</div>';
+  if (bal.anoFim > 1 && bal.passivo.ssContratante > 0 && bal.mesCivilFim < bal.b.mes_ss_contratante) {
+    avisos += '<div class="aviso">⚠ A contribuição da entidade contratante do ano anterior continua no passivo: é paga em ' + NOMES_MESES[bal.b.mes_ss_contratante - 1] + ' (data da notificação da Segurança Social ' + A_VALIDAR + ').</div>';
+  }
+  if (bal.b.iva_recuperacao === 'reembolso' && bal.b.iva_reembolso_meses < IVA_REEMBOLSO_MESES) {
+    avisos += '<div class="aviso">⚠ Reembolso de IVA antes de ' + IVA_REEMBOLSO_MESES + ' meses: só é pedido se o crédito exceder ' + fmtE(IVA_REEMBOLSO_ANTECIPADO_MINIMO, 0) + ' (CIVA, art. 22.º n.º 6) ' + A_VALIDAR + '.</div>';
   }
   if (!bal.fecha) avisos += '<div class="aviso erro">✗ Balanço provisório: a verificação não fecha (diferença de ' + fmtE(bal.diferenca) + '). Os valores não devem ser usados.</div>';
   if (bal.ativo.caixa < 0 || bal.caixaMin < 0) {
@@ -2009,9 +2414,18 @@ function calcCenarios() {
     parseFloat(document.getElementById('cn_s3').value) || 1200
   ];
   const contratoAlex = cfg.motoristas[0].contrato;
-  document.getElementById('cn-aviso').innerHTML = contratoAlex === 'dependente' ? '' :
+  const anoCn = cfg.balanco.ano_inicio > 0 ? cfg.balanco.ano_inicio : anoEmCurso();
+  const minimoCn = salarioMinimoDependente(cfg.motoristas[0], anoCn);
+  const abaixoMinimo = sal => minimoCn.horasSem > 0 && sal < minimoCn.minimo - 0.005;
+  const marcaSal = sal => abaixoMinimo(sal) ? ' ⚠' : '';
+  const salariosAbaixo = salarios.filter(abaixoMinimo);
+  document.getElementById('cn-aviso').innerHTML = (contratoAlex === 'dependente' ? '' :
     '<div class="aviso">⚠ Os cenários de salário só fazem sentido para motoristas Dependentes. O Alexandre está como <strong>' +
-    (CONTRATOS[contratoAlex] || 'contrato por seleccionar') + '</strong>: os valores abaixo simulam-no como Dependente, mantendo o Motorista 2 como está.</div>';
+    (CONTRATOS[contratoAlex] || 'contrato por seleccionar') + '</strong>: os valores abaixo simulam-no como Dependente, mantendo o Motorista 2 como está.</div>') +
+    (salariosAbaixo.length ? '<div class="aviso">⚠ Salário(s) marcados com ⚠ abaixo da retribuição mínima proporcional de ' + fmtE(minimoCn.minimo) + ' (' +
+      fmt(Math.min(minimoCn.horasSem, PERIODO_NORMAL_SEMANA), 1) + ' h de ' + PERIODO_NORMAL_SEMANA + ' h/semana; RMMG ' + textoRmmg(minimoCn) + ').</div>' : '') +
+    (minimoCn.horasSem > PERIODO_NORMAL_SEMANA ? '<div class="aviso">⚠ ' + fmt(minimoCn.horasSem, 1) + ' h/semana excedem o período normal de ' + PERIODO_NORMAL_SEMANA +
+      ' h (Código do Trabalho, art. 203.º n.º 1) ' + A_VALIDAR + '. As horas suplementares não estão modeladas.</div>' : '');
 
   const cn = salarios.map(sal => {
     const c = JSON.parse(JSON.stringify(cfg));
@@ -2023,7 +2437,7 @@ function calcCenarios() {
     return {
       cfg: c, mod, sal, ssP: d.ssP, ssT: d.ssT, irsR: d.irs, salLiq: d.salLiq, ajudas: d.ajudas, subRefMes: d.subRefMes, subRefIsento: d.subRefIsento,
       custoPessoal: d.custoMensal, custTotalEmp: mod.totalGastos,
-      ebitda: mod.ebitda, ebit: mod.ebit, ebt: mod.ebt, irc: mod.irc, resLiq: mod.resLiq, fluxo: mod.fluxo,
+      margemAntesPessoal: mod.margemAntesPessoal, ebitda: mod.ebitda, ebit: mod.ebit, ebt: mod.ebt, irc: mod.irc, resLiq: mod.resLiq, fluxo: mod.fluxo,
       ebtA: mod.ebtA, ircA: mod.ircA, resA: mod.resA, fluxoA: mod.fluxoA,
       distBrutaA: mod.distBrutaA, distIrsA: mod.distIrsA, distLiqMes: mod.distLiqMes,
       rendTotal: d.rendimento,
@@ -2052,7 +2466,7 @@ function calcCenarios() {
   // ── REMUNERAÇÃO
   document.getElementById('cn-grid-rem').innerHTML = hdr() +
     sec('Salário') +
-    row('Salário bruto', r => fmtE(r.sal,0), 'blue') +
+    row('Salário bruto', r => fmtE(r.sal,0) + marcaSal(r.sal), 'blue') +
     row('(−) SS trabalhador (11%)', r => '−' + fmtE(r.ssT,0), 'red') +
     row('(−) SS patronal (23,75%)', r => '−' + fmtE(r.ssP,0), 'red') +
     row('(−) IRS retido (tabela 2026)', r => '−' + fmtE(r.irsR,0), 'red') +
@@ -2093,10 +2507,12 @@ function calcCenarios() {
     row('(−) Energia', r => '−' + fmtE(r.mod.energia,0), 'red') +
     row('(−) Estrutura', r => '−' + fmtE(r.mod.estrutura,0), 'red') +
     row('(−) Variáveis', r => '−' + fmtE(r.mod.varTotal,0), 'red') +
-    row('= EBITDA', r => fmtE(r.ebitda,0), 'total') +
+    row('= Margem antes de pessoal', r => fmtE(r.margemAntesPessoal,0), 'total') +
     sec('Custos com motoristas') +
     row('(−) Pessoal dependentes (14 meses)', r => '−' + fmtE(r.mod.custoPessoal,0), 'red') +
     row('(−) Comissões independentes + SS', r => '−' + fmtE(outrosInd,0), 'red') +
+    row('= EBITDA', r => fmtE(r.ebitda,0), 'total') +
+    sec('Depreciações') +
     row('(−) Depreciação viatura', r => '−' + fmtE(r.mod.deprMes,0), 'red') +
     row('= EBIT', r => fmtE(r.ebit,0), 'total') +
     sec('Gastos financeiros') +
@@ -2121,10 +2537,12 @@ function calcCenarios() {
     row('(−) Energia', r => '−' + fmtE(r.mod.energia*f,0), 'red') +
     row('(−) Estrutura', r => '−' + fmtE(r.mod.estrutura*f,0), 'red') +
     row('(−) Variáveis', r => '−' + fmtE(r.mod.varTotal*f,0), 'red') +
-    row('= EBITDA', r => fmtE(r.ebitda*f,0), 'total') +
+    row('= Margem antes de pessoal', r => fmtE(r.margemAntesPessoal*f,0), 'total') +
     sec('Custos com motoristas') +
     row('(−) Pessoal dependentes (14 meses)', r => '−' + fmtE(r.mod.custoPessoal*f,0), 'red') +
     row('(−) Comissões independentes + SS', r => '−' + fmtE(outrosInd*f,0), 'red') +
+    row('= EBITDA', r => fmtE(r.ebitda*f,0), 'total') +
+    sec('Depreciações') +
     row('(−) Depreciação viatura', r => '−' + fmtE(r.mod.deprMes*f,0), 'red') +
     row('= EBIT', r => fmtE(r.ebit*f,0), 'total') +
     sec('Gastos financeiros') +
@@ -2198,7 +2616,7 @@ function calcCenarios() {
     }).join('');
 
   document.getElementById('cn-grid-decisao').innerHTML = hdr() +
-    row('Salário bruto', r => fmtE(r.sal,0), 'blue') +
+    row('Salário bruto', r => fmtE(r.sal,0) + marcaSal(r.sal), 'blue') +
     row('Custo total Alexandre/mês', r => fmtE(r.custoPessoal,0), 'total') +
     row('IRC mensal estimado', r => fmtE(r.irc,0), 'red') +
     `<div class="cn-lbl">Resultado líquido/mês</div>` +
@@ -2219,7 +2637,8 @@ function calcCenarios() {
 // ── ARRANQUE ──────────────────────────────────────────────────────
 // Página nova: dois motoristas Activos e Independentes, percentagens a 0.
 montarMotoristas();
-aplicarExtra(extraPorOmissao({ rec_dia: getVal('rec_dia'), dias_sem: getVal('dias_sem'), sem_mes: getVal('sem_mes') }));
+aplicarExtra(extraPorOmissao({ rec_dia: getVal('rec_dia'), dias_sem: getVal('dias_sem'), sem_mes: getVal('sem_mes'),
+  km_sem: getVal('km_sem'), portagens: getVal('portagens'), manut: getVal('manut'), limpeza: getVal('limpeza') }));
 calcular();
 </script>
 </body>

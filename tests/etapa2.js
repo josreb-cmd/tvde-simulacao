@@ -6,7 +6,7 @@
 const fs = require('fs');
 const path = require('path');
 const { carregarApp } = require('./dom-simulado');
-const { TIPOS, valoresCombinacao, valoresVariante, cenariosDR, definir, capturarDR } = require('./cenarios-teste');
+const { TIPOS, valoresCombinacao, valoresVariante, cenariosDR, definir, capturarDR, definirComoV1, desfazerEtapa3, normalizarMargemEbitda } = require('./cenarios-teste');
 
 let falhas = 0;
 function verificar(condicao, descricao) {
@@ -100,9 +100,10 @@ function testeFecho() {
 // O Balanço dos Cenários mudou de propósito (passou a usar o novo Balanço): fica fora da comparação
 // com o baseline e é testado em [1]. Tudo o resto, incluindo a DR dos Cenários, tem de ser idêntico.
 const semBalancoCenarios = r => { const c = Object.assign({}, r); delete c['cn-grid-balanco']; return c; };
+// Etapa 3: a captura desfaz as alterações pedidas (EBITDA e campos novos do modelo) antes de comparar.
 function compararComBaseline(nome, esperadoCompleto, app) {
-  const esperado = semBalancoCenarios(esperadoCompleto);
-  const obtido = semBalancoCenarios(capturarDR(app));
+  const esperado = semBalancoCenarios(normalizarMargemEbitda(esperadoCompleto));
+  const obtido = semBalancoCenarios(desfazerEtapa3(capturarDR(app)));
   const d = primeiraDiferenca(esperado, obtido, nome);
   if (d) console.log('    ✗ ' + d.slice(0, 300));
   return !d;
@@ -110,12 +111,12 @@ function compararComBaseline(nome, esperadoCompleto, app) {
 
 async function testeBaseline(ficheiroAntigo) {
   console.log('\n[2] DR idêntica ao baseline do commit 78041a2 (DR mensal e anual, indicadores, DR dos Cenários e restantes separadores)');
+  console.log('  Etapa 3: cada cenário é guardado pela página f4aba6b (versão 1) e carregado pela actual; desfeitas as alterações do EBITDA.');
   const base = require('./baseline-78041a2-dr.json');
   let iguais = 0, iguaisComParametros = 0;
   const cenarios = cenariosDR();
   for (const c of cenarios) {
-    const app = carregarApp();
-    definir(app, c.valores);
+    const app = await definirComoV1(c.valores);
     if (compararComBaseline(c.nome, base.cenarios[c.nome], app)) iguais++;
     // Mudar os parâmetros do Balanço não pode alterar a DR.
     definir(app, { bal_horizonte: 24, bal_distribuicao: true, bal_mes_inicio: 5, bal_iva_periodicidade: 'mensal', bal_suprimentos: 2000 });
@@ -252,7 +253,7 @@ function testeQuadro() {
       const base = m.nome + ': ' + m.contrato;
       if (m.contrato === 'inactivo') return base + ' (sem receita nem custos)';
       const extra = m.contrato === 'independente' ? m.pct.uber + '% do valor líquido sem IVA' : 'salário ' + m.dep.salario + ' € × 14, sub. refeição ' + m.dep.sub_ref_dias + ' × ' + m.dep.sub_ref_val + ' €';
-      return base + ', ' + r2(m.receita.uber.faturacao) + ' €/mês, ' + m.dias_sem + ' × ' + m.horas_dia + ' h, ' + extra;
+      return base + ', ' + r2(r.m.motoristas.find(x => x.id === m.id).F) + ' €/mês, ' + m.dias_sem + ' × ' + m.horas_dia + ' h, ' + extra;
     }).join(' | ');
     console.log('    ' + r.nome.padEnd(28) + desc);
   });
@@ -271,12 +272,14 @@ async function carregarAntiga(ficheiro) {
 
 async function testeCarregamento(ficheiroAntigo) {
   console.log('\n[5] Carregamento de configurações');
-  const omissao = JSON.parse(carregarApp().correr('JSON.stringify(BALANCO_OMISSAO)'));
+  // Etapa 3: o Balanço tem parâmetros novos (ano de início, recuperação do IVA, mês da SS da entidade contratante).
+  const ordenado = o => JSON.stringify(Object.keys(o).sort().reduce((r, k) => (r[k] = o[k], r), {}));
+  const omissao = ordenado(JSON.parse(carregarApp().correr('JSON.stringify(balancoPorOmissao())')));
   if (ficheiroAntigo) {
     const antiga = await carregarAntiga(ficheiroAntigo);
     const b = balanco(antiga);
     verificar(antiga.el('sb-status').textContent === '✔ Configuração antiga carregada: motoristas como Independentes', 'configuração antiga carregada: ' + antiga.el('sb-status').textContent);
-    verificar(JSON.stringify(cfgDom(antiga).balanco) === JSON.stringify(omissao) && Math.abs(b.diferenca) < TOL && verificacaoVisivel(antiga), 'parâmetros do Balanço por omissão; balanço ao mês 12 fecha');
+    verificar(ordenado(cfgDom(antiga).balanco) === omissao && Math.abs(b.diferenca) < TOL && verificacaoVisivel(antiga), 'parâmetros do Balanço por omissão; balanço ao mês 12 fecha');
     console.log('\n  Balanço da configuração antiga ao fim do mês 12:');
     antiga.tabela('balanco-table').forEach(l => console.log('    ' + l));
     console.log('    ' + antiga.texto('balanco-verificacao'));
@@ -297,7 +300,7 @@ async function testeCarregamento(ficheiroAntigo) {
   const etapa1 = carregarApp({ fetch: async () => ({ ok: true, status: 200, json: async () => [linha] }) });
   await etapa1.correr('carregarConfig()');
   const b = balanco(etapa1);
-  verificar(etapa1.el('sb-status').textContent === '✔ Configuração carregada' && JSON.stringify(cfgDom(etapa1).balanco) === JSON.stringify(omissao),
+  verificar(etapa1.el('sb-status').textContent === '✔ Configuração carregada' && ordenado(cfgDom(etapa1).balanco) === omissao,
     'config sem os campos novos: carregada sem erro, valores por omissão (' + etapa1.el('sb-status').textContent + ')');
   verificar(Math.abs(b.diferenca) < TOL && etapa1.texto('motoristas-avisos').indexOf('Balanço:') < 0, 'balanço fecha e não há erros de validação');
 
